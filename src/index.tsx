@@ -1,10 +1,42 @@
 import {  Button, Checkbox, Divider, FluentProvider, Input,  Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, webLightTheme } from "@fluentui/react-components";
-import React, { useState } from "react";
+import React, { Dispatch, useState } from "react";
 import ReactDOM from "react-dom/client";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
-let globalRacerId = 67;
+function getStoredObject<T>(key: string, fallback: T): T {
+  const value = localStorage.getItem(key);
+  if (value) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return fallback;
+    }
+  } else {
+    return fallback;
+  }
+}
+
+function setStoredObject<T>(key: string, value: T) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function useLocalStorage<T>(key: string, fallback: T) {
+  const obj = getStoredObject(key, fallback);
+  const [value, setValue] = useState(obj);
+  return [
+    value,
+    (newValue: T) => {
+      setStoredObject(key, newValue);
+      setValue(newValue);
+    }
+  ];
+}
+
+function nextRacerId() {
+  const id = getStoredObject("globalRacerId", 67) + 1;
+  setStoredObject("globalRacerId", id);
+}
 
 interface Racer {
   id: number;
@@ -95,7 +127,7 @@ function NewSeriesState({ setState, racers, setRacers }) {
 
   const submit = () => {
       const newRacer = {
-          id: globalRacerId++,
+          id: nextRacerId(),
           name: name.trim(),
           number: number.trim(),
           isChecked: true,
@@ -202,7 +234,7 @@ function RaceViewState({ racers, finishboards, setState }) {
 }
 
 function StateManager({ state, setState }) {
-  const [racers, setRacers] = useState<Racer[]>([]);
+  const [racers, setRacers] = useLocalStorage<Racer[]>("racers", []);
   const [finishboards, setFinishboards] = useState<number[][]>([[67, 68]]);
 
   if (state == AppState.StartMenu) {
@@ -224,9 +256,39 @@ function StateManager({ state, setState }) {
   }
 }
 
+function parseStateFromLocation(): AppState {
+  const hash = window.location.hash;
+  if (hash == "#new-series") {
+    return AppState.NewSeries;
+  } else if (hash == "#score-table") {
+    return AppState.RaceView;
+  } else if (hash == "#new-race") {
+    return AppState.NewRace;
+  } else {
+    return AppState.StartMenu;
+  }
+}
+
 function App() {
-  const [state, setState] = useState(AppState.StartMenu);
-  return <StateManager state={state} setState={setState} />
+  const [state, setState] = useState(parseStateFromLocation());
+
+  window.onhashchange = () => {
+    setState(parseStateFromLocation());
+  };
+
+  return <StateManager state={state} setState={(state) => {
+    setState(state);
+
+    if (state == AppState.StartMenu) {
+      window.location.hash = "";
+    } else if (state == AppState.NewSeries) {
+      window.location.hash = "new-series";
+    } else if (state == AppState.RaceView) {
+      window.location.hash = "score-table";
+    } else if (state == AppState.NewRace) {
+      window.location.hash = "new-race";
+    }
+  }} />
 }
 
 root.render(
