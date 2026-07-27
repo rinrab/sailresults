@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, Button, Checkbox, Divider, FluentProvider, Input, List, ListItem, Text, webLightTheme } from "@fluentui/react-components";
+import {  Button, Checkbox, Divider, FluentProvider, Input,  Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, webLightTheme } from "@fluentui/react-components";
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 
@@ -19,37 +19,37 @@ const enum AppState {
 
 function RacerRow({ racer, updateRacer }) {
   return (
-    <tr>
-      <td>
-        <Checkbox
-          checked={racer.isChecked}
-          onChange={e => {
-            const value = e.target.checked;
-            updateRacer(racer, { ...racer, isChecked: value });
-          }}
-        />
-      </td>
-      <td>{racer.name == "" ? "-" : racer.name}</td>
-      <td>{racer.number == "" ? "-" : racer.number}</td>
-    </tr>
+    <TableRow>
+      <TableSelectionCell
+        checked={racer.isChecked}
+        onChange={e => {
+          const value = e.target.checked;
+          updateRacer(racer, { ...racer, isChecked: value });
+        }}
+      />
+      <TableCell>{racer.name == "" ? "-" : racer.name}</TableCell>
+      <TableCell>{racer.number == "" ? "-" : racer.number}</TableCell>
+    </TableRow>
   );
 }
 
 function RacersList({ racers, updateRacer }) {
   return (
-    <table style={{ width: "100%" }}>
-      <thead>
-        <th style={{ width: 0 }}></th>
-        <th>Name</th>
-        <th>Number</th>
-      </thead>
-      <tbody>
+    <Table style={{ width: "100%" }}>
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell style={{ width: "1%" }}></TableHeaderCell>
+          <TableHeaderCell>Name</TableHeaderCell>
+          <TableHeaderCell>Number</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {
           racers.map((item, index) =>
             <RacerRow racer={item} updateRacer={updateRacer} key={index} />) 
         }
-      </tbody>
-    </table>);
+      </TableBody>
+    </Table>);
 }
 
 function NewSeriesState() {
