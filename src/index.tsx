@@ -10,6 +10,13 @@ interface Racer {
   isChecked: boolean;
 }
 
+const enum AppState {
+  StartMenu,
+  NewSeries,
+  RaceView,
+  NewRace,
+}
+
 function RacerRow({ racer, updateRacer }) {
   return (
     <tr>
@@ -104,13 +111,14 @@ function NewSeriesState() {
 }
 
 function StartState({setState}) {
-  return <Button onClick={() => setState(1)}>Create New Series</Button>;
+  return <Button onClick={() => setState(AppState.NewSeries)}>
+    Create New Series</Button>;
 }
 
 function StateManager({ state, setState }) {
-  if (state == 0) {
+  if (state == AppState.StartMenu) {
     return <StartState setState={setState} />
-  } else if (state == 1) {
+  } else if (state == AppState.NewSeries) {
     return <NewSeriesState />
   } else {
     throw "tuff day";
@@ -118,7 +126,7 @@ function StateManager({ state, setState }) {
 }
 
 function App() {
-  const [state, setState] = useState(0);
+  const [state, setState] = useState(AppState.StartMenu);
   return <StateManager state={state} setState={setState} />
 }
 
