@@ -1,4 +1,4 @@
-import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, SearchBox, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme } from "@fluentui/react-components";
+import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, SearchBox, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, { Dispatch, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -290,7 +290,7 @@ function racerMatches(racer: Racer, query: string) {
   return (racer.name + racer.number).toLowerCase().includes(query);
 }
 
-function FinishBoardSuggestions({ racers, finishboard, query, select }) {
+function FinishBoardSuggestions({ racers, finishboard, query }) {
   const pickableItems = racers.filter(item => ! finishboard.includes(item.id));
   const filteredItems = pickableItems.filter(item => racerMatches(item, query));
 
@@ -302,23 +302,17 @@ function FinishBoardSuggestions({ racers, finishboard, query, select }) {
   };
 
   if (pickableItems.length == 0) {
-    return <li style={itemStyle} onMouseDown={(e) => e.preventDefault()}>
-      The finish board is completed!</li>
+    return <><Text style={itemStyle}>
+      The finish board is completed!</Text></>
   } else if (filteredItems.length == 0) {
-    return <li style={itemStyle} onMouseDown={(e) => e.preventDefault()}>
-      No racers matched by this query.</li>
+    return <><Text style={itemStyle}>
+      No racers matched by this query.</Text></>
   } else {
     return (<>
-      {filteredItems.map(item => 
-        <li
-          key={item.id}
-          style={{ ...itemStyle, cursor: "pointer" }}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => {
-            select(item);
-          }}
-        >{item.name} {item.number}</li>)
-      }
+      {filteredItems.map(item => {
+        const text = `${item.name} ${item.number}`;
+        return <Option key={item.id} text={text} value={item.id}>{text}</Option>;
+      })}
     </>)
   }
 }
@@ -347,17 +341,9 @@ function FinishboardGood() {
 
 function NewRaceState({ racers, finishboards, setFinishboards, setState }) {
   const [query, setQuery] = useState("");
-  const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", []);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
-
-  const select = (racer: Racer) => {
-    setDraft([...draft, racer.id]);
-    setQuery("");
-    setOpen(false);
-    inputRef.current?.focus();
-  };
 
   const remainingRacers = racers.length - draft.length;
 
@@ -368,45 +354,22 @@ function NewRaceState({ racers, finishboards, setFinishboards, setState }) {
       gap: 8,
       height: "100%" }}>
       <div style={{ position: "relative" }}>
-        <SearchBox
+        <Combobox
           ref={inputRef}
           style={{ width: "100%", maxWidth: "100%" }} 
           placeholder="Start typing to fill the finish board in..."
           value={query}
-          onChange={(_, data) => {
-            setQuery(data.value);
-            setOpen(true);
+          onInput={(e) => setQuery(e.currentTarget.value)} 
+          onOptionSelect={(_, data) => {
+            setDraft([...draft, parseInt(data.optionValue)]);
+            setQuery("");
           }}
-          onFocus={() => setOpen(true)}
-          onClick={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
-        />
-        {open && (
-          <ul
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              width: "100%",
-              zIndex: 1000,
-              boxSizing: "border-box",
-              margin: 0,
-              marginTop: 2,
-              padding: "4px 0",
-              listStyle: "none",
-              background: "var(--colorNeutralBackground1)",
-              border: "1px solid var(--colorNeutralStroke1)",
-              borderRadius: 6,
-              boxShadow: "0 8px 24px rgba(0,0,0,.18)",
-            }}
-          >
-            <FinishBoardSuggestions 
-              racers={racers}
-              finishboard={draft}
-              query={query}
-              select={select} />
-          </ul>
-        )}
+        >
+        {<FinishBoardSuggestions 
+            racers={racers}
+            finishboard={draft}
+            query={query} />}
+        </Combobox>
       </div>
       <div style={{ flex: "auto", overflow: "auto" }}>
         <Table style={{}}>
