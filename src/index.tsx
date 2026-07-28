@@ -609,33 +609,33 @@ function NavBar({ state }) {
         <BreadcrumbButton href="#">
           <Home24Filled />
         </BreadcrumbButton>
-        <BreadcrumbDivider />
-        {stateIsGlobal(state.state)
-          ? <BreadcrumbButton href="#">Main Menu</BreadcrumbButton>
-          : <BreadcrumbButton href={`#${state.series}/results`}>Regatta 23</BreadcrumbButton>
-        }
-        {! stateIsGlobal(state.state) && 
-        <>
-          <BreadcrumbDivider />
-          <BreadcrumbItem>
-            <Menu>
-              <MenuTrigger disableButtonEnhancement>
-                <BreadcrumbButton>
-                  {getTitle(state)}
-                  <ChevronDown20Regular style={{ marginLeft: 4 }} />
-                </BreadcrumbButton>
-              </MenuTrigger>
-              <MenuPopover>
-                <MenuList>
-                  <MenuItem onClick={() => window.location.hash = `#${state.series}/results`}>Results</MenuItem>
-                  <MenuItem onClick={() => window.location.hash = `#${state.series}/new-race`}>New Race</MenuItem>
-                  <MenuItem onClick={() => window.location.hash = `#${state.series}/competitors`}>Competitors</MenuItem>
-                </MenuList>
-              </MenuPopover>
-            </Menu>
-          </BreadcrumbItem>
-        </>}
       </BreadcrumbItem>
+      <BreadcrumbDivider />
+      {stateIsGlobal(state.state)
+        ? <BreadcrumbButton href="#">Main Menu</BreadcrumbButton>
+        : <BreadcrumbButton href={`#${state.series}/results`}>Regatta 23</BreadcrumbButton>
+      }
+      {! stateIsGlobal(state.state) && 
+      <>
+        <BreadcrumbDivider />
+        <BreadcrumbItem>
+          <Menu>
+            <MenuTrigger disableButtonEnhancement>
+              <BreadcrumbButton>
+                {getTitle(state)}
+                <ChevronDown20Regular style={{ marginLeft: 4 }} />
+              </BreadcrumbButton>
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem onClick={() => window.location.hash = `#${state.series}/results`}>Results</MenuItem>
+                <MenuItem onClick={() => window.location.hash = `#${state.series}/new-race`}>New Race</MenuItem>
+                <MenuItem onClick={() => window.location.hash = `#${state.series}/competitors`}>Competitors</MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
+        </BreadcrumbItem>
+      </>}
     </Breadcrumb>
   );
 }
