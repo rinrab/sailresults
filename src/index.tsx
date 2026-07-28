@@ -1,4 +1,5 @@
-import {  Button, Checkbox, Divider, FluentProvider, Input,  Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, webLightTheme } from "@fluentui/react-components";
+import {  Button, Checkbox, Divider, FluentProvider, Input, SearchBox,  Table, TableBody, TableCell, TableCellActions, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme } from "@fluentui/react-components";
+import { CheckmarkCircle16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, { Dispatch, useState } from "react";
 import ReactDOM from "react-dom/client";
 
@@ -8,7 +9,7 @@ function getStoredObject<T>(key: string, fallback: T): T {
   const value = localStorage.getItem(key);
   if (value) {
     try {
-      return JSON.parse(value);
+      return JSON.parse(value) ?? fallback;
     } catch {
       return fallback;
     }
@@ -17,11 +18,15 @@ function getStoredObject<T>(key: string, fallback: T): T {
   }
 }
 
-function setStoredObject<T>(key: string, value: T) {
-  localStorage.setItem(key, JSON.stringify(value));
+function setStoredObject<T>(key: string, value?: T) {
+  if (value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  } else {
+    localStorage.removeItem(key);
+  }
 }
 
-function useLocalStorage<T>(key: string, fallback: T) {
+function useLocalStorage<T>(key: string, fallback: T): [T, (newValue?: T) => void] {
   const obj = getStoredObject(key, fallback);
   const [value, setValue] = useState(obj);
   return [
@@ -36,6 +41,7 @@ function useLocalStorage<T>(key: string, fallback: T) {
 function nextRacerId() {
   const id = getStoredObject("globalRacerId", 67) + 1;
   setStoredObject("globalRacerId", id);
+  return id;
 }
 
 interface Racer {
@@ -233,9 +239,164 @@ function RaceViewState({ racers, finishboards, setState }) {
   );
 }
 
+function racerMatches(racer: Racer, query: string) {
+  return (racer.name + racer.number).toLowerCase().includes(query);
+}
+
+function FinishBoardSuggestions({ racers, finishboard, query, select }) {
+  const pickableItems = racers.filter(item => ! finishboard.includes(item.id));
+  const filteredItems = pickableItems.filter(item => racerMatches(item, query));
+
+  const itemStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 12px",
+  };
+
+  if (pickableItems.length == 0) {
+    return <li style={itemStyle} onMouseDown={(e) => e.preventDefault()}>
+      The finish board is completed!</li>
+  } else if (filteredItems.length == 0) {
+    return <li style={itemStyle} onMouseDown={(e) => e.preventDefault()}>
+      No racers matched by this query.</li>
+  } else {
+    return (<>
+      {filteredItems.map(item => 
+        <li
+          key={item.id}
+          style={{ ...itemStyle, cursor: "pointer" }}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            select(item);
+          }}
+        >{item.name} {item.number}</li>)
+      }
+    </>)
+  }
+}
+
+function FinishboardBad({ remaining }) {
+  return <div style={{ margin: "auto" }}>
+    <Warning16Regular style={{
+      color: tokens.colorPaletteDarkOrangeForeground1,
+      margin: "-2px 4px" }} />
+    <Text>
+      Note: {remaining} remaining racers will be added as DNS.
+    </Text>
+  </div>;
+}
+
+function FinishboardGood() {
+  return <div style={{ margin: "auto" }}>
+    <CheckmarkCircle16Regular style={{
+      color: tokens.colorPaletteGreenForeground1,
+      margin: "-2px 4px" }} />
+    <Text>
+    The finish board is fine!
+    </Text>
+  </div>;
+}
+
+function NewRaceState({ racers, finishboards, setFinishboards, setState }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = React.useState(false);
+  const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", []);
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const select = (racer: Racer) => {
+    setDraft([...draft, racer.id]);
+    setQuery("");
+    setOpen(false);
+    inputRef.current?.focus();
+  };
+
+  const remainingRacers = racers.length - draft.length;
+
+  return (
+    <div style={{ 
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      gap: 8 
+    }}>
+      <div style={{ position: "relative" }}>
+        <SearchBox
+          ref={inputRef}
+          style={{ width: "100%", maxWidth: "100%" }} 
+          placeholder="Start typing to fill the finish board in..."
+          value={query}
+          onChange={(_, data) => {
+            setQuery(data.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
+          onBlur={() => setOpen(false)}
+        />
+        {open && (
+          <ul
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              width: "100%",
+              zIndex: 1000,
+              boxSizing: "border-box",
+              margin: 0,
+              marginTop: 2,
+              padding: "4px 0",
+              listStyle: "none",
+              background: "var(--colorNeutralBackground1)",
+              border: "1px solid var(--colorNeutralStroke1)",
+              borderRadius: 6,
+              boxShadow: "0 8px 24px rgba(0,0,0,.18)",
+            }}
+          >
+            <FinishBoardSuggestions 
+              racers={racers}
+              finishboard={draft}
+              query={query}
+              select={select} />
+          </ul>
+        )}
+      </div>
+      <div style={{ flex: "auto" }}>
+        <Table style={{}}>
+          <TableBody>
+            {draft.map((item, index) => {
+              const racer = racers.find(racer => racer.id == item);
+              return <TableRow key={racer.id}>
+                <TableCell style={{ width: "35px" }}>{index + 1}</TableCell>
+                <TableCell>{racer.name} {racer.number}</TableCell>
+              </TableRow>
+            })}
+          </TableBody>
+        </Table>
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        {draft.length < racers.length 
+          ? <FinishboardBad remaining={remainingRacers} />
+          : <FinishboardGood /> }
+        <div style={{ flex: "auto" }} />
+        <Button onClick={() => setState(AppState.RaceView)}>Back</Button>
+        <Button onClick={() => setDraft([])}>Clear</Button>
+        <Button onClick={() => {
+          setState(AppState.RaceView);
+          setFinishboards([...finishboards, draft]);
+          setDraft(null);
+        }}>Continue</Button>
+      </div>
+    </div>
+  )
+}
+
 function StateManager({ state, setState }) {
-  const [racers, setRacers] = useLocalStorage<Racer[]>("racers", []);
-  const [finishboards, setFinishboards] = useState<number[][]>([[67, 68]]);
+  const [racers, setRacers] =
+    useLocalStorage<Racer[]>("racers", []);
+  const [finishboards, setFinishboards] =
+    useLocalStorage<number[][]>("finishboards", []);
 
   if (state == AppState.StartMenu) {
     return <StartState setState={setState} />
@@ -251,6 +412,12 @@ function StateManager({ state, setState }) {
       finishboards={finishboards}
       setState={setState}
     />
+  } else if (state == AppState.NewRace) {
+    return <NewRaceState 
+      racers={racers}
+      finishboards={finishboards}
+      setFinishboards={setFinishboards}
+      setState={setState} />
   } else {
     throw "tuff day";
   }
