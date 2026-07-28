@@ -1,4 +1,4 @@
-import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter } from "@fluentui/react-components";
+import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, ChevronDown20Regular, Edit16Regular, Home24Filled, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -289,7 +289,7 @@ function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
     const newSeries = { id: nextRacerId(), ...draft };
     setSeries([...series, newSeries]);
     setDraft(null);
-    state.navigate(AppState.RaceView, newSeries.id);
+    window.location.hash = `${newSeries.id}/results`;
   };
 
   return (
@@ -329,7 +329,7 @@ function EditCompetitorsState({ state, id, racers, setRacers, series, setSeries 
         draft={draft}
         setDraft={setDraft} />
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={() => state.navigate(AppState.RaceView, id)}>Done</Button>
+        <Button as="a" href={`#${id}/results`}>Done</Button>
       </div>
     </div>
   );
@@ -354,11 +354,9 @@ function SeriesCard({ series, state }) {
 
       <CardFooter>
         <Button appearance="primary" icon={<Open16Regular />}
-                onClick={() => state.navigate(AppState.RaceView, series.id)}>
-          Open</Button>
+                as="a" href={`#${series.id}/results`}>Open</Button>
         <Button icon={<Edit16Regular />}
-                onClick={() => state.navigate(AppState.Competitors, series.id)}>
-          Edit Competitors</Button>
+                as="a" href={`#${series.id}/competitors`}>Edit Competitors</Button>
       </CardFooter>
     </Card>
   );
@@ -367,7 +365,7 @@ function SeriesCard({ series, state }) {
 function StartState({ state, series }) {
   return (
     <div style={{ gap: 8, display: "flex", flexDirection: "column" }}>
-      <Button onClick={() => state.setState(AppState.NewSeries)}>
+      <Button as="a" href="#new-series">
         Create New Series</Button>
       <Divider />
       <div style={{
@@ -469,7 +467,7 @@ function RaceViewState({ racers, finishboards, state }) {
         </DataGrid>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={() => state.setState(AppState.NewRace)}>New Race</Button>
+        <Button as="a" href={`#${state.series}/new-race`}>New Race</Button>
       </div>
     </div>
   );
@@ -581,12 +579,12 @@ function NewRaceState({ racers, finishboards, setFinishboards, state }) {
         </div>
         <div style={{ flex: "1 1 150px", display: "flex", gap: 8 }}>
           <div style={{ flex: "auto" }} />
-          <Button onClick={() => state.setState(AppState.RaceView)}>Back</Button>
+          <Button as="a" href={`#${state.series}/results`}>Back</Button>
           <Button onClick={() => setDraft([])}>Clear</Button>
           <Button onClick={() => {
-            state.setState(AppState.RaceView);
             setFinishboards([...finishboards, draft]);
             setDraft(null);
+            window.location.hash = `#${state.series}/results`;
           }}>Continue</Button>
         </div>
       </div>
@@ -644,15 +642,13 @@ function NavBar({ state }) {
       padding: "4px 8px",
       backgroundColor: tokens.colorNeutralBackground4 }}>
       <BreadcrumbItem>
-        <BreadcrumbButton onClick={() => state.setState(AppState.StartMenu)}>
+        <BreadcrumbButton href="#">
           <Home24Filled />
         </BreadcrumbButton>
         <BreadcrumbDivider />
         {stateIsGlobal(state.state)
-          ? <BreadcrumbButton onClick={() => state.setState(AppState.StartMenu)}>
-              Main Menu</BreadcrumbButton>
-          : <BreadcrumbButton onClick={() => state.setState(AppState.RaceView)}>
-              Regatta 23 </BreadcrumbButton>
+          ? <BreadcrumbButton href="#">Main Menu</BreadcrumbButton>
+          : <BreadcrumbButton href={`#${state.series}/results`}>Regatta 23</BreadcrumbButton>
         }
         {! stateIsGlobal(state.state) && 
         <>
@@ -667,9 +663,9 @@ function NavBar({ state }) {
               </MenuTrigger>
               <MenuPopover>
                 <MenuList>
-                  <MenuItem onClick={() => state.setState(AppState.RaceView)}>Results</MenuItem>
-                  <MenuItem onClick={() => state.setState(AppState.NewRace)}>New Race</MenuItem>
-                  <MenuItem onClick={() => state.setState(AppState.Competitors)}>Competitors</MenuItem>
+                  <MenuItem onClick={() => window.location.hash = `#${state.series}/results`}>Results</MenuItem>
+                  <MenuItem onClick={() => window.location.hash = `#${state.series}/new-race`}>New Race</MenuItem>
+                  <MenuItem onClick={() => window.location.hash = `#${state.series}/competitors`}>Competitors</MenuItem>
                 </MenuList>
               </MenuPopover>
             </Menu>
