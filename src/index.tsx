@@ -169,9 +169,6 @@ class State {
     }
   }
 
-  usesSeries() {
-  }
-
   navigate(state: AppState, series?: number) {
     this._setState(state);
     this._setSeries(series);
@@ -236,14 +233,9 @@ function RacersList({ racers, series, setSeries }) {
     </Table>);
 }
 
-function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
+function EditSeries({ racers, setRacers, draft, setDraft }) {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
-
-  const [draft, setDraft] = useLocalStorage("draft-series", {
-    name: "",
-    racers: []
-  });
 
   const submit = () => {
     const newRacer = {
@@ -260,19 +252,7 @@ function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
     });
   }
 
-  const done = () => {
-    const newSeries = { id: nextRacerId(), ...draft };
-    setSeries([...series, newSeries]);
-    setDraft(null);
-    state.navigate(AppState.RaceView, newSeries.id);
-  };
-
-  return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      gap: 8 }}>
+  return (<>
       <Input value={draft.name}  placeholder="Enter Series Name..."
              onChange={e => setDraft({ ...draft, name: e.target.value })} />
       <Divider style={{ flex: "0", padding: "8px 0" }} />
@@ -295,10 +275,61 @@ function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
             : <RacersList racers={racers} series={draft} setSeries={setDraft} />
         }
       </div>
+    </>
+  );
+}
+
+function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
+  const [draft, setDraft] = useLocalStorage("draft-series", {
+    name: "",
+    racers: []
+  });
+
+  const done = () => {
+    const newSeries = { id: nextRacerId(), ...draft };
+    setSeries([...series, newSeries]);
+    setDraft(null);
+    state.navigate(AppState.RaceView, newSeries.id);
+  };
+
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      gap: 8 }}>
+      <EditSeries
+        racers={racers}
+        setRacers={setRacers}
+        draft={draft}
+        setDraft={setDraft} />
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <Button onClick={done}>
           Contunue with {draft.racers.length} racers
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function EditCompetitorsState({ state, id, racers, setRacers, series, setSeries }) {
+  const draft = series.find(item => item.id == id);
+  const setDraft = (newvalue) => setSeries(series.map(
+    item => item.id == id ? newvalue : item));
+
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      gap: 8 }}>
+      <EditSeries
+        racers={racers}
+        setRacers={setRacers}
+        draft={draft}
+        setDraft={setDraft} />
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button onClick={() => state.navigate(AppState.RaceView, id)}>Done</Button>
       </div>
     </div>
   );
@@ -573,9 +604,18 @@ function StateManager({ state }) {
 
   if (state.state == AppState.StartMenu) {
     return <StartState series={series} state={state} />
-  } else if (state.state == AppState.NewSeries || state.state == AppState.Competitors) {
+  } else if (state.state == AppState.NewSeries) {
     return <NewSeriesState 
       state={state}
+      racers={racers}
+      setRacers={setRacers}
+      series={series}
+      setSeries={setSeries}
+    />
+  } else if (state.state == AppState.Competitors) {
+    return <EditCompetitorsState 
+      state={state}
+      id={state.series}
       racers={racers}
       setRacers={setRacers}
       series={series}
@@ -609,7 +649,7 @@ function NavBar({ state }) {
         </BreadcrumbButton>
         <BreadcrumbDivider />
         {stateIsGlobal(state.state)
-          ? <BreadcrumbButton onClick={() => state.setState(AppState.RaceView)}>
+          ? <BreadcrumbButton onClick={() => state.setState(AppState.StartMenu)}>
               Main Menu</BreadcrumbButton>
           : <BreadcrumbButton onClick={() => state.setState(AppState.RaceView)}>
               Regatta 23 </BreadcrumbButton>
@@ -629,14 +669,15 @@ function NavBar({ state }) {
                 <MenuList>
                   <MenuItem onClick={() => state.setState(AppState.RaceView)}>Results</MenuItem>
                   <MenuItem onClick={() => state.setState(AppState.NewRace)}>New Race</MenuItem>
-                  <MenuItem onClick={() => state.setState(AppState.NewSeries)}>Competitors</MenuItem>
+                  <MenuItem onClick={() => state.setState(AppState.Competitors)}>Competitors</MenuItem>
                 </MenuList>
               </MenuPopover>
             </Menu>
           </BreadcrumbItem>
         </>}
       </BreadcrumbItem>
-    </Breadcrumb>);
+    </Breadcrumb>
+  );
 }
 
 
