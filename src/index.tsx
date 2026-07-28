@@ -318,7 +318,7 @@ function FinishBoardSuggestions({ racers, finishboard, query }) {
 }
 
 function FinishboardBad({ remaining }) {
-  return <div style={{ margin: "auto" }}>
+  return <div>
     <Warning16Regular style={{
       color: tokens.colorPaletteDarkOrangeForeground1,
       margin: "-2px 4px" }} />
@@ -329,7 +329,7 @@ function FinishboardBad({ remaining }) {
 }
 
 function FinishboardGood() {
-  return <div style={{ margin: "auto" }}>
+  return <div>
     <CheckmarkCircle16Regular style={{
       color: tokens.colorPaletteGreenForeground1,
       margin: "-2px 4px" }} />
@@ -385,7 +385,7 @@ function NewRaceState({ racers, finishboards, setFinishboards, setState }) {
         </Table>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ flex: "1 1 300px"  }}>
+        <div style={{ flex: "1 1 300px", margin: "auto" }}>
           {draft.length < racers.length 
             ? <FinishboardBad remaining={remainingRacers} />
             : <FinishboardGood /> }
@@ -532,7 +532,6 @@ function App() {
       <div style={{ flex: "1", padding: "8px", minHeight: "0" }}>
         <StateManager state={state} setState={setState} />
       </div>
-      <div>footer</div>
     </div>
   );
 }
