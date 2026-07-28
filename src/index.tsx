@@ -161,16 +161,16 @@ function NewSeriesState({ setState, racers, setRacers }) {
       gap: 8 }}>
       <Input placeholder="Enter Series Name..." />
       <Divider style={{ flex: "0", padding: "8px 0" }} />
-      <form style={{ display: "flex", gap: 8 }}
+      <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
             onSubmit={e => { e.preventDefault(); submit(); }}>
         <Input placeholder="Name" value={name}
                onChange={e => setName(e.target.value)}
-               style={{ flexGrow: 3 }} />
+               style={{ flex: "1 1 200px" }} />
         <Input placeholder="Sail Number" value={number}
                onChange={e => setNumber(e.target.value)}
-               style={{ flexGrow: 3 }} />
+               style={{ flex: "1 1 200px" }} />
         <Button type="submit"
-                style={{ width: "200px" }}>Add</Button>
+                style={{ flex: "1 1 70px" }}>Add</Button>
       </form>
       <Divider style={{ flex: "0", padding: "8px 0" }} />
       <div style={{ flex: "auto", overflow: "auto" }}>
@@ -421,18 +421,22 @@ function NewRaceState({ racers, finishboards, setFinishboards, setState }) {
           </TableBody>
         </Table>
       </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        {draft.length < racers.length 
-          ? <FinishboardBad remaining={remainingRacers} />
-          : <FinishboardGood /> }
-        <div style={{ flex: "auto" }} />
-        <Button onClick={() => setState(AppState.RaceView)}>Back</Button>
-        <Button onClick={() => setDraft([])}>Clear</Button>
-        <Button onClick={() => {
-          setState(AppState.RaceView);
-          setFinishboards([...finishboards, draft]);
-          setDraft(null);
-        }}>Continue</Button>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ flex: "1 1 300px"  }}>
+          {draft.length < racers.length 
+            ? <FinishboardBad remaining={remainingRacers} />
+            : <FinishboardGood /> }
+        </div>
+        <div style={{ flex: "1 1 150px", display: "flex", gap: 8 }}>
+          <div style={{ flex: "auto" }} />
+          <Button onClick={() => setState(AppState.RaceView)}>Back</Button>
+          <Button onClick={() => setDraft([])}>Clear</Button>
+          <Button onClick={() => {
+            setState(AppState.RaceView);
+            setFinishboards([...finishboards, draft]);
+            setDraft(null);
+          }}>Continue</Button>
+        </div>
       </div>
     </div>
   )
