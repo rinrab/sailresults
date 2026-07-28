@@ -1,6 +1,6 @@
-import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, SearchBox, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme } from "@fluentui/react-components";
-import { CheckmarkCircle16Regular, Warning16Regular } from "@fluentui/react-icons";
-import React, { Dispatch, useState } from "react";
+import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem } from "@fluentui/react-components";
+import { CheckmarkCircle16Regular, ChevronDown20Regular, Home24Filled, Warning16Regular } from "@fluentui/react-icons";
+import React, {  useState } from "react";
 import ReactDOM from "react-dom/client";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -449,41 +449,98 @@ function parseStateFromLocation(): AppState {
   }
 }
 
-function App() {
+function useLocationState() {
   const [state, setState] = useState(parseStateFromLocation());
 
   window.onhashchange = () => {
     setState(parseStateFromLocation());
   };
 
-  return <StateManager state={state} setState={(state) => {
-    setState(state);
-
-    if (state == AppState.StartMenu) {
+  return [state, (newValue) => {
+    setState(newValue);
+    if (newValue == AppState.StartMenu) {
       window.location.hash = "";
-    } else if (state == AppState.NewSeries) {
+    } else if (newValue == AppState.NewSeries) {
       window.location.hash = "new-series";
-    } else if (state == AppState.RaceView) {
+    } else if (newValue == AppState.RaceView) {
       window.location.hash = "score-table";
-    } else if (state == AppState.NewRace) {
+    } else if (newValue == AppState.NewRace) {
       window.location.hash = "new-race";
     }
-  }} />
+  }];
+}
+
+function stateToTitle(state: AppState): string {
+  if (state == AppState.StartMenu) {
+    return "Main Menu";
+  } else if (state == AppState.NewRace) {
+    return "New Race";
+  } else if (state == AppState.NewSeries) {
+    return "Competitors";
+  } else if (state == AppState.RaceView) {
+    return "Results";
+  }
+}
+
+function NavBar({ state, setState }) {
+  return (
+    <Breadcrumb style={{
+      padding: "4px 8px",
+      backgroundColor: tokens.colorNeutralBackground4 }}>
+      <BreadcrumbItem>
+        <BreadcrumbButton onClick={() => setState(AppState.StartMenu)}>
+          <Home24Filled />
+        </BreadcrumbButton>
+        <BreadcrumbDivider />
+        <BreadcrumbButton onClick={() => setState(AppState.RaceView)}>
+          Regatta 23
+        </BreadcrumbButton>
+        <BreadcrumbDivider />
+        <BreadcrumbItem>
+          <Menu>
+            <MenuTrigger disableButtonEnhancement>
+              <BreadcrumbButton>
+                {stateToTitle(state)}
+                <ChevronDown20Regular style={{ marginLeft: 4 }} />
+              </BreadcrumbButton>
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem onClick={() => setState(AppState.RaceView)}>Results</MenuItem>
+                <MenuItem onClick={() => setState(AppState.NewRace)}>New Race</MenuItem>
+                <MenuItem onClick={() => setState(AppState.NewSeries)}>Competitors</MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
+        </BreadcrumbItem>
+      </BreadcrumbItem>
+    </Breadcrumb>);
+}
+
+
+function App() {
+  const [state, setState] = useLocationState();
+
+  return (
+    <div style={{
+      height: "100%",
+      display: "flex",
+      flexDirection: "column"
+    }}>
+      <NavBar state={state} setState={setState} />
+      <Divider style={{ flex: 0 }} />
+      <div style={{ flex: "1", padding: "8px", minHeight: "0" }}>
+        <StateManager state={state} setState={setState} />
+      </div>
+      <div>footer</div>
+    </div>
+  );
 }
 
 root.render(
   <React.StrictMode>
     <FluentProvider theme={webLightTheme} style={{ height: "100%" }}>
-      <div style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column"
-      }}>
-        <div style={{ flex: "1", padding: "8px", minHeight: "0" }}>
-          <App />
-        </div>
-        <div>footer</div>
-      </div>
+      <App />
     </FluentProvider>
   </React.StrictMode>
 );
