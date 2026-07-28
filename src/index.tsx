@@ -5,16 +5,16 @@ import ReactDOM from "react-dom/client";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
-function getStoredObject<T>(key: string, fallback: T): T {
+function getStoredObject<T>(key: string, createNew: () => T): T {
   const value = localStorage.getItem(key);
   if (value) {
     try {
-      return JSON.parse(value) ?? fallback;
+      return JSON.parse(value) ?? createNew();
     } catch {
-      return fallback;
+      return createNew();
     }
   } else {
-    return fallback;
+    return createNew();
   }
 }
 
@@ -26,8 +26,8 @@ function setStoredObject<T>(key: string, value?: T) {
   }
 }
 
-function useLocalStorage<T>(key: string, fallback: T): [T, (newValue?: T) => void] {
-  const obj = getStoredObject(key, fallback);
+function useLocalStorage<T>(key: string, createNew: () => T): [T, (newValue?: T) => void] {
+  const obj = getStoredObject(key, createNew);
   const [value, setValue] = useState(obj);
   return [
     value,
@@ -39,7 +39,7 @@ function useLocalStorage<T>(key: string, fallback: T): [T, (newValue?: T) => voi
 }
 
 function nextRacerId() {
-  const id = getStoredObject("globalRacerId", 67) + 1;
+  const id = getStoredObject("globalRacerId", () => 67) + 1;
   setStoredObject("globalRacerId", id);
   return id;
 }
@@ -60,6 +60,8 @@ interface Series {
   id: number;
   name: string;
   racers: number[];
+  finishboards: number[][];
+  draftFinishboard: number[] | null;
 }
 
 function evaluateScoreboard(racers: Racer[], finishBoards: number[][]) {
@@ -244,16 +246,18 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
 }
 
 function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
-  const [draft, setDraft] = useLocalStorage("draft-series", {
+  const [draft, setDraft] = useLocalStorage<Series>("draft-series", () => ({
+    id: nextRacerId(),
     name: "",
-    racers: []
-  });
+    racers: [],
+    finishboards: [],
+    draftFinishboard: null
+  }));
 
   const done = () => {
-    const newSeries = { id: nextRacerId(), ...draft };
-    setSeries([...series, newSeries]);
+    setSeries([...series, draft]);
     setDraft(null);
-    window.location.hash = `${newSeries.id}/results`;
+    window.location.hash = `${draft.id}/results`;
   };
 
   return (
@@ -492,7 +496,7 @@ function FinishboardGood() {
 
 function NewRaceState({ racers, finishboards, setFinishboards, state }) {
   const [query, setQuery] = useState("");
-  const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", []);
+  const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", () => []);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -558,11 +562,11 @@ function NewRaceState({ racers, finishboards, setFinishboards, state }) {
 
 function StateManager({ state }) {
   const [racers, setRacers] =
-    useLocalStorage<Racer[]>("racers", []);
+    useLocalStorage<Racer[]>("racers", () => []);
   const [finishboards, setFinishboards] =
-    useLocalStorage<number[][]>("finishboards", []);
+    useLocalStorage<number[][]>("finishboards", () => []);
   const [series, setSeries] =
-    useLocalStorage<Series[]>("series", []);
+    useLocalStorage<Series[]>("series", () => []);
 
   if (state.state == AppState.StartMenu) {
     return <StartState series={series} state={state} />
