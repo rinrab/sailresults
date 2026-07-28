@@ -1,6 +1,6 @@
 import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, ChevronDown20Regular, Edit16Regular, Home24Filled, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
-import React, {  useState } from "react";
+import React, {  useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -91,102 +91,66 @@ function evaluateScoreboard(racers: Racer[], finishBoards: number[][]) {
 }
 
 const enum AppState {
-  StartMenu,
+  StartMenu ,
   NewSeries,
   RaceView,
   NewRace,
   Competitors,
 }
 
-function parseHash(hash: string) {
+type Route = {
+  state: AppState.Competitors | AppState.RaceView | AppState.NewRace,
+  series: number;
+} | {
+  state: AppState.StartMenu | AppState.NewSeries,
+};
+
+function parseRoute(hash: string): Route {
   const parts = hash.replace("#", "").split("/");
 
   if (parts.length == 1 && parts[0] == "new-series") {
-    return [AppState.NewSeries, null];
+    return { state: AppState.NewSeries };
   } else if (parts.length == 2) {
     const series = parseInt(parts[0]);
     if (parts[1] == "new-race") {
-      return [AppState.NewRace, series];
+      return { state: AppState.NewRace, series: series };
     } else if (parts[1] == "results") {
-      return [AppState.RaceView, series];
+      return { state: AppState.RaceView, series: series };
     } else if (parts[1] == "competitors") {
-      return [AppState.Competitors, series];
+      return { state: AppState.Competitors, series: series };
     } else {
-      return [AppState.StartMenu, null];
+      return { state: AppState.RaceView, series: series };
     }
   } else {
-    return [AppState.StartMenu, null];
+    return { state: AppState.StartMenu };
   }
 }
 
-function toHashLocation(state, series) {
-  if (state == AppState.StartMenu) {
-    return "";
-  } else if (state == AppState.NewSeries) {
-    return "new-series"; 
-  } else if (state == AppState.RaceView) {
-    return `${series}/results`; 
-  } else if (state == AppState.NewRace) {
-    return `${series}/new-race`; 
-  } else if (state == AppState.Competitors) {
-    return `${series}/competitors`; 
-  } else {
-    throw "never hit";
-  }
+function useHash() {
+    const [hash, setHash] = useState(() => window.location.hash);
+    useEffect(() => {
+        const onHashChange = () => setHash(window.location.hash);
+        window.addEventListener("hashchange", onHashChange);
+        return () => window.removeEventListener("hashchange", onHashChange);
+    }, []);
+    return hash;
 }
 
 function stateIsGlobal(state: AppState) {
   return state == AppState.StartMenu || state == AppState.NewSeries;
 }
 
-class State {
-  state: AppState;
-  series?: number;
-
-  private _setState;
-  private _setSeries;
-
-  constructor() {
-    const [state, series] = parseHash(window.location.hash);
-
-    [this.state, this._setState] = useState(state);
-    [this.series, this._setSeries] = useState(series);
-
-    window.onhashchange = () => {
-      const [state, series] = parseHash(window.location.hash);
-      this._setState(state);
-      this._setSeries(series);
-    };
-  }
-
-  setState(state: AppState) {
-    if (stateIsGlobal(state)) {
-      this.navigate(state, null);
-    } else if (! this.series) {
-      throw "series is not set";
-    } else {
-      this.navigate(state, this.series);
-    }
-  }
-
-  navigate(state: AppState, series?: number) {
-    this._setState(state);
-    this._setSeries(series);
-    window.location.hash = toHashLocation(state, series);
-  }
-
-  getTitle(): string {
-    if (this.state == AppState.StartMenu) {
-      return "Main Menu";
-    } else if (this.state == AppState.NewRace) {
-      return "New Race";
-    } else if (this.state == AppState.NewSeries) {
-      return "New Series";
-    } else if (this.state == AppState.Competitors) {
-      return "Competitors";
-    } else if (this.state == AppState.RaceView) {
-      return "Results";
-    }
+function getTitle(route: Route): string {
+  if (route.state == AppState.StartMenu) {
+    return "Main Menu";
+  } else if (route.state == AppState.NewRace) {
+    return "New Race";
+  } else if (route.state == AppState.NewSeries) {
+    return "New Series";
+  } else if (route.state == AppState.Competitors) {
+    return "Competitors";
+  } else if (route.state == AppState.RaceView) {
+    return "Results";
   }
 }
 
@@ -657,7 +621,7 @@ function NavBar({ state }) {
             <Menu>
               <MenuTrigger disableButtonEnhancement>
                 <BreadcrumbButton>
-                  {state.getTitle()}
+                  {getTitle(state)}
                   <ChevronDown20Regular style={{ marginLeft: 4 }} />
                 </BreadcrumbButton>
               </MenuTrigger>
@@ -676,9 +640,8 @@ function NavBar({ state }) {
   );
 }
 
-
 function App() {
-  const state = new State();
+  const state = parseRoute(useHash());
 
   return (
     <div style={{
