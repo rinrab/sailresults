@@ -1,4 +1,4 @@
-import {  Button, Checkbox, Divider, FluentProvider, Input, SearchBox,  Table, TableBody, TableCell, TableCellActions, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme } from "@fluentui/react-components";
+import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, SearchBox, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, { Dispatch, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -198,39 +198,78 @@ function formatRaceScore(score: number) {
   }
 }
 
+function formatString(str: string) {
+  return (str == "") ? "-" : str;
+}
+
 function RaceViewState({ racers, finishboards, setState }) {
   const scoreboard = evaluateScoreboard(racers, finishboards );
 
+  const columns = [
+    createTableColumn({
+      columnId: "place",
+      renderHeaderCell: () => "Place",
+      renderCell: (index: number) => index,
+    }),
+    createTableColumn({
+      columnId: "name",
+      renderHeaderCell: () => "Name",
+      renderCell: (index: number) => formatString(scoreboard[index].racer.name),
+    }),
+    createTableColumn({
+      columnId: "number",
+      renderHeaderCell: () => "Number",
+      renderCell: (index: number) => formatString(scoreboard[index].racer.number),
+    }),
+  ];
+
+  for (let i = 0; i < scoreboard[0].scores.length; i++) {
+    columns.push(createTableColumn({
+      columnId: "race" + i,
+      renderHeaderCell: () => `Race ${i + 1}`,
+      renderCell: (index: number) => formatRaceScore(scoreboard[index].scores[i]),
+    }));
+  }
+
+  columns.push(createTableColumn({
+    columnId: "total",
+    renderHeaderCell: () => "Total",
+    renderCell: (index: number) => scoreboard[index].total,
+  }));
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 8 }}>
-      <div style={{flex: "auto"}}>
-        <Table style={{ width: "100%" }}>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell>Place</TableHeaderCell>
-              <TableHeaderCell>Name</TableHeaderCell>
-              <TableHeaderCell>Number</TableHeaderCell>
-              {Array.from(
-                { length: scoreboard[0].scores.length },
-                (_, i) => <TableHeaderCell key={i}>Race {i + 1}</TableHeaderCell>) }
-              <TableHeaderCell>Total</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {
-              scoreboard.map((racer, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{racer.racer.name == "" ? "-" : racer.racer.name}</TableCell>
-                  <TableCell>{racer.racer.number == "" ? "-" : racer.racer.number}</TableCell>
-                  { racer.scores.map((score, index) =>
-                     <TableCell key={index}>{formatRaceScore(score)}</TableCell>) }
-                  <TableHeaderCell>{racer.total}</TableHeaderCell>
-                </TableRow>
-                )) 
-            }
-          </TableBody>
-        </Table>
+      <div style={{ overflow: "auto", flex: "auto" }}>
+        <DataGrid
+          items={racers.map((_, i) => i)}
+          columns={columns}
+          getRowId={(item) => item}
+          focusMode="none"
+          resizableColumns
+          resizableColumnsOptions={{
+            autoFitColumns: false,
+          }} >
+          <DataGridHeader>
+            <DataGridRow>
+              {({ renderHeaderCell }) => (
+                <DataGridHeaderCell>
+                  {renderHeaderCell()}
+                </DataGridHeaderCell>
+              )}
+            </DataGridRow>
+          </DataGridHeader>
+          <DataGridBody>
+            {({ item, rowId }) => (
+              <DataGridRow key={rowId}>
+                {({ renderCell }) => (
+                  <DataGridCell>
+                    {renderCell(item)}
+                  </DataGridCell>
+                )}
+              </DataGridRow>
+            )}
+          </DataGridBody>
+        </DataGrid>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <Button onClick={() => setState(AppState.NewRace)}>New Race</Button>
