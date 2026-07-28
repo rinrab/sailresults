@@ -1,5 +1,5 @@
-import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem } from "@fluentui/react-components";
-import { CheckmarkCircle16Regular, ChevronDown20Regular, Home24Filled, Warning16Regular } from "@fluentui/react-icons";
+import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter } from "@fluentui/react-components";
+import { CheckmarkCircle16Regular, ChevronDown20Regular, Edit16Regular, Home24Filled, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  useState } from "react";
 import ReactDOM from "react-dom/client";
 
@@ -48,13 +48,18 @@ interface Racer {
   id: number;
   name: string;
   number: string;
-  isChecked: boolean;
 }
 
 interface EvaluatedRacer {
   racer: Racer,
   scores: number[],
   total: number,
+}
+
+interface Series {
+  id: number;
+  name: string;
+  racers: number[];
 }
 
 function evaluateScoreboard(racers: Racer[], finishBoards: number[][]) {
@@ -92,14 +97,18 @@ const enum AppState {
   NewRace,
 }
 
-function RacerRow({ racer, updateRacer }) {
+function RacerRow({ racer, series, setSeries }) {
   return (
     <TableRow>
       <TableSelectionCell
-        checked={racer.isChecked}
+        checked={series.racers.includes(racer.id)}
         onChange={e => {
-          const value = e.target.checked;
-          updateRacer(racer, { ...racer, isChecked: value });
+          setSeries({
+            ...series,
+            racers: (e.target.checked) 
+              ? [...series.racers, racer.id] 
+              : series.racers.filter(item => item != racer.id),
+          });
         }}
       />
       <TableCell>{racer.name == "" ? "-" : racer.name}</TableCell>
@@ -108,7 +117,7 @@ function RacerRow({ racer, updateRacer }) {
   );
 }
 
-function RacersList({ racers, updateRacer }) {
+function RacersList({ racers, series, setSeries }) {
   return (
     <Table style={{ width: "100%" }}>
       <TableHeader>
@@ -121,37 +130,46 @@ function RacersList({ racers, updateRacer }) {
       <TableBody>
         {
           racers.map(item =>
-            <RacerRow racer={item} updateRacer={updateRacer} key={item.id} />) 
+            <RacerRow
+              key={item.id}
+              racer={item}
+              series={series}
+              setSeries={setSeries} />) 
         }
       </TableBody>
     </Table>);
 }
 
-function NewSeriesState({ setState, racers, setRacers }) {
+function NewSeriesState({ setState, racers, setRacers, series, setSeries }) {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
 
+  const [draft, setDraft] = useLocalStorage("draft-series", {
+    name: "",
+    racers: []
+  });
+
   const submit = () => {
-      const newRacer = {
-          id: nextRacerId(),
-          name: name.trim(),
-          number: number.trim(),
-          isChecked: true,
-      };
-      setRacers([...racers, newRacer]);
-      setName("");
-      setNumber("");
+    const newRacer = {
+        id: nextRacerId(),
+        name: name.trim(),
+        number: number.trim(),
+    };
+    setRacers([...racers, newRacer]);
+    setName("");
+    setNumber("");
+    setDraft({
+      ...draft,
+      racers: [...draft.racers, newRacer.id],
+    });
   }
 
-  const updateRacer = (racer: Racer, newValue: Racer) => {
-    setRacers(racers.map(item => {
-      if (item == racer) {
-        return newValue;
-      } else {
-        return item;
-      }
-    }));
-  }
+  const done = () => {
+    const newSeries = { id: nextRacerId(), ...draft };
+    setSeries([...series, newSeries]);
+    setDraft(null);
+    setState(AppState.RaceView);
+  };
 
   return (
     <div style={{
@@ -159,7 +177,8 @@ function NewSeriesState({ setState, racers, setRacers }) {
       flexDirection: "column",
       height: "100%",
       gap: 8 }}>
-      <Input placeholder="Enter Series Name..." />
+      <Input value={draft.name}  placeholder="Enter Series Name..."
+             onChange={e => setDraft({ ...draft, name: e.target.value })} />
       <Divider style={{ flex: "0", padding: "8px 0" }} />
       <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
             onSubmit={e => { e.preventDefault(); submit(); }}>
@@ -177,21 +196,64 @@ function NewSeriesState({ setState, racers, setRacers }) {
         {
           racers.length == 0 
             ? <Text>No racers added.</Text> 
-            : <RacersList racers={racers} updateRacer={updateRacer} />
+            : <RacersList racers={racers} series={draft} setSeries={setDraft} />
         }
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={() => setState(AppState.RaceView)}>
-          Contunue with {racers.filter(item => item.isChecked).length} racers
+        <Button onClick={done}>
+          Contunue with {draft.racers.length} racers
         </Button>
       </div>
     </div>
   );
 }
 
-function StartState({setState}) {
-  return <Button onClick={() => setState(AppState.NewSeries)}>
-    Create New Series</Button>;
+function SeriesCard({ series, setState }) {
+  return (
+    <Card style={{
+      maxWidth: "400px",
+      width: "100%",
+      height: "fit-content" }}>
+      <CardPreview>
+      </CardPreview>
+
+      <CardHeader
+        header={
+          <Body1 as="h5" style={{ margin: 0, fontWeight: "bold" }}>
+            {series.name}
+          </Body1>
+        }
+        description={`3 races / ${series.racers.length} competitors`} />
+
+      <CardFooter>
+        <Button appearance="primary" icon={<Open16Regular />}
+                onClick={() => setState(AppState.RaceView)}>
+          Open</Button>
+        <Button icon={<Edit16Regular />}
+                onClick={() => setState(AppState.NewSeries)}>
+          Edit Competitors</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+function StartState({ setState, series }) {
+  return (
+    <div style={{ gap: 8, display: "flex", flexDirection: "column" }}>
+      <Button onClick={() => setState(AppState.NewSeries)}>
+        Create New Series</Button>
+      <Divider />
+      <div style={{
+        display: "flex",
+        flexWrap: "wrap",
+        flexDirection: "column",
+        columnGap: "16px",
+        rowGap: "36px" }}>
+        {series.map(item => (
+          <SeriesCard key={item.id} series={item} setState={setState} />
+        ))}
+      </div>
+    </div>);
 }
 
 function formatRaceScore(score: number) {
@@ -410,14 +472,20 @@ function StateManager({ state, setState }) {
     useLocalStorage<Racer[]>("racers", []);
   const [finishboards, setFinishboards] =
     useLocalStorage<number[][]>("finishboards", []);
+  const [series, setSeries] =
+    useLocalStorage<Series[]>("series", []);
 
   if (state == AppState.StartMenu) {
-    return <StartState setState={setState} />
+    return <StartState
+      setState={setState}
+      series={series} />
   } else if (state == AppState.NewSeries) {
     return <NewSeriesState 
       setState={setState}
       racers={racers}
       setRacers={setRacers}
+      series={series}
+      setSeries={setSeries}
     />
   } else if (state == AppState.RaceView) {
     return <RaceViewState
