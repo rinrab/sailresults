@@ -154,7 +154,11 @@ function NewSeriesState({ setState, racers, setRacers }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 8 }}>
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      gap: 8 }}>
       <Input placeholder="Enter Series Name..." />
       <Divider style={{ flex: "0", padding: "8px 0" }} />
       <form style={{ display: "flex", gap: 8 }}
@@ -169,7 +173,7 @@ function NewSeriesState({ setState, racers, setRacers }) {
                 style={{ width: "200px" }}>Add</Button>
       </form>
       <Divider style={{ flex: "0", padding: "8px 0" }} />
-      <div style={{ flex: "auto" }}>
+      <div style={{ flex: "auto", overflow: "auto" }}>
         {
           racers.length == 0 
             ? <Text>No racers added.</Text> 
@@ -238,7 +242,11 @@ function RaceViewState({ racers, finishboards, setState }) {
   }));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 8 }}>
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      gap: 8 }}>
       <div style={{ overflow: "auto", flex: "auto" }}>
         <DataGrid
           items={racers.map((_, i) => i)}
@@ -357,9 +365,8 @@ function NewRaceState({ racers, finishboards, setFinishboards, setState }) {
     <div style={{ 
       display: "flex",
       flexDirection: "column",
-      height: "100%",
-      gap: 8 
-    }}>
+      gap: 8,
+      height: "100%" }}>
       <div style={{ position: "relative" }}>
         <SearchBox
           ref={inputRef}
@@ -401,7 +408,7 @@ function NewRaceState({ racers, finishboards, setFinishboards, setState }) {
           </ul>
         )}
       </div>
-      <div style={{ flex: "auto" }}>
+      <div style={{ flex: "auto", overflow: "auto" }}>
         <Table style={{}}>
           <TableBody>
             {draft.map((item, index) => {
@@ -499,13 +506,13 @@ function App() {
 
 root.render(
   <React.StrictMode>
-    <FluentProvider theme={webLightTheme}>
+    <FluentProvider theme={webLightTheme} style={{ height: "100%" }}>
       <div style={{
-        height: "calc(100vh - 16px)",
+        height: "100%",
         display: "flex",
         flexDirection: "column"
       }}>
-        <div style={{ flex: "auto" }}>
+        <div style={{ flex: "1", padding: "8px", minHeight: "0" }}>
           <App />
         </div>
         <div>footer</div>
