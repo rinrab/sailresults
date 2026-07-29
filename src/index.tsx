@@ -452,9 +452,9 @@ function RaceViewState({ route, setRoute, series, racers }) {
 
   const columns = [
     createTableColumn({
-      columnId: "place",
-      renderHeaderCell: () => "Place",
-      renderCell: (index: number) => index,
+      columnId: "rank",
+      renderHeaderCell: () => "Rank",
+      renderCell: (index: number) => <Text style={{ width: "100%" }} align="end">{index + 1}</Text>,
     }),
     createTableColumn({
       columnId: "name",
@@ -468,37 +468,49 @@ function RaceViewState({ route, setRoute, series, racers }) {
     }),
   ];
 
+  const columnSizingOptions: TableColumnSizingOptions = {
+    "rank": { idealWidth: 35, minWidth: 35 },
+    "name": {},
+    "number": {},
+    "total": {},
+  };
+
   for (let i = 0; i < scoreboard[0].scores.length; i++) {
     columns.push(createTableColumn({
       columnId: "race" + i,
       renderHeaderCell: () => (
-        <div>
-          Race {i + 1}
-          <Menu positioning={{ autoSize: true }}>
-            <MenuTrigger disableButtonEnhancement>
-              <Button icon={<MoreHorizontalRegular />} appearance="transparent" />
-            </MenuTrigger>
-            <MenuPopover>
-              <MenuList>
-                <MenuItem onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}
-                          icon={<New16Regular />}>New Race</MenuItem>
-                <MenuItem onClick={() => setRoute({ state: AppState.EditRace, series: route.series, race: i })}
-                          icon={ <Edit16Regular /> }>Edit Race</MenuItem>
-                <MenuItem onClick={() => alert("dont kill me :(")}
-                          icon={ <Delete16Regular /> }>Delete Race</MenuItem>
-              </MenuList>
-            </MenuPopover>
-          </Menu>
+        <div style={{ width: "100%", display: "flex" }}>
+          <Text style={{ flex: "1", margin: "auto" }}>{i + 1}</Text>
+          <div>
+            <Menu>
+              <MenuTrigger disableButtonEnhancement>
+                <Button icon={<MoreHorizontalRegular />} appearance="transparent" />
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  <MenuItem onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}
+                            icon={<New16Regular />}>New Race</MenuItem>
+                  <MenuItem onClick={() => setRoute({ state: AppState.EditRace, series: route.series, race: i })}
+                            icon={ <Edit16Regular /> }>Edit Race</MenuItem>
+                  <MenuItem onClick={() => alert("dont kill me :(")}
+                            icon={ <Delete16Regular /> }>Delete Race</MenuItem>
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+          </div>
         </div>
       ),
-      renderCell: (index: number) => formatRaceScore(scoreboard[index].scores[i]),
+      renderCell: (index: number) => <Text style={{ width: "100%" }} align="end">
+        {formatRaceScore(scoreboard[index].scores[i])}
+      </Text>,
     }));
+    columnSizingOptions["race" + i] = { idealWidth: 40, minWidth: 40 };
   }
 
   columns.push(createTableColumn({
     columnId: "total",
     renderHeaderCell: () => "Total",
-    renderCell: (index: number) => scoreboard[index].total,
+    renderCell: (index: number) => <Text weight="semibold">{scoreboard[index].total}</Text>
   }));
 
   return (
@@ -515,8 +527,9 @@ function RaceViewState({ route, setRoute, series, racers }) {
           focusMode="none"
           resizableColumns
           resizableColumnsOptions={{
-            autoFitColumns: false,
-          }} >
+            autoFitColumns: true,
+          }}
+          columnSizingOptions={columnSizingOptions} >
           <DataGridHeader>
             <DataGridRow>
               {({ renderHeaderCell }) => (
