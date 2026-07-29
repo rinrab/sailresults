@@ -1,4 +1,4 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions } from "@fluentui/react-components";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth } from "@fluentui/react-components";
 import { ArrowDownRegular, ArrowUpRegular, CheckmarkCircle16Regular, ChevronDown20Regular, Delete16Regular, DeleteRegular, Edit16Regular, EditRegular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  captureOwnerStack, Component, ErrorInfo, Fragment, JSX, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -233,6 +233,17 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
     setSelectedRacers(data.selectedItems);
   }
 
+  const renderRow = ({ item, rowId }, style) => (
+    <DataGridRow key={rowId} style={style}>
+      {({ renderCell }) => (
+        <DataGridCell focusMode="group">{renderCell(item)}</DataGridCell>
+      )}
+    </DataGridRow>
+  );
+
+  const { targetDocument } = useFluent();
+  const scrollbarWidth = useScrollbarWidth({ targetDocument });
+
   return (
     <div style={{ overflow: "auto", flex: "auto" }}>
       <DataGrid
@@ -247,7 +258,7 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
         }}
         selectedItems={selectedRacers}
         onSelectionChange={onSelectionChange}>
-        <DataGridHeader>
+        <DataGridHeader style={{ paddingRight: scrollbarWidth }}>
           <DataGridRow 
             selectionCell={{
               invisible: true,
@@ -263,15 +274,7 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
           </DataGridRow>
         </DataGridHeader>
         <DataGridBody<Racer>>
-          {({ item, rowId }) => (
-            <DataGridRow key={rowId}>
-              {({ renderCell }) => (
-                <DataGridCell>
-                  {renderCell(item)}
-                </DataGridCell>
-              )}
-            </DataGridRow>
-          )}
+          {renderRow}
         </DataGridBody>
       </DataGrid>
     </div>
@@ -287,7 +290,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
     setSelectedItems(value);
     setDraft({
       ...draft,
-      racers: value
+      racers: value,
     });
   };
 
