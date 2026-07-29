@@ -1,4 +1,4 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions } from "@fluentui/react-components";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, ChevronDown20Regular, Delete16Regular, Edit16Regular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  captureOwnerStack, Component, ErrorInfo, Fragment, JSX, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -472,30 +472,7 @@ function RaceViewState({ route, setRoute, series, racers }) {
   ];
 
   for (let i = 0; i < scoreboard[0].scores.length; i++) {
-    columns.push(createTableColumn({
-      columnId: "race" + i,
-      renderHeaderCell: () => (
-        <div>
-          Race {i + 1}
-          <Menu positioning={{ autoSize: true }}>
-            <MenuTrigger disableButtonEnhancement>
-              <Button icon={<MoreHorizontalRegular />} appearance="transparent" />
-            </MenuTrigger>
-            <MenuPopover>
-              <MenuList>
-                <MenuItem onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}
-                          icon={<New16Regular />}>New Race</MenuItem>
-                <MenuItem onClick={() => setRoute({ state: AppState.EditRace, series: route.series, race: i })}
-                          icon={ <Edit16Regular /> }>Edit Race</MenuItem>
-                <MenuItem onClick={() => alert("dont kill me :(")}
-                          icon={ <Delete16Regular /> }>Delete Race</MenuItem>
-              </MenuList>
-            </MenuPopover>
-          </Menu>
-        </div>
-      ),
-      renderCell: (index: number) => formatRaceScore(scoreboard[index].scores[i]),
-    }));
+    columns.push();
   }
 
   columns.push(createTableColumn({
@@ -695,17 +672,59 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
     if (draft.length == 0) {
       return <Text>The finishboard is empty.</Text>
     } else {
-      return <Table>
-        <TableBody>
-          {draft.map((item, index) => {
-            const racer = racers[item];
-            return <TableRow key={racer.id}>
-              <TableCell style={{ width: "35px" }}>{index + 1}</TableCell>
-              <TableCell>{racer.name} {racer.number}</TableCell>
-            </TableRow>
-          })}
-        </TableBody>
-      </Table>
+      const columns = [
+        createTableColumn<number>({
+          columnId: "rank",
+          renderHeaderCell: () => "Rank",
+          renderCell: (index) => index + 1,
+        }),
+        createTableColumn<number>({
+          columnId: "name",
+          renderHeaderCell: () => "Name",
+          renderCell: (index) => formatString(racers[draft[index]].name),
+        }),
+        createTableColumn<number>({
+          columnId: "number",
+          renderHeaderCell: () => "Number",
+          renderCell: (index) => formatString(racers[draft[index]].number),
+        }),
+      ];
+
+      const columnSizingOptions: TableColumnSizingOptions = {
+        "rank": { idealWidth: 35, minWidth: 35 },
+        "name": {},
+        "number": {},
+      };
+
+      return (
+        <div style={{ overflow: "auto", flex: "auto" }}>
+          <DataGrid
+            items={draft.map((_, index) => index)}
+            columns={columns}
+            columnSizingOptions={columnSizingOptions}
+            resizableColumns
+            focusMode="none">
+            <DataGridHeader>
+              <DataGridRow>
+                {({ renderHeaderCell }) => (
+                  <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                )}
+              </DataGridRow>
+            </DataGridHeader>
+            <DataGridBody<Racer>>
+              {({ item, rowId }) => (
+                <DataGridRow key={rowId}>
+                  {({ renderCell }) => (
+                    <DataGridCell>
+                      {renderCell(item)}
+                    </DataGridCell>
+                  )}
+                </DataGridRow>
+              )}
+            </DataGridBody>
+          </DataGrid>
+        </div>
+      );
     }
   }
 
