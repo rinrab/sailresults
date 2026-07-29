@@ -1,4 +1,4 @@
-import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton } from "@fluentui/react-components";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, ChevronDown20Regular, Edit16Regular, Home24Filled, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -190,47 +190,99 @@ function RacerRow({ racer, series, setSeries }) {
       <TableSelectionCell
         checked={series.racers.includes(racer.id)}
         onChange={e => {
-          setSeries({
-            ...series,
-            racers: (e.target.checked)
-              ? [...series.racers, racer.id] 
-              : series.racers.filter(item => item != racer.id),
-          });
         }}
       />
-      <TableCell>{racer.name == "" ? "-" : racer.name}</TableCell>
+      <TableCell>{}</TableCell>
       <TableCell>{racer.number == "" ? "-" : racer.number}</TableCell>
     </TableRow>
   );
 }
 
-function RacersList({ racers, series, setSeries }) {
+function RacersList({ racers, selectedRacers, setSelectedRacers }) {
+  const columns = [
+    createTableColumn<Racer>({
+      columnId: "name",
+      renderHeaderCell: () => "Name",
+      renderCell: (racer: Racer) => racer.name == "" ? "-" : racer.name,
+    }),
+    createTableColumn<Racer>({
+      columnId: "number",
+      renderHeaderCell: () => "Number",
+      renderCell: (racer: Racer) => racer.name == "" ? "-" : racer.name,
+    }),
+  ];
+
+  const onSelectionChange: DataGridProps["onSelectionChange"] = (e, data) => {
+    const target = e.target as HTMLElement;
+    if (! target.closest('input[type="checkbox"]')) {
+      return;
+    }
+    setSelectedRacers([...data.selectedItems]);
+  }
+
   return (
-    <Table style={{ width: "100%" }}>
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell style={{ width: "1%" }}></TableHeaderCell>
-          <TableHeaderCell>Name</TableHeaderCell>
-          <TableHeaderCell>Number</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Object.values(racers).map((item: Racer) =>
-            <RacerRow
-              key={item.id}
-              racer={item}
-              series={series}
-              setSeries={setSeries} />) 
-        }
-      </TableBody>
-    </Table>);
+    <div style={{ overflow: "auto", flex: "auto" }}>
+      <DataGrid
+        items={Object.values(racers)}
+        getRowId={racer => racer.id}
+        columns={columns}
+        focusMode="none"
+        selectionMode="multiselect"
+        resizableColumns
+        resizableColumnsOptions={{
+          autoFitColumns: true,
+        }}
+        selectedItems={selectedRacers}
+        onSelectionChange={onSelectionChange}>
+        <DataGridHeader>
+          <DataGridRow 
+            selectionCell={{
+              invisible: true,
+              checkboxIndicator: {
+                disabled: true,
+              },
+            }}>
+            {({ renderHeaderCell }) => (
+              <DataGridHeaderCell>
+                {renderHeaderCell()}
+              </DataGridHeaderCell>
+            )}
+          </DataGridRow>
+        </DataGridHeader>
+        <DataGridBody<Racer>>
+          {({ item, rowId }) => (
+            <DataGridRow key={rowId}>
+              {({ renderCell }) => (
+                <DataGridCell>
+                  {renderCell(item)}
+                </DataGridCell>
+              )}
+            </DataGridRow>
+          )}
+        </DataGridBody>
+      </DataGrid>
+    </div>
+  );
 }
 
 function EditSeries({ racers, setRacers, draft, setDraft }) {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
 
+  const [selectedItems, setSelectedItems] = useState(() => draft.racers);
+  const setSelectedRacers = (value: Racer[]) => {
+    setSelectedItems(value);
+    setDraft({
+      ...draft,
+      racers: value
+    });
+  };
+
   const submit = () => {
+    /* clear inputs */
+    setName("");
+    setNumber("");
+
     const id = nextRacerId(); 
     const newRacer = {
         id: id,
@@ -238,12 +290,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
         number: number.trim(),
     };
     setRacers({ ...racers, [id]: newRacer });
-    setName("");
-    setNumber("");
-    setDraft({
-      ...draft,
-      racers: [...draft.racers, id],
-    });
+    setSelectedRacers([...draft.racers, id]);
   }
 
   return (<>
@@ -266,7 +313,9 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
         {
           racers.length == 0 
             ? <Text>No racers added.</Text> 
-            : <RacersList racers={racers} series={draft} setSeries={setDraft} />
+            : <RacersList racers={racers}
+                          selectedRacers={selectedItems}
+                          setSelectedRacers={setSelectedRacers} />
         }
       </div>
     </>
