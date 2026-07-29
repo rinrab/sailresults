@@ -245,7 +245,7 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
   const scrollbarWidth = useScrollbarWidth({ targetDocument });
 
   return (
-    <div style={{ overflow: "auto", flex: "auto" }}>
+    <div style={{ overflow: "auto", height: "100%" }}>
       <DataGrid
         items={Object.values(racers)}
         getRowId={racer => racer.id}
