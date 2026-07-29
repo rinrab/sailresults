@@ -290,7 +290,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
     setSelectedItems(value);
     setDraft({
       ...draft,
-      racers: value,
+      racers: [...value],
     });
   };
 
