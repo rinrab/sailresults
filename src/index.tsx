@@ -1,6 +1,6 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox } from "@fluentui/react-components";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, ChevronDown20Regular, Edit16Regular, Home24Filled, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
-import React, {  useEffect, useState } from "react";
+import React, {  captureOwnerStack, Component, ErrorInfo, Fragment, JSX, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -669,7 +669,68 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
   )
 }
 
+class ErrorBoundary extends Component<
+  { children: React.ReactNode, route: Route },
+  { error?: Error, info?: ErrorInfo }
+> {
+  onHashChange: () => void;
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  componentDidCatch(_, info: any) {
+    this.setState({ info: info });
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ overflow: "auto", height: "100%" }}>
+          <MessageBar intent="error" layout="multiline">
+            <MessageBarBody>
+              <MessageBarTitle>Oh no, I fell!</MessageBarTitle>
+              <br />
+              <Text>{this.state.error.toString()}</Text>
+              <br />
+              {this.state.info?.componentStack && 
+                <Text style={{ whiteSpace: 'pre-line' }}>
+                  {this.state.info.componentStack}
+                </Text>}
+              <br /> <br />
+              {this.state.error?.stack && 
+                <Text style={{ whiteSpace: 'pre-line' }}>
+                  {this.state.error.stack}
+                </Text>}
+            </MessageBarBody>
+            <MessageBarActions
+              containerAction={
+                <div>
+                  <Button onClick={() => {
+                    window.location.hash = "";
+                    window.location.reload();
+                  }}>Home</Button>
+                </div>
+              }
+            />
+          </MessageBar>
+        </div>
+      );
+    } else {
+      return (<Fragment>
+        {this.props.children}
+      </Fragment>)
+    }
+  }
+}
+
 function StateManager({ route, setRoute }) {
+  console.log(route)
   const [racers, setRacers] =
     useLocalStorage<{ [key: number]: Racer }>("racers", () => ({}));
   const [finishboards, setFinishboards] =
@@ -719,7 +780,7 @@ function StateManager({ route, setRoute }) {
       series={series[route.series]}
     />
   } else {
-    throw "tuff day";
+    throw "invalid state";
   }
 }
 
@@ -775,7 +836,9 @@ function App() {
       <NavBar route={route} setRoute={setRoute}  />
       <Divider style={{ flex: 0 }} />
       <div style={{ flex: "1", padding: "8px", minHeight: "0" }}>
-        <StateManager route={route} setRoute={setRoute} />
+        <ErrorBoundary>
+          <StateManager route={route} setRoute={setRoute} />
+        </ErrorBoundary>
       </div>
     </div>
   );
