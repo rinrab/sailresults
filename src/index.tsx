@@ -64,16 +64,20 @@ interface Series {
   draftFinishboard: number[] | null;
 }
 
-function evaluateScoreboard(racers: Racer[], finishBoards: number[][]) {
+function evaluateScoreboard(
+  racers: { [id: number]: Racer },
+  series: Series,
+  finishBoards: number[][]
+) {
   const result: EvaluatedRacer[] = [];
-  for (const racer of racers) {
+  for (const racerId of series.racers) {
     const scores: number[] = [];
     let total = 0;
 
     for (const board of finishBoards) {
-      const index = board.findIndex(item => item == racer.id); 
+      const index = board.findIndex(item => item == racerId); 
       if (index == -1) {
-        total += racers.length + 1;
+        total += series.racers.length + 1;
         scores.push(-1);
       } else {
         /* plus-one to convert from index to real score that is used for
@@ -84,7 +88,7 @@ function evaluateScoreboard(racers: Racer[], finishBoards: number[][]) {
     }
 
     result.push({
-      racer: racer,
+      racer: racers[racerId],
       scores: scores,
       total: total,
     });
@@ -188,7 +192,7 @@ function RacerRow({ racer, series, setSeries }) {
         onChange={e => {
           setSeries({
             ...series,
-            racers: (e.target.checked) 
+            racers: (e.target.checked)
               ? [...series.racers, racer.id] 
               : series.racers.filter(item => item != racer.id),
           });
@@ -211,8 +215,7 @@ function RacersList({ racers, series, setSeries }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {
-          racers.map(item =>
+        {Object.values(racers).map((item: Racer) =>
             <RacerRow
               key={item.id}
               racer={item}
@@ -228,17 +231,18 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
   const [number, setNumber] = useState("");
 
   const submit = () => {
+    const id = nextRacerId(); 
     const newRacer = {
-        id: nextRacerId(),
+        id: id,
         name: name.trim(),
         number: number.trim(),
     };
-    setRacers([...racers, newRacer]);
+    setRacers({ ...racers, [id]: newRacer });
     setName("");
     setNumber("");
     setDraft({
       ...draft,
-      racers: [...draft.racers, newRacer.id],
+      racers: [...draft.racers, id],
     });
   }
 
@@ -279,7 +283,7 @@ function NewSeriesState({ route, setRoute, racers, setRacers, series, setSeries 
   }));
 
   const done = () => {
-    setSeries([...series, draft]);
+    setSeries({ ...series, [draft.id]: draft });
     setDraft(null);
     setRoute({ state: AppState.RaceView, series: draft.id });
   };
@@ -305,9 +309,8 @@ function NewSeriesState({ route, setRoute, racers, setRacers, series, setSeries 
 }
 
 function EditCompetitorsState({ setRoute, id, racers, setRacers, series, setSeries }) {
-  const draft = series.find(item => item.id == id);
-  const setDraft = (newvalue) => setSeries(series.map(
-    item => item.id == id ? newvalue : item));
+  const draft = series[id];
+  const setDraft = (newvalue: Series) => setSeries({ ...series, [id]: newvalue });
 
   return (
     <div style={{
@@ -366,7 +369,7 @@ function StartState({ route, setRoute, series }) {
         flexDirection: "column",
         columnGap: "16px",
         rowGap: "36px" }}>
-        {series.map(item => (
+        {Object.values(series).map((item: Series) => (
           <SeriesCard key={item.id} series={item} route={route} setRoute={setRoute} />
         ))}
       </div>
@@ -385,8 +388,8 @@ function formatString(str: string) {
   return (str == "") ? "-" : str;
 }
 
-function RaceViewState({ route, setRoute, racers, finishboards }) {
-  const scoreboard = evaluateScoreboard(racers, finishboards );
+function RaceViewState({ route, setRoute, series, racers, finishboards }) {
+  const scoreboard = evaluateScoreboard(racers, series, finishboards );
 
   const columns = [
     createTableColumn({
@@ -428,7 +431,7 @@ function RaceViewState({ route, setRoute, racers, finishboards }) {
       gap: 8 }}>
       <div style={{ overflow: "auto", flex: "auto" }}>
         <DataGrid
-          items={racers.map((_, i) => i)}
+          items={scoreboard.map((_, i) => i)}
           columns={columns}
           getRowId={(item) => item}
           focusMode="none"
@@ -470,7 +473,8 @@ function racerMatches(racer: Racer, query: string) {
 }
 
 function FinishBoardSuggestions({ racers, finishboard, query }) {
-  const pickableItems = racers.filter(item => ! finishboard.includes(item.id));
+  const values: Racer[] = Object.values(racers);
+  const pickableItems = values.filter(item => ! finishboard.includes(item.id));
   const filteredItems = pickableItems.filter(item => racerMatches(item, query));
 
   const itemStyle = {
@@ -490,7 +494,7 @@ function FinishBoardSuggestions({ racers, finishboard, query }) {
     return (<>
       {filteredItems.map(item => {
         const text = `${item.name} ${item.number}`;
-        return <Option key={item.id} text={text} value={item.id}>{text}</Option>;
+        return <Option key={item.id} text={text} value={item.id.toString()}>{text}</Option>;
       })}
     </>)
   }
@@ -540,8 +544,10 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }
           value={query}
           onInput={(e) => setQuery(e.currentTarget.value)} 
           onOptionSelect={(_, data) => {
-            setDraft([...draft, parseInt(data.optionValue)]);
-            setQuery("");
+            if (data.optionValue) {
+              setDraft([...draft, parseInt(data.optionValue)]);
+              setQuery("");
+            }
           }}
         >
         {<FinishBoardSuggestions 
@@ -554,7 +560,7 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }
         <Table style={{}}>
           <TableBody>
             {draft.map((item, index) => {
-              const racer = racers.find(racer => racer.id == item);
+              const racer = racers[item];
               return <TableRow key={racer.id}>
                 <TableCell style={{ width: "35px" }}>{index + 1}</TableCell>
                 <TableCell>{racer.name} {racer.number}</TableCell>
@@ -586,11 +592,11 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }
 
 function StateManager({ route, setRoute }) {
   const [racers, setRacers] =
-    useLocalStorage<Racer[]>("racers", () => []);
+    useLocalStorage<{ [key: number]: Racer }>("racers", () => ({}));
   const [finishboards, setFinishboards] =
     useLocalStorage<number[][]>("finishboards", () => []);
   const [series, setSeries] =
-    useLocalStorage<Series[]>("series", () => []);
+    useLocalStorage<{ [key: number]: Series }>("series", () => ({}));
 
   if (route.state == AppState.StartMenu) {
     return <StartState
@@ -621,6 +627,7 @@ function StateManager({ route, setRoute }) {
       route={route}
       setRoute={setRoute}
       racers={racers}
+      series={series[route.series]}
       finishboards={finishboards}
     />
   } else if (route.state == AppState.NewRace) {
