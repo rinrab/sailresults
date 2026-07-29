@@ -208,7 +208,7 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
     createTableColumn<Racer>({
       columnId: "number",
       renderHeaderCell: () => "Number",
-      renderCell: (racer: Racer) => racer.name == "" ? "-" : racer.name,
+      renderCell: (racer: Racer) => racer.number == "" ? "-" : racer.number,
     }),
   ];
 
@@ -279,18 +279,18 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
   };
 
   const submit = () => {
-    /* clear inputs */
-    setName("");
-    setNumber("");
-
     const id = nextRacerId(); 
-    const newRacer = {
+    const newRacer: Racer = {
         id: id,
         name: name.trim(),
         number: number.trim(),
     };
     setRacers({ ...racers, [id]: newRacer });
     setSelectedRacers([...draft.racers, id]);
+
+    /* clear inputs */
+    setName("");
+    setNumber("");
   }
 
   return (<>
@@ -311,7 +311,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
       <Divider style={{ flex: "0", padding: "8px 0" }} />
       <div style={{ flex: "auto", overflow: "auto" }}>
         {
-          racers.length == 0 
+          (Object.keys(racers).length == 0)
             ? <Text>No racers added.</Text> 
             : <RacersList racers={racers}
                           selectedRacers={selectedItems}
@@ -521,59 +521,42 @@ function racerMatches(racer: Racer, query: string) {
   return (racer.name + racer.number).toLowerCase().includes(query);
 }
 
-function FinishBoardSuggestions({ racers, finishboard, query }) {
-  const values: Racer[] = Object.values(racers);
-  const pickableItems = values.filter(item => ! finishboard.includes(item.id));
-  const filteredItems = pickableItems.filter(item => racerMatches(item, query));
+function FinishBoardStatus({ currentRacers, draft }) {
+  const remainingRacers = currentRacers.filter(racer => ! draft.includes(racer.id));
 
-  const itemStyle = {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "8px 12px",
-  };
-
-  if (pickableItems.length == 0) {
-    return <><Text style={itemStyle}>
-      The finish board is completed!</Text></>
-  } else if (filteredItems.length == 0) {
-    return <><Text style={itemStyle}>
-      No racers matched by this query.</Text></>
+  if (draft.length == 0) {
+    return <div>
+      <Warning16Regular style={{
+        color: tokens.colorPaletteDarkOrangeForeground1,
+        margin: "-2px 4px" }} />
+      <Text>
+        Please add at least one racer.
+      </Text>
+    </div>;
+  } else if (remainingRacers.length == 0) {
+    return <div>
+      <CheckmarkCircle16Regular style={{
+        color: tokens.colorPaletteGreenForeground1,
+        margin: "-2px 4px" }} />
+      <Text>
+      The finish board is fine!
+      </Text>
+    </div>;
   } else {
-    return (<>
-      {filteredItems.map(item => {
-        const text = `${item.name} ${item.number}`;
-        return <Option key={item.id} text={text} value={item.id.toString()}>{text}</Option>;
-      })}
-    </>)
+    return <div>
+      <Warning16Regular style={{
+        color: tokens.colorPaletteDarkOrangeForeground1,
+        margin: "-2px 4px" }} />
+      <Text>
+        Note: {remainingRacers.length} remaining racers will be added as DNS.
+      </Text>
+    </div>;
   }
 }
 
-function FinishboardBad({ remaining }) {
-  return <div>
-    <Warning16Regular style={{
-      color: tokens.colorPaletteDarkOrangeForeground1,
-      margin: "-2px 4px" }} />
-    <Text>
-      Note: {remaining} remaining racers will be added as DNS.
-    </Text>
-  </div>;
-}
-
-function FinishboardGood() {
-  return <div>
-    <CheckmarkCircle16Regular style={{
-      color: tokens.colorPaletteGreenForeground1,
-      margin: "-2px 4px" }} />
-    <Text>
-    The finish board is fine!
-    </Text>
-  </div>;
-}
-
-function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }) {
+function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards, series }) {
   const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", () => []);
-  const remainingRacers = racers.length - draft.length;
+  const currentRacers = series.racers.map(id => racers[id]);
 
   return (
     <div style={{ 
@@ -582,22 +565,21 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }
       gap: 8,
       height: "100%" }}>
       <div style={{ flex: "auto", overflow: "auto" }}>
-        <FinishboardEditor racers={racers} draft={draft} setDraft={setDraft} />
+        <FinishboardEditor racers={racers} currentRacers={currentRacers}
+                           draft={draft} setDraft={setDraft} />
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         <div style={{ flex: "1 1 300px", margin: "auto" }}>
-          {draft.length < racers.length 
-            ? <FinishboardBad remaining={remainingRacers} />
-            : <FinishboardGood /> }
+          {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
         </div>
         <div style={{ flex: "1 1 150px", display: "flex", gap: 8 }}>
           <div style={{ flex: "auto" }} />
           <Button onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Back</Button>
           <Button onClick={() => setDraft([])}>Clear</Button>
-          <Button onClick={() => {
+          <Button disabled={draft.length == 0} onClick={() => {
             setFinishboards([...finishboards, draft]);
             setDraft(null);
-            setRoute({ state: AppState.RaceView, series: route.series })
+            setRoute({ state: AppState.RaceView, series: route.series });
           }}>Done</Button>
         </div>
       </div>
@@ -605,9 +587,54 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }
   )
 }
 
-function FinishboardEditor({ racers, draft, setDraft }) {
+function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
   const [query, setQuery] = useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const FinishBoardSuggestions = () => {
+    const remainingRacers = currentRacers.filter(racer => ! draft.includes(racer.id));
+    const filteredItems = remainingRacers.filter(item => racerMatches(item, query));
+
+    const itemStyle = {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      padding: "8px 12px",
+    };
+
+    if (remainingRacers.length == 0) {
+      return <><Text style={itemStyle}>
+        The finish board is completed!</Text></>
+    } else if (filteredItems.length == 0) {
+      return <><Text style={itemStyle}>
+        No racers matched by this query.</Text></>
+    } else {
+      return (<>
+        {filteredItems.map(item => {
+          const text = `${item.name} ${item.number}`;
+          return <Option key={item.id} text={text} value={item.id.toString()}>{text}</Option>;
+        })}
+      </>)
+    }
+  }
+
+  const FinishboardTable = () => {
+    if (draft.length == 0) {
+      return <Text>The finishboard is empty.</Text>
+    } else {
+      return <Table>
+        <TableBody>
+          {draft.map((item, index) => {
+            const racer = racers[item];
+            return <TableRow key={racer.id}>
+              <TableCell style={{ width: "35px" }}>{index + 1}</TableCell>
+              <TableCell>{racer.name} {racer.number}</TableCell>
+            </TableRow>
+          })}
+        </TableBody>
+      </Table>
+    }
+  }
 
   return (
     <div style={{ 
@@ -630,24 +657,11 @@ function FinishboardEditor({ racers, draft, setDraft }) {
             }
           }}
         >
-        {<FinishBoardSuggestions 
-            racers={racers}
-            finishboard={draft}
-            query={query} />}
+          <FinishBoardSuggestions />
         </Combobox>
       </div>
       <div style={{ flex: "auto", overflow: "auto" }}>
-        <Table style={{}}>
-          <TableBody>
-            {draft.map((item, index) => {
-              const racer = racers[item];
-              return <TableRow key={racer.id}>
-                <TableCell style={{ width: "35px" }}>{index + 1}</TableCell>
-                <TableCell>{racer.name} {racer.number}</TableCell>
-              </TableRow>
-            })}
-          </TableBody>
-        </Table>
+        <FinishboardTable />
       </div>
     </div>
   )
@@ -700,6 +714,7 @@ function StateManager({ route, setRoute }) {
       racers={racers}
       finishboards={finishboards}
       setFinishboards={setFinishboards}
+      series={series[route.series]}
     />
   } else {
     throw "tuff day";
