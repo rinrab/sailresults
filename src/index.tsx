@@ -235,9 +235,11 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
 
   const renderRow = ({ item, rowId }, style) => (
     <DataGridRow key={rowId} style={style}>
-      {({ renderCell }) => (
-        <DataGridCell focusMode="group">{renderCell(item)}</DataGridCell>
-      )}
+      {(column) =>
+        <DataGridCell focusMode="group">
+          {column.renderCell(item)}
+        </DataGridCell>
+      }
     </DataGridRow>
   );
 
@@ -513,6 +515,16 @@ function RaceViewState({ route, setRoute, series, racers }) {
     renderCell: (index: number) => <Text weight="semibold">{scoreboard[index].total}</Text>
   }));
 
+  const renderRow = ({ item, rowId }, style) => (
+    <DataGridRow key={rowId} style={style}>
+      {(column) => (
+        <DataGridCell focusMode="group">
+          {column.renderCell(item)}
+        </DataGridCell>
+      )}
+    </DataGridRow>
+  );
+
   return (
     <div style={{
       display: "flex",
@@ -532,23 +544,15 @@ function RaceViewState({ route, setRoute, series, racers }) {
           columnSizingOptions={columnSizingOptions} >
           <DataGridHeader>
             <DataGridRow>
-              {({ renderHeaderCell }) => (
+              {( column ) => (
                 <DataGridHeaderCell>
-                  {renderHeaderCell()}
+                  {column.renderHeaderCell()}
                 </DataGridHeaderCell>
               )}
             </DataGridRow>
           </DataGridHeader>
           <DataGridBody>
-            {({ item, rowId }) => (
-              <DataGridRow key={rowId}>
-                {({ renderCell }) => (
-                  <DataGridCell>
-                    {renderCell(item)}
-                  </DataGridCell>
-                )}
-              </DataGridRow>
-            )}
+            {renderRow}
           </DataGridBody>
         </DataGrid>
       </div>
@@ -708,8 +712,8 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
       const columns = [
         createTableColumn<number>({
           columnId: "rank",
-          renderHeaderCell: () => "Rank",
-          renderCell: (index) => index + 1
+          renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Rank</Text>,
+          renderCell: (index) => <Text style={{ width: "100%" }} align="end">{index + 1}</Text>
         }),
         createTableColumn<number>({
           columnId: "name",
@@ -723,7 +727,7 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
         }),
         createTableColumn<number>({
           columnId: "actions",
-          renderHeaderCell: () => "Actions",
+          renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Actions</Text>,
           renderCell: (index) => <div style={{ display: "flex", gap: 8, width: "100%" }}>
             <div style={{ flex: "auto" }} />
             <Button icon={<DeleteRegular />} style={{ flex: "1" }} appearance="transparent" />
@@ -731,36 +735,43 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
         }),
       ];
 
-      const columnSizingOptions: TableColumnSizingOptions = {
-        "rank": { idealWidth: 35, defaultWidth: 35, minWidth: 35 },
-        "name": {},
-        "number": {},
+      const getColumnStyle = (columnId) => {
+        if (columnId == "rank") {
+          return { maxWidth: "40px", };
+        } else if (columnId == "actions") {
+          return { maxWidth: "70px", };
+        } else {
+          return {};
+        }
       };
+
+      const renderRow = ({ item, rowId }) => (
+        <DataGridRow key={rowId}>
+          {(column) => (
+            <DataGridCell style={getColumnStyle(column.columnId)}>
+              {column.renderCell(item)}
+            </DataGridCell>
+          )}
+        </DataGridRow>
+      );
 
       return (
         <div style={{ overflow: "auto", flex: "auto" }}>
           <DataGrid
             items={draft.map((_, index) => index)}
             columns={columns}
-            columnSizingOptions={columnSizingOptions}
             focusMode="none">
             <DataGridHeader>
               <DataGridRow>
-                {({ renderHeaderCell }) => (
-                  <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                {( column ) => (
+                  <DataGridHeaderCell style={getColumnStyle(column.columnId)}>
+                    {column.renderHeaderCell()}
+                  </DataGridHeaderCell>
                 )}
               </DataGridRow>
             </DataGridHeader>
             <DataGridBody<Racer>>
-              {({ item, rowId }) => (
-                <DataGridRow key={rowId}>
-                  {({ renderCell }) => (
-                    <DataGridCell>
-                      {renderCell(item)}
-                    </DataGridCell>
-                  )}
-                </DataGridRow>
-              )}
+              {renderRow}
             </DataGridBody>
           </DataGrid>
         </div>
