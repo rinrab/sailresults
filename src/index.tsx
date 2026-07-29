@@ -1,5 +1,5 @@
 import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions } from "@fluentui/react-components";
-import { CheckmarkCircle16Regular, ChevronDown20Regular, Edit16Regular, Home24Filled, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
+import { CheckmarkCircle16Regular, ChevronDown20Regular, Delete16Regular, Edit16Regular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  captureOwnerStack, Component, ErrorInfo, Fragment, JSX, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 
@@ -102,13 +102,18 @@ const enum AppState {
   RaceView,
   NewRace,
   Competitors,
+  EditRace,
 }
 
 type Route = {
   state: AppState.Competitors | AppState.RaceView | AppState.NewRace,
-  series: number;
+  series: number,
 } | {
   state: AppState.StartMenu | AppState.NewSeries,
+} | {
+  state: AppState.EditRace,
+  series: number,
+  race: number,
 };
 
 function parseRoute(hash: string): Route {
@@ -116,7 +121,7 @@ function parseRoute(hash: string): Route {
 
   if (parts.length == 1 && parts[0] == "new-series") {
     return { state: AppState.NewSeries };
-  } else if (parts.length == 2) {
+  } else if (parts.length >= 2) {
     const series = parseInt(parts[0]);
     if (parts[1] == "new-race") {
       return { state: AppState.NewRace, series: series };
@@ -124,6 +129,12 @@ function parseRoute(hash: string): Route {
       return { state: AppState.RaceView, series: series };
     } else if (parts[1] == "competitors") {
       return { state: AppState.Competitors, series: series };
+    } else if (parts[1] == "race" && parts.length >= 3) {
+      return { 
+        state: AppState.EditRace,
+        series: series,
+        race: parseInt(parts[2]),
+      };
     } else {
       return { state: AppState.RaceView, series: series };
     }
@@ -143,6 +154,8 @@ function serializeRoute(route: Route): string {
     return `${route.series}/new-race`; 
   } else if (route.state == AppState.Competitors) {
     return `${route.series}/competitors`; 
+  } else if (route.state == AppState.EditRace) {
+    return `${route.series}/race/${route.race}`; 
   } else {
     throw "never hit";
   }
@@ -461,7 +474,26 @@ function RaceViewState({ route, setRoute, series, racers }) {
   for (let i = 0; i < scoreboard[0].scores.length; i++) {
     columns.push(createTableColumn({
       columnId: "race" + i,
-      renderHeaderCell: () => `Race ${i + 1}`,
+      renderHeaderCell: () => (
+        <div>
+          Race {i + 1}
+          <Menu positioning={{ autoSize: true }}>
+            <MenuTrigger disableButtonEnhancement>
+              <Button icon={<MoreHorizontalRegular />} appearance="transparent" />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}
+                          icon={<New16Regular />}>New Race</MenuItem>
+                <MenuItem onClick={() => setRoute({ state: AppState.EditRace, series: route.series, race: i })}
+                          icon={ <Edit16Regular /> }>Edit Race</MenuItem>
+                <MenuItem onClick={() => alert("dont kill me :(")}
+                          icon={ <Delete16Regular /> }>Delete Race</MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
+        </div>
+      ),
       renderCell: (index: number) => formatRaceScore(scoreboard[index].scores[i]),
     }));
   }
@@ -588,6 +620,40 @@ function NewRaceState({ route, setRoute, racers, series, setSeries }) {
             })
             setRoute({ state: AppState.RaceView, series: route.series });
           }}>Done</Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function EditRaceState({ route, setRoute, racers, series, setSeries }) {
+  const draft = series.finishboards[route.race];
+  const setDraft = (value) => {
+    const copy = [...series.finishboards];
+    copy[route.race] = value;
+    setSeries({ ...series, finishboards: copy });
+  };
+
+  const currentRacers = series.racers.map(id => racers[id]);
+
+  return (
+    <div style={{ 
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      height: "100%" }}>
+      <div style={{ flex: "auto", overflow: "auto" }}>
+        <FinishboardEditor racers={racers} currentRacers={currentRacers}
+                           draft={draft} setDraft={setDraft} />
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ flex: "1 1 300px", margin: "auto" }}>
+          {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button style={{ flex: "auto", width: "120px" }}
+                  disabled={draft.length == 0}
+                  onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Done</Button>
         </div>
       </div>
     </div>
@@ -773,6 +839,14 @@ function StateManager({ route, setRoute }) {
     />
   } else if (route.state == AppState.NewRace) {
     return <NewRaceState 
+      route={route}
+      setRoute={setRoute}
+      racers={racers}
+      series={series[route.series]}
+      setSeries={value => setSeries({ ...series, [route.series]: value })}
+    />
+  } else if (route.state == AppState.EditRace) {
+    return <EditRaceState 
       route={route}
       setRoute={setRoute}
       racers={racers}
