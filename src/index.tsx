@@ -1,5 +1,5 @@
 import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions } from "@fluentui/react-components";
-import { CheckmarkCircle16Regular, ChevronDown20Regular, Delete16Regular, Edit16Regular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
+import { ArrowDownRegular, ArrowUpRegular, CheckmarkCircle16Regular, ChevronDown20Regular, Delete16Regular, DeleteRegular, Edit16Regular, EditRegular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  captureOwnerStack, Component, ErrorInfo, Fragment, JSX, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 
@@ -472,7 +472,30 @@ function RaceViewState({ route, setRoute, series, racers }) {
   ];
 
   for (let i = 0; i < scoreboard[0].scores.length; i++) {
-    columns.push();
+    columns.push(createTableColumn({
+      columnId: "race" + i,
+      renderHeaderCell: () => (
+        <div>
+          Race {i + 1}
+          <Menu positioning={{ autoSize: true }}>
+            <MenuTrigger disableButtonEnhancement>
+              <Button icon={<MoreHorizontalRegular />} appearance="transparent" />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}
+                          icon={<New16Regular />}>New Race</MenuItem>
+                <MenuItem onClick={() => setRoute({ state: AppState.EditRace, series: route.series, race: i })}
+                          icon={ <Edit16Regular /> }>Edit Race</MenuItem>
+                <MenuItem onClick={() => alert("dont kill me :(")}
+                          icon={ <Delete16Regular /> }>Delete Race</MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
+        </div>
+      ),
+      renderCell: (index: number) => formatRaceScore(scoreboard[index].scores[i]),
+    }));
   }
 
   columns.push(createTableColumn({
@@ -676,7 +699,7 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
         createTableColumn<number>({
           columnId: "rank",
           renderHeaderCell: () => "Rank",
-          renderCell: (index) => index + 1,
+          renderCell: (index) => index + 1
         }),
         createTableColumn<number>({
           columnId: "name",
@@ -688,10 +711,18 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
           renderHeaderCell: () => "Number",
           renderCell: (index) => formatString(racers[draft[index]].number),
         }),
+        createTableColumn<number>({
+          columnId: "actions",
+          renderHeaderCell: () => "Actions",
+          renderCell: (index) => <div style={{ display: "flex", gap: 8, width: "100%" }}>
+            <div style={{ flex: "auto" }} />
+            <Button icon={<DeleteRegular />} style={{ flex: "1" }} appearance="transparent" />
+          </div>,
+        }),
       ];
 
       const columnSizingOptions: TableColumnSizingOptions = {
-        "rank": { idealWidth: 35, minWidth: 35 },
+        "rank": { idealWidth: 35, defaultWidth: 35, minWidth: 35 },
         "name": {},
         "number": {},
       };
@@ -702,7 +733,6 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
             items={draft.map((_, index) => index)}
             columns={columns}
             columnSizingOptions={columnSizingOptions}
-            resizableColumns
             focusMode="none">
             <DataGridHeader>
               <DataGridRow>
