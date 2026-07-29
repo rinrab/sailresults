@@ -622,6 +622,7 @@ function FinishboardEditor({ racers, draft, setDraft }) {
           placeholder="Start typing to fill the finish board in..."
           value={query}
           onInput={(e) => setQuery(e.currentTarget.value)} 
+          selectedOptions={[]}
           onOptionSelect={(_, data) => {
             if (data.optionValue) {
               setDraft([...draft, parseInt(data.optionValue)]);
