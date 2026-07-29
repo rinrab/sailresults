@@ -572,11 +572,13 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards, 
         <div style={{ flex: "1 1 300px", margin: "auto" }}>
           {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
         </div>
-        <div style={{ flex: "1 1 150px", display: "flex", gap: 8 }}>
-          <div style={{ flex: "auto" }} />
-          <Button onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Back</Button>
-          <Button onClick={() => setDraft([])}>Clear</Button>
-          <Button disabled={draft.length == 0} onClick={() => {
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button style={{ flex: "auto", width: "120px" }}
+                  onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Close</Button>
+          <Button style={{ flex: "auto", width: "120px" }}
+                  onClick={() => setDraft([])}>Delete Draft</Button>
+          <Button style={{ flex: "auto", width: "120px" }}
+                  disabled={draft.length == 0} onClick={() => {
             setFinishboards([...finishboards, draft]);
             setDraft(null);
             setRoute({ state: AppState.RaceView, series: route.series });
