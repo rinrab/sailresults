@@ -572,11 +572,7 @@ function FinishboardGood() {
 }
 
 function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }) {
-  const [query, setQuery] = useState("");
   const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", () => []);
-
-  const inputRef = React.useRef<HTMLInputElement>(null);
-
   const remainingRacers = racers.length - draft.length;
 
   return (
@@ -585,6 +581,40 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }
       flexDirection: "column",
       gap: 8,
       height: "100%" }}>
+      <div style={{ flex: "auto", overflow: "auto" }}>
+        <FinishboardEditor racers={racers} draft={draft} setDraft={setDraft} />
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ flex: "1 1 300px", margin: "auto" }}>
+          {draft.length < racers.length 
+            ? <FinishboardBad remaining={remainingRacers} />
+            : <FinishboardGood /> }
+        </div>
+        <div style={{ flex: "1 1 150px", display: "flex", gap: 8 }}>
+          <div style={{ flex: "auto" }} />
+          <Button onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Back</Button>
+          <Button onClick={() => setDraft([])}>Clear</Button>
+          <Button onClick={() => {
+            setFinishboards([...finishboards, draft]);
+            setDraft(null);
+            setRoute({ state: AppState.RaceView, series: route.series })
+          }}>Done</Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FinishboardEditor({ racers, draft, setDraft }) {
+  const [query, setQuery] = useState("");
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  return (
+    <div style={{ 
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }}>
       <div style={{ position: "relative" }}>
         <Combobox
           ref={inputRef}
@@ -617,23 +647,6 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }
             })}
           </TableBody>
         </Table>
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ flex: "1 1 300px", margin: "auto" }}>
-          {draft.length < racers.length 
-            ? <FinishboardBad remaining={remainingRacers} />
-            : <FinishboardGood /> }
-        </div>
-        <div style={{ flex: "1 1 150px", display: "flex", gap: 8 }}>
-          <div style={{ flex: "auto" }} />
-          <Button onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Back</Button>
-          <Button onClick={() => setDraft([])}>Clear</Button>
-          <Button onClick={() => {
-            setFinishboards([...finishboards, draft]);
-            setDraft(null);
-            setRoute({ state: AppState.RaceView, series: route.series })
-          }}>Continue</Button>
-        </div>
       </div>
     </div>
   )
