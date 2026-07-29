@@ -230,7 +230,7 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
     if (! target.closest('input[type="checkbox"]')) {
       return;
     }
-    setSelectedRacers([...data.selectedItems]);
+    setSelectedRacers(data.selectedItems);
   }
 
   return (
@@ -282,8 +282,8 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
 
-  const [selectedItems, setSelectedItems] = useState(() => draft.racers);
-  const setSelectedRacers = (value: Racer[]) => {
+  const [selectedItems, setSelectedItems] = useState(() => new Set(draft.racers));
+  const setSelectedRacers = (value: Set<Racer>) => {
     setSelectedItems(value);
     setDraft({
       ...draft,
@@ -299,7 +299,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
         number: number.trim(),
     };
     setRacers({ ...racers, [id]: newRacer });
-    setSelectedRacers([...draft.racers, id]);
+    setSelectedRacers(new Set([...draft.racers, id]));
 
     /* clear inputs */
     setName("");
@@ -307,7 +307,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
   }
 
   return (<>
-      <Input value={draft.name}  placeholder="Enter Series Name..."
+      <Input placeholder="Enter Series Name..."
              onChange={e => setDraft({ ...draft, name: e.target.value })} />
       <Divider style={{ flex: "0", padding: "8px 0" }} />
       <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
