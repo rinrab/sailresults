@@ -437,8 +437,8 @@ function formatString(str: string) {
   return (str == "") ? "-" : str;
 }
 
-function RaceViewState({ route, setRoute, series, racers, finishboards }) {
-  const scoreboard = evaluateScoreboard(racers, series, finishboards );
+function RaceViewState({ route, setRoute, series, racers }) {
+  const scoreboard = evaluateScoreboard(racers, series, series.finishboards );
 
   const columns = [
     createTableColumn({
@@ -554,8 +554,10 @@ function FinishBoardStatus({ currentRacers, draft }) {
   }
 }
 
-function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards, series }) {
-  const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", () => []);
+function NewRaceState({ route, setRoute, racers, series, setSeries }) {
+  const draft = series.draftFinishboard ?? [];
+  const setDraft = (value) => setSeries({ ...series, draftFinishboard: value });
+
   const currentRacers = series.racers.map(id => racers[id]);
 
   return (
@@ -579,8 +581,11 @@ function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards, 
                   onClick={() => setDraft([])}>Delete Draft</Button>
           <Button style={{ flex: "auto", width: "120px" }}
                   disabled={draft.length == 0} onClick={() => {
-            setFinishboards([...finishboards, draft]);
-            setDraft(null);
+            setSeries({
+              ...series,
+              draftFinishboard: null,
+              finishboards: [...series.finishboards, draft]
+            })
             setRoute({ state: AppState.RaceView, series: route.series });
           }}>Done</Button>
         </div>
@@ -670,7 +675,7 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
 }
 
 class ErrorBoundary extends Component<
-  { children: React.ReactNode, route: Route },
+  { children: React.ReactNode },
   { error?: Error, info?: ErrorInfo }
 > {
   onHashChange: () => void;
@@ -730,11 +735,8 @@ class ErrorBoundary extends Component<
 }
 
 function StateManager({ route, setRoute }) {
-  console.log(route)
   const [racers, setRacers] =
     useLocalStorage<{ [key: number]: Racer }>("racers", () => ({}));
-  const [finishboards, setFinishboards] =
-    useLocalStorage<number[][]>("finishboards", () => []);
   const [series, setSeries] =
     useLocalStorage<{ [key: number]: Series }>("series", () => ({}));
 
@@ -768,16 +770,14 @@ function StateManager({ route, setRoute }) {
       setRoute={setRoute}
       racers={racers}
       series={series[route.series]}
-      finishboards={finishboards}
     />
   } else if (route.state == AppState.NewRace) {
     return <NewRaceState 
       route={route}
       setRoute={setRoute}
       racers={racers}
-      finishboards={finishboards}
-      setFinishboards={setFinishboards}
       series={series[route.series]}
+      setSeries={value => setSeries({ ...series, [route.series]: value })}
     />
   } else {
     throw "invalid state";
