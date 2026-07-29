@@ -259,13 +259,7 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
         selectedItems={selectedRacers}
         onSelectionChange={onSelectionChange}>
         <DataGridHeader style={{ paddingRight: scrollbarWidth }}>
-          <DataGridRow 
-            selectionCell={{
-              invisible: true,
-              checkboxIndicator: {
-                disabled: true,
-              },
-            }}>
+          <DataGridRow>
             {({ renderHeaderCell }) => (
               <DataGridHeaderCell>
                 {renderHeaderCell()}
