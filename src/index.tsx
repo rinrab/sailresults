@@ -128,14 +128,38 @@ function parseRoute(hash: string): Route {
   }
 }
 
-function useHash() {
+function serializeRoute(route: Route): string {
+  if (route.state == AppState.StartMenu) {
+    return "";
+  } else if (route.state == AppState.NewSeries) {
+    return "new-series"; 
+  } else if (route.state == AppState.RaceView) {
+    return `${route.series}/results`; 
+  } else if (route.state == AppState.NewRace) {
+    return `${route.series}/new-race`; 
+  } else if (route.state == AppState.Competitors) {
+    return `${route.series}/competitors`; 
+  } else {
+    throw "never hit";
+  }
+}
+
+function useRoute() {
     const [hash, setHash] = useState(() => window.location.hash);
+
     useEffect(() => {
         const onHashChange = () => setHash(window.location.hash);
         window.addEventListener("hashchange", onHashChange);
         return () => window.removeEventListener("hashchange", onHashChange);
     }, []);
-    return hash;
+
+    return [
+      parseRoute(hash),
+      (route: Route) => {
+        const hash = serializeRoute(route);
+        setHash(hash);
+        window.location.hash = hash;
+      }];
 }
 
 function stateIsGlobal(state: AppState) {
@@ -245,7 +269,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
   );
 }
 
-function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
+function NewSeriesState({ route, setRoute, racers, setRacers, series, setSeries }) {
   const [draft, setDraft] = useLocalStorage<Series>("draft-series", () => ({
     id: nextRacerId(),
     name: "",
@@ -257,7 +281,7 @@ function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
   const done = () => {
     setSeries([...series, draft]);
     setDraft(null);
-    window.location.hash = `${draft.id}/results`;
+    setRoute({ state: AppState.RaceView, series: draft.id });
   };
 
   return (
@@ -280,7 +304,7 @@ function NewSeriesState({ state, racers, setRacers, series, setSeries }) {
   );
 }
 
-function EditCompetitorsState({ state, id, racers, setRacers, series, setSeries }) {
+function EditCompetitorsState({ setRoute, id, racers, setRacers, series, setSeries }) {
   const draft = series.find(item => item.id == id);
   const setDraft = (newvalue) => setSeries(series.map(
     item => item.id == id ? newvalue : item));
@@ -297,13 +321,13 @@ function EditCompetitorsState({ state, id, racers, setRacers, series, setSeries 
         draft={draft}
         setDraft={setDraft} />
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button as="a" href={`#${id}/results`}>Done</Button>
+        <Button onClick={() => setRoute({ state: AppState.RaceView, series: id })}>Done</Button>
       </div>
     </div>
   );
 }
 
-function SeriesCard({ series, state }) {
+function SeriesCard({ series, route, setRoute }) {
   return (
     <Card style={{
       maxWidth: "400px",
@@ -322,18 +346,18 @@ function SeriesCard({ series, state }) {
 
       <CardFooter>
         <Button appearance="primary" icon={<Open16Regular />}
-                as="a" href={`#${series.id}/results`}>Open</Button>
+                onClick={() => setRoute({ state: AppState.RaceView, series: series.id })}>Open</Button>
         <Button icon={<Edit16Regular />}
-                as="a" href={`#${series.id}/competitors`}>Edit Competitors</Button>
+                onClick={() => setRoute({ state: AppState.Competitors, series: series.id })}>Edit Competitors</Button>
       </CardFooter>
     </Card>
   );
 }
 
-function StartState({ state, series }) {
+function StartState({ route, setRoute, series }) {
   return (
     <div style={{ gap: 8, display: "flex", flexDirection: "column" }}>
-      <Button as="a" href="#new-series">
+      <Button onClick={() => setRoute({ state: AppState.NewSeries })}>
         Create New Series</Button>
       <Divider />
       <div style={{
@@ -343,7 +367,7 @@ function StartState({ state, series }) {
         columnGap: "16px",
         rowGap: "36px" }}>
         {series.map(item => (
-          <SeriesCard key={item.id} series={item} state={state} />
+          <SeriesCard key={item.id} series={item} route={route} setRoute={setRoute} />
         ))}
       </div>
     </div>);
@@ -361,7 +385,7 @@ function formatString(str: string) {
   return (str == "") ? "-" : str;
 }
 
-function RaceViewState({ racers, finishboards, state }) {
+function RaceViewState({ route, setRoute, racers, finishboards }) {
   const scoreboard = evaluateScoreboard(racers, finishboards );
 
   const columns = [
@@ -435,7 +459,7 @@ function RaceViewState({ racers, finishboards, state }) {
         </DataGrid>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button as="a" href={`#${state.series}/new-race`}>New Race</Button>
+        <Button onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}>New Race</Button>
       </div>
     </div>
   );
@@ -494,7 +518,7 @@ function FinishboardGood() {
   </div>;
 }
 
-function NewRaceState({ racers, finishboards, setFinishboards, state }) {
+function NewRaceState({ route, setRoute, racers, finishboards, setFinishboards }) {
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useLocalStorage<number[]>("draft-finishboard", () => []);
 
@@ -547,12 +571,12 @@ function NewRaceState({ racers, finishboards, setFinishboards, state }) {
         </div>
         <div style={{ flex: "1 1 150px", display: "flex", gap: 8 }}>
           <div style={{ flex: "auto" }} />
-          <Button as="a" href={`#${state.series}/results`}>Back</Button>
+          <Button onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Back</Button>
           <Button onClick={() => setDraft([])}>Clear</Button>
           <Button onClick={() => {
             setFinishboards([...finishboards, draft]);
             setDraft(null);
-            window.location.hash = `#${state.series}/results`;
+            setRoute({ state: AppState.RaceView, series: route.series })
           }}>Continue</Button>
         </div>
       </div>
@@ -560,7 +584,7 @@ function NewRaceState({ racers, finishboards, setFinishboards, state }) {
   )
 }
 
-function StateManager({ state }) {
+function StateManager({ route, setRoute }) {
   const [racers, setRacers] =
     useLocalStorage<Racer[]>("racers", () => []);
   const [finishboards, setFinishboards] =
@@ -568,73 +592,81 @@ function StateManager({ state }) {
   const [series, setSeries] =
     useLocalStorage<Series[]>("series", () => []);
 
-  if (state.state == AppState.StartMenu) {
-    return <StartState series={series} state={state} />
-  } else if (state.state == AppState.NewSeries) {
+  if (route.state == AppState.StartMenu) {
+    return <StartState
+      route={route}
+      setRoute={setRoute}
+      series={series}
+    />
+  } else if (route.state == AppState.NewSeries) {
     return <NewSeriesState 
-      state={state}
+      route={route}
+      setRoute={setRoute}
       racers={racers}
       setRacers={setRacers}
       series={series}
       setSeries={setSeries}
     />
-  } else if (state.state == AppState.Competitors) {
+  } else if (route.state == AppState.Competitors) {
     return <EditCompetitorsState 
-      state={state}
-      id={state.series}
+      setRoute={setRoute}
+      id={route.series}
       racers={racers}
       setRacers={setRacers}
       series={series}
       setSeries={setSeries}
     />
-  } else if (state.state == AppState.RaceView) {
+  } else if (route.state == AppState.RaceView) {
     return <RaceViewState
+      route={route}
+      setRoute={setRoute}
       racers={racers}
       finishboards={finishboards}
-      state={state}
     />
-  } else if (state.state == AppState.NewRace) {
+  } else if (route.state == AppState.NewRace) {
     return <NewRaceState 
+      route={route}
+      setRoute={setRoute}
       racers={racers}
       finishboards={finishboards}
       setFinishboards={setFinishboards}
-      state={state} />
+    />
   } else {
     throw "tuff day";
   }
 }
 
-function NavBar({ state }) {
+function NavBar({ route, setRoute }) {
   return (
     <Breadcrumb style={{
       padding: "4px 8px",
       backgroundColor: tokens.colorNeutralBackground4 }}>
       <BreadcrumbItem>
-        <BreadcrumbButton href="#">
+        <BreadcrumbButton onClick={() => setRoute({ state: AppState.StartMenu })}>
           <Home24Filled />
         </BreadcrumbButton>
       </BreadcrumbItem>
       <BreadcrumbDivider />
-      {stateIsGlobal(state.state)
-        ? <BreadcrumbButton href="#">Main Menu</BreadcrumbButton>
-        : <BreadcrumbButton href={`#${state.series}/results`}>Regatta 23</BreadcrumbButton>
+      {stateIsGlobal(route.state)
+        ? <BreadcrumbButton onClick={() => setRoute({ state: AppState.StartMenu })}>Main Menu</BreadcrumbButton>
+        : <BreadcrumbButton onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}> Regatta 23</BreadcrumbButton>
       }
-      {! stateIsGlobal(state.state) && 
+      {! stateIsGlobal(route.state) && 
       <>
         <BreadcrumbDivider />
         <BreadcrumbItem>
           <Menu>
             <MenuTrigger disableButtonEnhancement>
               <BreadcrumbButton>
-                {getTitle(state)}
+                {getTitle(route)}
                 <ChevronDown20Regular style={{ marginLeft: 4 }} />
               </BreadcrumbButton>
             </MenuTrigger>
             <MenuPopover>
               <MenuList>
-                <MenuItem onClick={() => window.location.hash = `#${state.series}/results`}>Results</MenuItem>
-                <MenuItem onClick={() => window.location.hash = `#${state.series}/new-race`}>New Race</MenuItem>
-                <MenuItem onClick={() => window.location.hash = `#${state.series}/competitors`}>Competitors</MenuItem>
+                <MenuItem onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Results</MenuItem>
+                <MenuItem onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}>New Race</MenuItem>
+                <MenuItem onClick={() => setRoute({ state: AppState.Competitors, series: route.series })}>Competitors</MenuItem>
               </MenuList>
             </MenuPopover>
           </Menu>
@@ -645,7 +677,7 @@ function NavBar({ state }) {
 }
 
 function App() {
-  const state = parseRoute(useHash());
+  const [route, setRoute] = useRoute();
 
   return (
     <div style={{
@@ -653,10 +685,10 @@ function App() {
       display: "flex",
       flexDirection: "column"
     }}>
-      <NavBar state={state} />
+      <NavBar route={route} setRoute={setRoute}  />
       <Divider style={{ flex: 0 }} />
       <div style={{ flex: "1", padding: "8px", minHeight: "0" }}>
-        <StateManager state={state} />
+        <StateManager route={route} setRoute={setRoute} />
       </div>
     </div>
   );
