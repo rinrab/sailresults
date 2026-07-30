@@ -835,7 +835,7 @@ class ErrorBoundary extends Component<
         <div style={{ overflow: "auto", height: "100%" }}>
           <MessageBar intent="error" layout="multiline">
             <MessageBarBody>
-              <MessageBarTitle>Oh no, I fell!</MessageBarTitle>
+              <MessageBarTitle>Oh no, I crashed!</MessageBarTitle>
               <br />
               <Text>{this.state.error.toString()}</Text>
               <br />
