@@ -2,7 +2,7 @@ import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, D
 import { ArrowDownRegular, ArrowUpRegular, CheckmarkCircle16Regular, ChevronDown20Regular, Delete16Regular, DeleteRegular, Edit16Regular, EditRegular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  captureOwnerStack, Component, ErrorInfo, Fragment, JSX, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route, useNavigate, useParams, HashRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useParams, HashRouter, Outlet } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -842,6 +842,26 @@ function NavBar() {
   );
 }
 
+function Layout() {
+  return (
+    <div style={{
+      height: "100%",
+      display: "flex",
+      flexDirection: "column"
+    }}>
+      <NavBar />
+      <Divider style={{ flex: 0 }} />
+      <div style={{
+        flex: "1",
+        padding: "8px",
+        minHeight: "0"
+      }}>
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
 function SeriesOverviewState() {
   const navigate = useNavigate();
 
@@ -869,38 +889,30 @@ function RacesOverviewState() {
 
 function App() {
   return (
-    <div style={{
-      height: "100%",
-      display: "flex",
-      flexDirection: "column"
-    }}>
-      <NavBar />
-      <Divider style={{ flex: 0 }} />
-      <div style={{ flex: "1", padding: "8px", minHeight: "0" }}>
-        <ErrorBoundary>
-          <HashRouter>
-            <Routes>
-              <Route index element={<StartState />} />
-              <Route path="/series">
-                <Route path="new" element={<NewSeriesState />} />
-                <Route path=":seriesId">
-                  <Route index element={<SeriesOverviewState />} />
-                  <Route path="results" element={<ResultsState />} />
-                  <Route path="competitors" element={<EditCompetitorsState />} />
-                  <Route path="races">
-                    <Route index element={<RacesOverviewState />} />
-                    <Route path="new" element={<NewRaceState />} />
-                    <Route path=":raceId">
-                      <Route path="edit" element={<EditRaceState />} />
-                    </Route>
+    <ErrorBoundary>
+      <HashRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<StartState />} />
+            <Route path="series">
+              <Route path="new" element={<NewSeriesState />} />
+              <Route path=":seriesId">
+                <Route index element={<SeriesOverviewState />} />
+                <Route path="results" element={<ResultsState />} />
+                <Route path="competitors" element={<EditCompetitorsState />} />
+                <Route path="races">
+                  <Route index element={<RacesOverviewState />} />
+                  <Route path="new" element={<NewRaceState />} />
+                  <Route path=":raceId">
+                    <Route path="edit" element={<EditRaceState />} />
                   </Route>
                 </Route>
               </Route>
-            </Routes>
-          </HashRouter>
-        </ErrorBoundary>
-      </div>
-    </div>
+            </Route>
+          </Route>
+        </Routes>
+      </HashRouter>
+    </ErrorBoundary>
   );
 }
 
