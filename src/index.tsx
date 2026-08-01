@@ -1,4 +1,4 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth } from "@fluentui/react-components";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, JSXElement } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  Component, ErrorInfo, Fragment, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -210,8 +210,6 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
 
   return (
     <div>
-      <Input placeholder="Enter Series Name..."
-             onChange={e => setDraft({ ...draft, name: e.target.value })} />
       <Divider style={{ flex: "0", padding: "8px 0" }} />
       <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
             onSubmit={e => { e.preventDefault(); submit(); }}>
@@ -248,9 +246,9 @@ function NewSeriesState() {
   }));
   const navigate = useNavigate();
   const [series, setSeries] = useSeriesList();
-  const [racers, setRacers] = useRacers();
 
-  const done = () => {
+  const done = (e) => {
+    e.preventDefault();
     setSeries({ ...series, [draft.id]: draft });
     setDraft(null);
     navigate(`/series/${draft.id}/`);
@@ -262,16 +260,18 @@ function NewSeriesState() {
         <NavBarItem title="New Series" to="" />
       </NavBar>
       <Content>
-        <EditSeries
-          racers={racers}
-          setRacers={setRacers}
-          draft={draft}
-          setDraft={setDraft} />
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={done}>
-            Contunue with {draft.racers.length} racers
-          </Button>
-        </div>
+        <form
+          onSubmit={done}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+          }}>
+          <Input placeholder="Series Name" required
+                 onChange={e => setDraft({ ...draft, name: e.target.value })} />
+          <div style={{ flex: 1 }} />
+          <Button type="submit">Create</Button>
+        </form>
       </Content>
     </Layout>
   );
