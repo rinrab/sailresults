@@ -929,8 +929,9 @@ function ResultsOverview({ seriesId }) {
         <TableBody>
           {scoreboard.slice(-3).map((racer, index) =>
             <TableRow key={index}>
-              <TableCell>{emojis[index]}</TableCell>
-              <TableCell>{racer.racer.name}</TableCell>
+              <TableCell style={{ width: 20 }}>{emojis[index]}</TableCell>
+              <TableCell>{formatString(racer.racer.number)}</TableCell>
+              <TableCell>{formatString(racer.racer.name)}</TableCell>
             </TableRow>
           )}
         </TableBody>
