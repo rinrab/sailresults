@@ -28,8 +28,7 @@ function setStoredObject<T>(key: string, value?: T) {
 }
 
 function useLocalStorage<T>(key: string, createNew: () => T): [T, (newValue?: T) => void] {
-  const obj = getStoredObject(key, createNew);
-  const [value, setValue] = useState(obj);
+  const [value, setValue] = useState(() => getStoredObject(key, createNew));
   return [
     value,
     (newValue: T) => {
@@ -159,6 +158,56 @@ function NewSeriesState() {
   );
 }
 
+function RacersList({ series, racers, updateRacer, deleteRacer }) {
+  if (series.racers.length == 0) {
+    return <Text>No racers added.</Text>;
+  } else {
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHeaderCell>Name</TableHeaderCell>
+            <TableHeaderCell>Number</TableHeaderCell>
+            <TableHeaderCell style={{ width: 25 }}></TableHeaderCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {series.racers.map(id => (
+            <TableRow key={id.toString()}>
+              <TableCell>
+                <EditableText value={racers[id].name} compact
+                              setValue={(value) => updateRacer({
+                                          ...racers[id],
+                                          name: value,
+                                        })} />
+              </TableCell>
+              <TableCell>
+                <EditableText value={racers[id].number} compact
+                              setValue={(value) => updateRacer({
+                                          ...racers[id],
+                                          number: value,
+                                        })} />
+              </TableCell>
+              <TableCell style={{ width: 25 }}>
+                <Menu>
+                  <MenuTrigger>
+                    <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                            onClick={(e) => e.stopPropagation()} />
+                  </MenuTrigger>
+                  <MenuPopover>
+                    <MenuItem onClick={() => deleteRacer(id)}>Delete</MenuItem>
+                  </MenuPopover>
+                </Menu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    )
+  };
+}
+
+
 function EditCompetitorsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
@@ -178,9 +227,9 @@ function EditCompetitorsState() {
       racers: [...series.racers, racer.id],
     });
   };
-  const updateRacer = (racer: Racer) => {
+  const updateRacer = (value: Racer) => {
     const copy = { ...racers };
-    copy[racer.id] = racer;
+    copy[value.id] = value;
     setRacers(copy);
   };
   const deleteRacer = (id: number) => {
@@ -200,43 +249,6 @@ function EditCompetitorsState() {
     /* clear inputs */
     setName("");
     setNumber("");
-  }
-
-  const RacersList = () => {
-    if (series.racers.length == 0) {
-      return <Text>No racers added.</Text>;
-    } else {
-      return (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell>Name</TableHeaderCell>
-              <TableHeaderCell>Number</TableHeaderCell>
-              <TableHeaderCell style={{ width: 25 }}></TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {series.racers.map(id => (
-              <TableRow>
-                <TableCell>{formatString(racers[id].name)}</TableCell>
-                <TableCell>{formatString(racers[id].number)}</TableCell>
-                <TableCell style={{ width: 25 }}>
-                  <Menu>
-                    <MenuTrigger>
-                      <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                              onClick={(e) => e.stopPropagation()} />
-                    </MenuTrigger>
-                    <MenuPopover>
-                      <MenuItem onClick={() => deleteRacer(id)}>Delete</MenuItem>
-                    </MenuPopover>
-                  </Menu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )
-    };
   }
 
   return (
@@ -260,7 +272,11 @@ function EditCompetitorsState() {
         </form>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
         <div style={{ flex: "auto", overflow: "auto" }}>
-          <RacersList />
+          <RacersList
+            series={series}
+            racers={racers}
+            updateRacer={updateRacer}
+            deleteRacer={deleteRacer} />
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("..")}>Done</Button>
@@ -832,13 +848,14 @@ function Content({ children }) {
   </div>
 }
 
-function EditableText({ value, setValue, rejectEmpty = false }) {
+function EditableText({ value, setValue, rejectEmpty = false, compact = false }) {
   const [editing, setEditing] = useState(false);
   const [editingValue, setEditingValue] = useState();
   const [revertValue, setRevertValue] = useState();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    console.log(value)
     inputRef.current?.focus();
   });
 
@@ -865,13 +882,14 @@ function EditableText({ value, setValue, rejectEmpty = false }) {
   if (editing) {
     return <form style={{ display: "flex", gap: 8 }}
                  onSubmit={stopEdit}>
-      <Input ref={inputRef} style={{ flex: 1 }} value={editingValue}
+      <Input ref={inputRef} style={{ flex: 1, width: 0 }}
+             value={editingValue}
              onBlur={stopEdit} onChange={onChange} />
-      <Button onClick={() => setEditing(false)}>Done</Button>
+      {! compact && <Button onClick={() => setEditing(false)}>Done</Button>}
     </form>
   } else {
-    return <div>
-      <Text style={{ flex: 1, marginRight: 8 }}>{value}</Text>
+    return <div style={{ display: "flex" }}>
+      <Text style={{ flex: 1, marginRight: 8 }}>{formatString(value)}</Text>
       <Link onClick={startEdit}>Edit</Link>
     </div>;
   }
@@ -928,8 +946,10 @@ function SeriesOverviewState() {
 
           <Text block size={500} style={{ margin: "8px 0" }} >Settings</Text>
           <Text weight="semibold">Name</Text>
-          <EditableText rejectEmpty value={series.name}
-                        setValue={value => setSeries({...series, name: value })} />
+          <div style={{ maxWidth: 300 }}>
+            <EditableText rejectEmpty value={series.name}
+                          setValue={value => setSeries({...series, name: value })} />
+          </div>
 
           <Divider style={{ margin: "8px 0" }} />
           <Text block size={500} style={{ margin: "8px 0" }} >Results</Text>
