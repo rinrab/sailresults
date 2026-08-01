@@ -1,6 +1,6 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, JSXElement } from "@fluentui/react-components";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, Link, TableBody, TableRow, TableCell, Table } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
-import React, {  Component, ErrorInfo, Fragment, useState } from "react";
+import React, {  Component, ErrorInfo, Fragment, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Routes, Route, useNavigate, useParams, HashRouter } from "react-router-dom";
 
@@ -867,10 +867,87 @@ function Content({ children }) {
   </div>
 }
 
+function EditableText({ value, setValue, rejectEmpty = false }) {
+  const [editing, setEditing] = useState(false);
+  const [editingValue, setEditingValue] = useState();
+  const [revertValue, setRevertValue] = useState();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  });
+
+  const startEdit = () => {
+    setEditing(true);
+    setEditingValue(value);
+    setRevertValue(value);
+  };
+
+  const stopEdit = () => {
+    setEditing(false);
+  };
+
+  const onChange = (e) => {
+    const value = e.currentTarget.value;
+    setEditingValue(value);
+    if (value == "" && rejectEmpty) {
+      setValue(revertValue);
+    } else {
+      setValue(value);
+    }
+  };
+
+  if (editing) {
+    return <form style={{ display: "flex", gap: 8 }}
+                 onSubmit={stopEdit}>
+      <Input ref={inputRef} style={{ flex: 1 }} value={editingValue}
+             onBlur={stopEdit} onChange={onChange} />
+      <Button onClick={() => setEditing(false)}>Done</Button>
+    </form>
+  } else {
+    return <div>
+      <Text style={{ flex: 1, marginRight: 8 }}>{value}</Text>
+      <Link onClick={startEdit}>Edit</Link>
+    </div>;
+  }
+};
+
+function ResultsOverview({ seriesId }) {
+  const [series] = useSeries(seriesId);
+  const [racers] = useRacers();
+
+  if (series.finishboards.length == 0) {
+    return <>
+      <Text>Results overview cannot be displayed.</Text>
+      <Text>There are no races yet.</Text>
+    </>
+  } else {
+    const scoreboard = evaluateScoreboard(racers, series, series.finishboards);
+
+    const emojis = ["🥇", "🥈", "🥉"];
+
+    return <div>
+      <Table>
+        <TableBody>
+          {scoreboard.slice(-3).map((racer, index) =>
+            <TableRow key={index}>
+              <TableCell>{emojis[index]}</TableCell>
+              <TableCell>{racer.racer.name}</TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      {scoreboard.length > 3 && <div style={{ marginTop: 8 }}>
+        <Text>{scoreboard.length - 3} racers are not shown.</Text>
+      </div>}
+    </div>
+  }
+}
+
 function SeriesOverviewState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
-  const [series] = useSeries(parseInt(seriesId));
+  const [series, setSeries] = useSeries(parseInt(seriesId));
 
   return (
     <Layout>
@@ -879,11 +956,30 @@ function SeriesOverviewState() {
         <NavBarItem title="Overview" to="" />
       </NavBar>
       <Content>
-        <div>Series Overview</div>
-        <Button onClick={() => navigate("results")}>Results</Button>
-        <Button onClick={() => navigate("competitors")}>Competitors</Button>
-        <Button onClick={() => navigate("races")}>View Races</Button>
-        <Button onClick={() => navigate("races/new")}>New Race</Button>
+        <div style={{ overflow: "auto" }}>
+          <Text block size={700}>Series Overview</Text>
+          <Divider style={{ margin: "8px 0" }} />
+
+          <Text block size={500} style={{ margin: "8px 0" }} >Settings</Text>
+          <Text weight="semibold">Name</Text>
+          <EditableText rejectEmpty value={series.name}
+                        setValue={value => setSeries({...series, name: value })} />
+
+          <Divider style={{ margin: "8px 0" }} />
+          <Text block size={500} style={{ margin: "8px 0" }} >Results</Text>
+          <ResultsOverview seriesId={seriesId} />
+          <Button onClick={() => navigate("results")} style={{ width: "200px", margin: "8px 0" }}>View Full Results</Button>
+
+          <Divider style={{ margin: "8px 0" }} />
+          <Text block size={500}>Competitors</Text>
+          <Text block>{series.racers.length} people are racing in this ragatta.</Text>
+          <Button onClick={() => navigate("competitors")} style={{ width: "200px", margin: "8px 0" }}>Edit Competitors</Button>
+
+          <Divider style={{ margin: "8px 0" }} />
+          <Text block size={500}>Races</Text>
+          <Text block>There are {series.finishboards.length} races.</Text>
+          <Button onClick={() => navigate("races")} style={{ width: "200px", margin: "8px 0" }}>Edit Races</Button>
+        </div>
       </Content>
     </Layout>
   );
