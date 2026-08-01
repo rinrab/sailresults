@@ -183,6 +183,12 @@ function EditCompetitorsState() {
     copy[racer.id] = racer;
     setRacers(copy);
   };
+  const deleteRacer = (id: number) => {
+    setSeries({
+      ...series,
+      racers: series.racers.filter(item => item != id),
+    });
+  };
 
   const submit = () => {
     addRacer({
@@ -197,53 +203,38 @@ function EditCompetitorsState() {
   }
 
   const RacersList = () => {
-    const columns = [
-      createTableColumn<number>({
-        columnId: "name",
-        renderHeaderCell: () => "Name",
-        renderCell: (id) => formatString(racers[id].name),
-      }),
-      createTableColumn<number>({
-        columnId: "number",
-        renderHeaderCell: () => "Number",
-        renderCell: (id) => formatString(racers[id].number),
-      }),
-    ];
-
-    const renderRow = ({ item, rowId }) => (
-      <DataGridRow key={rowId}>
-        {(column) =>
-          <DataGridCell focusMode="group">
-            {column.renderCell(item)}
-          </DataGridCell>
-        }
-      </DataGridRow>
-    );
-
-    const { targetDocument } = useFluent();
-    const scrollbarWidth = useScrollbarWidth({ targetDocument });
-
     if (series.racers.length == 0) {
       return <Text>No racers added.</Text>;
     } else {
       return (
-        <DataGrid
-          items={series.racers}
-          columns={columns}
-          focusMode="none">
-          <DataGridHeader style={{ paddingRight: scrollbarWidth }}>
-            <DataGridRow>
-              {({ renderHeaderCell }) => (
-                <DataGridHeaderCell>
-                  {renderHeaderCell()}
-                </DataGridHeaderCell>
-              )}
-            </DataGridRow>
-          </DataGridHeader>
-          <DataGridBody<Racer>>
-            {renderRow}
-          </DataGridBody>
-        </DataGrid>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell>Name</TableHeaderCell>
+              <TableHeaderCell>Number</TableHeaderCell>
+              <TableHeaderCell style={{ width: 25 }}></TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {series.racers.map(id => (
+              <TableRow>
+                <TableCell>{formatString(racers[id].name)}</TableCell>
+                <TableCell>{formatString(racers[id].number)}</TableCell>
+                <TableCell style={{ width: 25 }}>
+                  <Menu>
+                    <MenuTrigger>
+                      <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                              onClick={(e) => e.stopPropagation()} />
+                    </MenuTrigger>
+                    <MenuPopover>
+                      <MenuItem onClick={() => deleteRacer(id)}>Delete</MenuItem>
+                    </MenuPopover>
+                  </Menu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )
     };
   }
