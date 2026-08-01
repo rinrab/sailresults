@@ -989,6 +989,11 @@ function RacesOverviewState() {
   const { seriesId } = useParams();
   const [series] = useSeries(parseInt(seriesId));
 
+  const deleteClick = (e) => {
+    e.stopPropagation();
+    alert("oh im not implemented");
+  };
+
   return (
     <Layout>
       <NavBar>
@@ -1021,7 +1026,7 @@ function RacesOverviewState() {
                                 onClick={(e) => e.stopPropagation()} />
                       </MenuTrigger>
                       <MenuPopover>
-                        <MenuItem onClick={() => alert("oh im not implemented")}>Delete</MenuItem>
+                        <MenuItem onClick={deleteClick}>Delete</MenuItem>
                       </MenuPopover>
                     </Menu>
                   </TableCell>
