@@ -566,7 +566,7 @@ function NewRaceState() {
                 draftFinishboard: null,
                 finishboards: [...series.finishboards, draft]
               })
-              navigate("../../results");
+              navigate("../..");
             }}>Done</Button>
           </div>
         </div>
@@ -609,7 +609,7 @@ function EditRaceState() {
           <div style={{ display: "flex", gap: 8 }}>
             <Button style={{ flex: "auto", width: "120px" }}
                     disabled={draft.length == 0}
-                    onClick={() => navigate(`../../results`)}>Done</Button>
+                    onClick={() => navigate("../..")}>Done</Button>
           </div>
         </div>
       </Content>
