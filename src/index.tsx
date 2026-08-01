@@ -1,8 +1,8 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MenuButton, Checkbox, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth } from "@fluentui/react-components";
-import { ArrowDownRegular, ArrowUpRegular, CheckmarkCircle16Regular, ChevronDown20Regular, Delete16Regular, DeleteRegular, Edit16Regular, EditRegular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
-import React, {  captureOwnerStack, Component, ErrorInfo, Fragment, JSX, useEffect, useState } from "react";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth } from "@fluentui/react-components";
+import { CheckmarkCircle16Regular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
+import React, {  Component, ErrorInfo, Fragment, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route, useNavigate, useParams, HashRouter, Outlet } from "react-router-dom";
+import { Routes, Route, useNavigate, useParams, HashRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -123,12 +123,12 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
     createTableColumn<Racer>({
       columnId: "name",
       renderHeaderCell: () => "Name",
-      renderCell: (racer: Racer) => racer.name == "" ? "-" : racer.name,
+      renderCell: (racer: Racer) => formatString(racer.name),
     }),
     createTableColumn<Racer>({
       columnId: "number",
       renderHeaderCell: () => "Number",
-      renderCell: (racer: Racer) => racer.number == "" ? "-" : racer.number,
+      renderCell: (racer: Racer) => formatString(racer.number),
     }),
   ];
 
@@ -161,10 +161,6 @@ function RacersList({ racers, selectedRacers, setSelectedRacers }) {
         columns={columns}
         focusMode="none"
         selectionMode="multiselect"
-        resizableColumns
-        resizableColumnsOptions={{
-          autoFitColumns: true,
-        }}
         selectedItems={selectedRacers}
         onSelectionChange={onSelectionChange}>
         <DataGridHeader style={{ paddingRight: scrollbarWidth }}>
@@ -212,7 +208,8 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
     setNumber("");
   }
 
-  return (<>
+  return (
+    <div>
       <Input placeholder="Enter Series Name..."
              onChange={e => setDraft({ ...draft, name: e.target.value })} />
       <Divider style={{ flex: "0", padding: "8px 0" }} />
@@ -237,7 +234,7 @@ function EditSeries({ racers, setRacers, draft, setDraft }) {
                           setSelectedRacers={setSelectedRacers} />
         }
       </div>
-    </>
+    </div>
   );
 }
 
@@ -260,22 +257,23 @@ function NewSeriesState() {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      gap: 8 }}>
-      <EditSeries
-        racers={racers}
-        setRacers={setRacers}
-        draft={draft}
-        setDraft={setDraft} />
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={done}>
-          Contunue with {draft.racers.length} racers
-        </Button>
-      </div>
-    </div>
+    <Layout>
+      <NavBar>
+        <NavBarItem title="New Series" to="" />
+      </NavBar>
+      <Content>
+        <EditSeries
+          racers={racers}
+          setRacers={setRacers}
+          draft={draft}
+          setDraft={setDraft} />
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={done}>
+            Contunue with {draft.racers.length} racers
+          </Button>
+        </div>
+      </Content>
+    </Layout>
   );
 }
 
@@ -286,20 +284,22 @@ function EditCompetitorsState() {
   const [racers, setRacers] = useRacers();
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      gap: 8 }}>
-      <EditSeries
-        racers={racers}
-        setRacers={setRacers}
-        draft={draft}
-        setDraft={setDraft} />
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={() => navigate("..")}>Done</Button>
-      </div>
-    </div>
+    <Layout>
+      <NavBar>
+        <NavBarItem title={draft.name} to=".." />
+        <NavBarItem title="Competitors" to="" />
+      </NavBar>
+      <Content>
+        <EditSeries
+          racers={racers}
+          setRacers={setRacers}
+          draft={draft}
+          setDraft={setDraft} />
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() => navigate("..")}>Done</Button>
+        </div>
+      </Content>
+    </Layout>
   );
 }
 
@@ -335,21 +335,29 @@ function StartState() {
   const [series, _] = useSeriesList();
 
   return (
-    <div style={{ gap: 8, display: "flex", flexDirection: "column" }}>
-      <Button onClick={() => navigate(`/series/new`)}>
-        Create New Series</Button>
-      <Divider />
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        flexDirection: "column",
-        columnGap: "16px",
-        rowGap: "36px" }}>
-        {Object.values(series).map((item: Series) => (
-          <SeriesCard key={item.id} series={item} />
-        ))}
-      </div>
-    </div>);
+    <Layout>
+      <NavBar>
+        <NavBarItem title="Main Menu" to="" />
+      </NavBar>
+      <Content>
+        <div style={{ gap: 8, display: "flex", flexDirection: "column" }}>
+          <Button onClick={() => navigate(`/series/new`)}>
+            Create New Series</Button>
+          <Divider />
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
+            flexDirection: "column",
+            columnGap: "16px",
+            rowGap: "36px" }}>
+            {Object.values(series).map((item: Series) => (
+              <SeriesCard key={item.id} series={item} />
+            ))}
+          </div>
+        </div>
+      </Content>
+    </Layout>
+  );
 }
 
 function formatRaceScore(score: number) {
@@ -409,9 +417,9 @@ function ResultsState() {
               </MenuTrigger>
               <MenuPopover>
                 <MenuList>
-                  <MenuItem onClick={() => navigate(`../new`)}
+                  <MenuItem onClick={() => navigate(`../races/new`)}
                             icon={<New16Regular />}>New Race</MenuItem>
-                  <MenuItem onClick={() => navigate(`../edit`)}
+                  <MenuItem onClick={() => navigate(`../races/${i}/edit`)}
                             icon={ <Edit16Regular /> }>Edit Race</MenuItem>
                   <MenuItem onClick={() => alert("dont kill me :(")}
                             icon={ <Delete16Regular /> }>Delete Race</MenuItem>
@@ -445,40 +453,42 @@ function ResultsState() {
   );
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      gap: 8 }}>
-      <div style={{ overflow: "auto", flex: "auto" }}>
-        <DataGrid
-          items={scoreboard.map((_, i) => i)}
-          columns={columns}
-          getRowId={(item) => item}
-          focusMode="none"
-          resizableColumns
-          resizableColumnsOptions={{
-            autoFitColumns: true,
-          }}
-          columnSizingOptions={columnSizingOptions} >
-          <DataGridHeader>
-            <DataGridRow>
-              {( column ) => (
-                <DataGridHeaderCell>
-                  {column.renderHeaderCell()}
-                </DataGridHeaderCell>
-              )}
-            </DataGridRow>
-          </DataGridHeader>
-          <DataGridBody>
-            {renderRow}
-          </DataGridBody>
-        </DataGrid>
-      </div>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={() => navigate("../races/new")}>New Race</Button>
-      </div>
-    </div>
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.name} to=".." />
+        <NavBarItem title="Results" to="" />
+      </NavBar>
+      <Content>
+        <div style={{ overflow: "auto", flex: "auto" }}>
+          <DataGrid
+            items={scoreboard.map((_, i) => i)}
+            columns={columns}
+            getRowId={(item) => item}
+            focusMode="none"
+            resizableColumns
+            resizableColumnsOptions={{
+              autoFitColumns: true,
+            }}
+            columnSizingOptions={columnSizingOptions} >
+            <DataGridHeader>
+              <DataGridRow>
+                {( column ) => (
+                  <DataGridHeaderCell>
+                    {column.renderHeaderCell()}
+                  </DataGridHeaderCell>
+                )}
+              </DataGridRow>
+            </DataGridHeader>
+            <DataGridBody>
+              {renderRow}
+            </DataGridBody>
+          </DataGrid>
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() => navigate("../races/new")}>New Race</Button>
+        </div>
+      </Content>
+    </Layout>
   );
 }
 
@@ -531,36 +541,39 @@ function NewRaceState() {
   const currentRacers = series.racers.map(id => racers[id]);
 
   return (
-    <div style={{ 
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
-      height: "100%" }}>
-      <div style={{ flex: "auto", overflow: "auto" }}>
-        <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                           draft={draft} setDraft={setDraft} />
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ flex: "1 1 300px", margin: "auto" }}>
-          {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.name} to="../.." />
+        <NavBarItem title="Races" to=".." />
+        <NavBarItem title="New Race" to="" />
+      </NavBar>
+      <Content>
+        <div style={{ flex: "auto", overflow: "auto" }}>
+          <FinishboardEditor racers={racers} currentRacers={currentRacers}
+                             draft={draft} setDraft={setDraft} />
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <Button style={{ flex: "auto", width: "120px" }}
-                  onClick={() => navigate(`..`)}>Close</Button>
-          <Button style={{ flex: "auto", width: "120px" }}
-                  onClick={() => setDraft([])}>Delete Draft</Button>
-          <Button style={{ flex: "auto", width: "120px" }}
-                  disabled={draft.length == 0} onClick={() => {
-            setSeries({
-              ...series,
-              draftFinishboard: null,
-              finishboards: [...series.finishboards, draft]
-            })
-            navigate("../../results");
-          }}>Done</Button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ flex: "1 1 300px", margin: "auto" }}>
+            {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    onClick={() => navigate(`..`)}>Close</Button>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    onClick={() => setDraft([])}>Delete Draft</Button>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    disabled={draft.length == 0} onClick={() => {
+              setSeries({
+                ...series,
+                draftFinishboard: null,
+                finishboards: [...series.finishboards, draft]
+              })
+              navigate("../../results");
+            }}>Done</Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </Content>
+    </Layout>
   )
 }
 
@@ -580,26 +593,29 @@ function EditRaceState() {
   const currentRacers = series.racers.map(id => racers[id]);
 
   return (
-    <div style={{ 
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
-      height: "100%" }}>
-      <div style={{ flex: "auto", overflow: "auto" }}>
-        <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                           draft={draft} setDraft={setDraft} />
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ flex: "1 1 300px", margin: "auto" }}>
-          {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.name} to="../.." />
+        <NavBarItem title="Races" to=".." />
+        <NavBarItem title={`Race ${parseInt(raceId) + 1}`} to="" />
+      </NavBar>
+      <Content>
+        <div style={{ flex: "auto", overflow: "auto" }}>
+          <FinishboardEditor racers={racers} currentRacers={currentRacers}
+                             draft={draft} setDraft={setDraft} />
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <Button style={{ flex: "auto", width: "120px" }}
-                  disabled={draft.length == 0}
-                  onClick={() => navigate(`../../results`)}>Done</Button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ flex: "1 1 300px", margin: "auto" }}>
+            {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    disabled={draft.length == 0}
+                    onClick={() => navigate(`../../results`)}>Done</Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </Content>
+    </Layout>
   )
 }
 
@@ -799,91 +815,98 @@ class ErrorBoundary extends Component<
   }
 }
 
-function NavBar() {
-  return <></>;
-  const navigate = useNavigate();
-
-  return (
-    <Breadcrumb style={{
-      padding: "4px 8px",
-      backgroundColor: tokens.colorNeutralBackground4 }}>
-      <BreadcrumbItem>
-        <BreadcrumbButton onClick={() => navigate("")}>
-          <Home24Filled />
-        </BreadcrumbButton>
-      </BreadcrumbItem>
-      <BreadcrumbDivider />
-      {/*stateIsGlobal(route.state)
-        ? <BreadcrumbButton onClick={() => setRoute({ state: AppState.StartMenu })}>Main Menu</BreadcrumbButton>
-        : <BreadcrumbButton onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}> Regatta 23</BreadcrumbButton>
-      */}
-      {/*! stateIsGlobal(route.state) && 
-      <>
-        <BreadcrumbDivider />
-        <BreadcrumbItem>
-          <Menu>
-            <MenuTrigger disableButtonEnhancement>
-              <BreadcrumbButton>
-                {getTitle(route)}
-                <ChevronDown20Regular style={{ marginLeft: 4 }} />
-              </BreadcrumbButton>
-            </MenuTrigger>
-            <MenuPopover>
-              <MenuList>
-                <MenuItem onClick={() => setRoute({ state: AppState.RaceView, series: route.series })}>Results</MenuItem>
-                <MenuItem onClick={() => setRoute({ state: AppState.NewRace, series: route.series })}>New Race</MenuItem>
-                <MenuItem onClick={() => setRoute({ state: AppState.Competitors, series: route.series })}>Competitors</MenuItem>
-              </MenuList>
-            </MenuPopover>
-          </Menu>
-        </BreadcrumbItem>
-      </>*/}
-    </Breadcrumb>
-  );
-}
-
-function Layout() {
-  return (
-    <div style={{
+function Layout({ children }) {
+  return <div style={{
       height: "100%",
       display: "flex",
       flexDirection: "column"
     }}>
-      <NavBar />
-      <Divider style={{ flex: 0 }} />
-      <div style={{
-        flex: "1",
-        padding: "8px",
-        minHeight: "0"
-      }}>
-        <Outlet />
-      </div>
-    </div>
-  );
+    { children }
+  </div>;
+}
+
+function NavBar({ children }) {
+  const navigate = useNavigate();
+
+  return <div style={{
+    padding: "4px 8px",
+    backgroundColor: tokens.colorNeutralBackground4,
+    display: "flex",
+  }}>
+    <Breadcrumb style={{ flex: 1 }}>
+      <BreadcrumbItem>
+        <BreadcrumbButton onClick={() => navigate("/")}>
+          <Home24Filled />
+        </BreadcrumbButton>
+      </BreadcrumbItem>
+      { children }
+    </Breadcrumb>
+  </div>;
+}
+
+function NavBarItem({ title, to }) {
+  const navigate = useNavigate();
+  return <>
+    <BreadcrumbDivider />
+    <BreadcrumbItem>
+      <BreadcrumbButton onClick={() => navigate(to)}>{title}</BreadcrumbButton>
+    </BreadcrumbItem>
+  </>
+}
+
+function Content({ children }) {
+  return <div style={{
+    flex: "1",
+    padding: "8px",
+    minHeight: "0",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  }}>
+    { children }
+  </div>
 }
 
 function SeriesOverviewState() {
   const navigate = useNavigate();
+  const { seriesId } = useParams();
+  const [series] = useSeries(parseInt(seriesId));
 
   return (
-    <div>
-      <div>Series Overview</div>
-      <Button onClick={() => navigate("results")}>Results</Button>
-      <Button onClick={() => navigate("competitors")}>Competitors</Button>
-      <Button onClick={() => navigate("races")}>View Races</Button>
-      <Button onClick={() => navigate("races/new")}>New Race</Button>
-    </div>
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.name} to="" />
+        <NavBarItem title="Overview" to="" />
+      </NavBar>
+      <Content>
+        <div>Series Overview</div>
+        <Button onClick={() => navigate("results")}>Results</Button>
+        <Button onClick={() => navigate("competitors")}>Competitors</Button>
+        <Button onClick={() => navigate("races")}>View Races</Button>
+        <Button onClick={() => navigate("races/new")}>New Race</Button>
+      </Content>
+    </Layout>
   );
 }
 
 function RacesOverviewState() {
   const navigate = useNavigate();
+  const { seriesId } = useParams();
+  const [series] = useSeries(parseInt(seriesId));
+
   return (
-    <div>
-      <div>Races Overview</div>
-      <Button onClick={() => navigate("..")}>Back</Button>
-      <Button onClick={() => navigate("new")}>New Race</Button>
-    </div>
+    <Layout>
+      <NavBar>
+        <NavBarItem title={ series.name } to=".." />
+        <NavBarItem title="Races" to="" />
+        <NavBarItem title="Overview" to="" />
+      </NavBar>
+      <Content>
+        <div>Races Overview</div>
+        <Button onClick={() => navigate("..")}>Back</Button>
+        <Button onClick={() => navigate("new")}>New Race</Button>
+      </Content>
+    </Layout>
   );
 }
 
@@ -892,7 +915,7 @@ function App() {
     <ErrorBoundary>
       <HashRouter>
         <Routes>
-          <Route element={<Layout />}>
+          <Route>
             <Route index element={<StartState />} />
             <Route path="series">
               <Route path="new" element={<NewSeriesState />} />
