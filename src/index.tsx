@@ -1,5 +1,5 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, Link, TableBody, TableRow, TableCell, Table } from "@fluentui/react-components";
-import { CheckmarkCircle16Regular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, Link, TableBody, TableRow, TableCell, Table, TableHeader, TableHeaderCell } from "@fluentui/react-components";
+import { CheckmarkCircle16Regular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, MoreVerticalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  Component, ErrorInfo, Fragment, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Routes, Route, useNavigate, useParams, HashRouter } from "react-router-dom";
@@ -593,8 +593,8 @@ function EditRaceState() {
   return (
     <Layout>
       <NavBar>
-        <NavBarItem title={series.name} to="../.." />
-        <NavBarItem title="Races" to=".." />
+        <NavBarItem title={series.name} to="../../.." />
+        <NavBarItem title="Races" to="../.." />
         <NavBarItem title={`Race ${parseInt(raceId) + 1}`} to="" />
       </NavBar>
       <Content>
@@ -997,9 +997,44 @@ function RacesOverviewState() {
         <NavBarItem title="Overview" to="" />
       </NavBar>
       <Content>
-        <div>Races Overview</div>
-        <Button onClick={() => navigate("..")}>Back</Button>
-        <Button onClick={() => navigate("new")}>New Race</Button>
+        <div style={{ overflow: "auto", flex: 1 }}>
+          <Text size={700}>Races</Text>
+          <Divider style={{ margin: "8px 0" }} />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell style={{ width: 70, textAlign: "right", fontWeight: "bolder" }}>Race No.</TableCell>
+                <TableCell style={{ fontWeight: "bolder" }}>Racers in the finishboard</TableCell>
+                <TableCell style={{ width: 25 }}></TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {series.finishboards.map((finishboard, index) => (
+                <TableRow key={index} style={{ cursor: "pointer" }}
+                          onClick={() => navigate(`${index}/edit`)}>
+                  <TableCell style={{ width: 70, textAlign: "right" }}>Race {index + 1}</TableCell>
+                  <TableCell>{finishboard.length} / {series.racers.length}</TableCell>
+                  <TableCell style={{ width: 25 }}>
+                    <Menu>
+                      <MenuTrigger>
+                        <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                                onClick={(e) => e.stopPropagation()} />
+                      </MenuTrigger>
+                      <MenuPopover>
+                        <MenuItem onClick={() => alert("oh im not implemented")}>Delete</MenuItem>
+                      </MenuPopover>
+                    </Menu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ flex: 1 }} />
+          <Button onClick={() => navigate("..")}>Back</Button>
+          <Button onClick={() => navigate("new")}>New Race</Button>
+        </div>
       </Content>
     </Layout>
   );
