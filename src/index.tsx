@@ -310,18 +310,16 @@ function SeriesCard({ series }) {
     <Card style={{
       maxWidth: "400px",
       width: "100%",
-      height: "fit-content" }}>
-      <CardPreview>
-      </CardPreview>
+      height: "fit-content",
+      marginBottom: 8}}
+    >
+      <Body1 as="h5" style={{ margin: 0, fontWeight: "bold" }}>
+        {series.name}
+      </Body1>
+      <Text>{3} races / {series.racers.length} competitors</Text>
 
-      <CardHeader
-        header={
-          <Body1 as="h5" style={{ margin: 0, fontWeight: "bold" }}>
-            {series.name}
-          </Body1>
-        }
-        description={`3 races / ${series.racers.length} competitors`} />
-
+      <ResultsOverview seriesId={series.id} />
+      
       <CardFooter>
         <Button appearance="primary" icon={<Open16Regular />}
                 onClick={() => navigate(`/series/${series.id}/`)}>Open</Button>
@@ -340,7 +338,7 @@ function StartState() {
         <NavBarItem title="Main Menu" to="" />
       </NavBar>
       <Content>
-        <div style={{ gap: 8, display: "flex", flexDirection: "column" }}>
+        <div style={{ overflow: "auto" }}>
           <Button onClick={() => navigate(`/series/new`)}>
             Create New Series</Button>
           <Divider />
@@ -917,10 +915,10 @@ function ResultsOverview({ seriesId }) {
   const [racers] = useRacers();
 
   if (series.finishboards.length == 0) {
-    return <>
-      <Text>Results overview cannot be displayed.</Text>
-      <Text>There are no races yet.</Text>
-    </>
+    return <div>
+      <Text block>Results overview cannot be displayed.</Text>
+      <Text block>There are no races yet.</Text>
+    </div>
   } else {
     const scoreboard = evaluateScoreboard(racers, series, series.finishboards);
 
