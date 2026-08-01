@@ -341,7 +341,7 @@ function StartState() {
         <div style={{ overflow: "auto" }}>
           <Button onClick={() => navigate(`/series/new`)}>
             Create New Series</Button>
-          <Divider />
+          <Divider style={{ margin: "8px 0" }} />
           <div style={{
             display: "flex",
             flexWrap: "wrap",
