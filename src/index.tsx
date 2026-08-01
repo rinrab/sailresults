@@ -118,124 +118,6 @@ function evaluateScoreboard(
   return result.sort((a, b) => a.total - b.total);
 }
 
-function RacersList({ racers, selectedRacers, setSelectedRacers }) {
-  const columns = [
-    createTableColumn<Racer>({
-      columnId: "name",
-      renderHeaderCell: () => "Name",
-      renderCell: (racer: Racer) => formatString(racer.name),
-    }),
-    createTableColumn<Racer>({
-      columnId: "number",
-      renderHeaderCell: () => "Number",
-      renderCell: (racer: Racer) => formatString(racer.number),
-    }),
-  ];
-
-  const onSelectionChange: DataGridProps["onSelectionChange"] = (e, data) => {
-    const target = e.target as HTMLElement;
-    if (! target.closest('input[type="checkbox"]')) {
-      return;
-    }
-    setSelectedRacers(data.selectedItems);
-  }
-
-  const renderRow = ({ item, rowId }, style) => (
-    <DataGridRow key={rowId} style={style}>
-      {(column) =>
-        <DataGridCell focusMode="group">
-          {column.renderCell(item)}
-        </DataGridCell>
-      }
-    </DataGridRow>
-  );
-
-  const { targetDocument } = useFluent();
-  const scrollbarWidth = useScrollbarWidth({ targetDocument });
-
-  return (
-    <div style={{ overflow: "auto", height: "100%" }}>
-      <DataGrid
-        items={Object.values(racers)}
-        getRowId={racer => racer.id}
-        columns={columns}
-        focusMode="none"
-        selectionMode="multiselect"
-        selectedItems={selectedRacers}
-        onSelectionChange={onSelectionChange}>
-        <DataGridHeader style={{ paddingRight: scrollbarWidth }}>
-          <DataGridRow>
-            {({ renderHeaderCell }) => (
-              <DataGridHeaderCell>
-                {renderHeaderCell()}
-              </DataGridHeaderCell>
-            )}
-          </DataGridRow>
-        </DataGridHeader>
-        <DataGridBody<Racer>>
-          {renderRow}
-        </DataGridBody>
-      </DataGrid>
-    </div>
-  );
-}
-
-function EditSeries({ racers, setRacers, draft, setDraft }) {
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
-
-  const [selectedItems, setSelectedItems] = useState(() => new Set(draft.racers));
-  const setSelectedRacers = (value: Set<Racer>) => {
-    setSelectedItems(value);
-    setDraft({
-      ...draft,
-      racers: [...value],
-    });
-  };
-
-  const submit = () => {
-    const id = nextRacerId(); 
-    const newRacer: Racer = {
-        id: id,
-        name: name.trim(),
-        number: number.trim(),
-    };
-    setRacers({ ...racers, [id]: newRacer });
-    setSelectedRacers(new Set([...draft.racers, id]));
-
-    /* clear inputs */
-    setName("");
-    setNumber("");
-  }
-
-  return (
-    <div>
-      <Divider style={{ flex: "0", padding: "8px 0" }} />
-      <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
-            onSubmit={e => { e.preventDefault(); submit(); }}>
-        <Input placeholder="Name" value={name}
-               onChange={e => setName(e.target.value)}
-               style={{ flex: "1 1 200px" }} />
-        <Input placeholder="Sail Number" value={number}
-               onChange={e => setNumber(e.target.value)}
-               style={{ flex: "1 1 200px" }} />
-        <Button type="submit"
-                style={{ flex: "1 1 70px" }}>Add</Button>
-      </form>
-      <Divider style={{ flex: "0", padding: "8px 0" }} />
-      <div style={{ flex: "auto", overflow: "auto" }}>
-        {
-          (Object.keys(racers).length == 0)
-            ? <Text>No racers added.</Text> 
-            : <RacersList racers={racers}
-                          selectedRacers={selectedItems}
-                          setSelectedRacers={setSelectedRacers} />
-        }
-      </div>
-    </div>
-  );
-}
-
 function NewSeriesState() {
   const [draft, setDraft] = useLocalStorage<Series>("draft-series", () => ({
     id: nextRacerId(),
@@ -280,21 +162,115 @@ function NewSeriesState() {
 function EditCompetitorsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
-  const [draft, setDraft] = useSeries(parseInt(seriesId));
+  const [series, setSeries] = useSeries(parseInt(seriesId));
   const [racers, setRacers] = useRacers();
+
+  const [name, setName] = useState("");
+  const [number, setNumber] = useState("");
+
+  const addRacer = (racer: Racer) => {
+    setRacers({
+      ...racers,
+      [racer.id]: racer,
+    });
+    setSeries({
+      ...series,
+      racers: [...series.racers, racer.id],
+    });
+  };
+  const updateRacer = (racer: Racer) => {
+    const copy = { ...racers };
+    copy[racer.id] = racer;
+    setRacers(copy);
+  };
+
+  const submit = () => {
+    addRacer({
+        id: nextRacerId(),
+        name: name.trim(),
+        number: number.trim(),
+    });
+
+    /* clear inputs */
+    setName("");
+    setNumber("");
+  }
+
+  const RacersList = () => {
+    const columns = [
+      createTableColumn<number>({
+        columnId: "name",
+        renderHeaderCell: () => "Name",
+        renderCell: (id) => formatString(racers[id].name),
+      }),
+      createTableColumn<number>({
+        columnId: "number",
+        renderHeaderCell: () => "Number",
+        renderCell: (id) => formatString(racers[id].number),
+      }),
+    ];
+
+    const renderRow = ({ item, rowId }) => (
+      <DataGridRow key={rowId}>
+        {(column) =>
+          <DataGridCell focusMode="group">
+            {column.renderCell(item)}
+          </DataGridCell>
+        }
+      </DataGridRow>
+    );
+
+    const { targetDocument } = useFluent();
+    const scrollbarWidth = useScrollbarWidth({ targetDocument });
+
+    if (series.racers.length == 0) {
+      return <Text>No racers added.</Text>;
+    } else {
+      return (
+        <DataGrid
+          items={series.racers}
+          columns={columns}
+          focusMode="none">
+          <DataGridHeader style={{ paddingRight: scrollbarWidth }}>
+            <DataGridRow>
+              {({ renderHeaderCell }) => (
+                <DataGridHeaderCell>
+                  {renderHeaderCell()}
+                </DataGridHeaderCell>
+              )}
+            </DataGridRow>
+          </DataGridHeader>
+          <DataGridBody<Racer>>
+            {renderRow}
+          </DataGridBody>
+        </DataGrid>
+      )
+    };
+  }
 
   return (
     <Layout>
       <NavBar>
-        <NavBarItem title={draft.name} to=".." />
+        <NavBarItem title={series.name} to=".." />
         <NavBarItem title="Competitors" to="" />
       </NavBar>
       <Content>
-        <EditSeries
-          racers={racers}
-          setRacers={setRacers}
-          draft={draft}
-          setDraft={setDraft} />
+        <Divider style={{ flex: "0", padding: "8px 0" }} />
+        <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
+              onSubmit={e => { e.preventDefault(); submit(); }}>
+          <Input placeholder="Name" value={name}
+                 onChange={e => setName(e.target.value)}
+                 style={{ flex: "1 1 200px" }} />
+          <Input placeholder="Sail Number" value={number}
+                 onChange={e => setNumber(e.target.value)}
+                 style={{ flex: "1 1 200px" }} />
+          <Button type="submit"
+                  style={{ flex: "1 1 70px" }}>Add</Button>
+        </form>
+        <Divider style={{ flex: "0", padding: "8px 0" }} />
+        <div style={{ flex: "auto", overflow: "auto" }}>
+          <RacersList />
+        </div>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("..")}>Done</Button>
         </div>
