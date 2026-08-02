@@ -1,4 +1,4 @@
-import { Finishboard, FinishboardEntry, Racer, Series } from "./scoring";
+import { dsqs, Finishboard, FinishboardEntry, Racer, Series } from "./scoring";
 import { getStoredObject, nextRacerId, setStoredObject } from "./storage";
 
 export interface PackedSeries {
@@ -7,6 +7,53 @@ export interface PackedSeries {
   finishboards: FinishboardEntry[][];
 };
 
+export function importSeries(pack: PackedSeries, ) {
+  const racers = getStoredObject<{ [key: number]: Racer }>("racers", () => ({}));
+  const series = getStoredObject<{ [key: number]: Series }>("series", () => ({}));
+
+  const seriesRacers: number[] = [];
+
+  let firstId: number;
+  for (const racer of pack.racers) {
+    const id = nextRacerId();
+    if (!firstId) {
+      firstId = id;
+    }
+    racers[id] = {
+      id: id,
+      ...racer,
+    };
+    seriesRacers.push(id);
+  }
+
+  const finishboards: Finishboard[] = [];
+  for (const packedBoard of pack.finishboards) {
+    const newBoard = {};
+    for (let i = 0; i < packedBoard.length; i++) {
+      newBoard[firstId + i] = packedBoard[i];
+    }
+    finishboards.push(newBoard);
+  }
+
+  const seriesId = nextRacerId();
+  const newSeries: Series = {
+    id: seriesId,
+    name: pack.name,
+    finishboards: finishboards,
+    draftFinishboard: null,
+    racers: seriesRacers,
+  };
+
+  setStoredObject("racers", racers);
+  setStoredObject("series", { ...series, [seriesId]: newSeries });
+
+  return seriesId;
+}
+
+/*           ### THE DATA ###
+ *
+ * !!! chatgpt generated slop warning !!!
+*/
 export const samples: PackedSeries[] = [
   {
     name: "Catastrophic Tacking Championship",
@@ -150,48 +197,53 @@ export const samples: PackedSeries[] = [
       [2, 1, 3, 4, 5],
       [1, 2, "DNF", 4, 5]
     ]
-  }
+  },
+  generateBigRegatta(167, 15, "Skibidi Ocean Chaos Invitational 2026"),
 ];
 
-export function importSeries(pack: PackedSeries, ) {
-  const racers = getStoredObject<{ [key: number]: Racer }>("racers", () => ({}));
-  const series = getStoredObject<{ [key: number]: Series }>("series", () => ({}));
+function generateBigRegatta(competitors: number, races: number, name: string): PackedSeries {
+  const names = [
+    "Skibidi Sailor", "Captain Rizz", "Ohio Ocean Man", "Bingus Boatman",
+    "Sir Yapsalot", "Tactical Toaster", "The Wet Nugget", "Goblin Mode",
+    "Average Optimist Enjoyer", "Rudderless Rat", "Wind NPC",
+    "The Imposter", "Soggy Amongus", "Mast Destroyer 3000",
+    "Lil Capsize", "Boat McBoatface", "Sea Shanty Final Boss",
+    "Turbo Duck", "The Floating L", "Certified Keel Issue",
+    "Google En Passant", "No Wind No Problem", "Tack Simulator",
+    "Anchor Enthusiast", "Wave Check Failed", "Admiral of Ohio",
+    "The Sailussy", "Dripless Dinghy", "Hydration Goblin",
+    "Full Send Fisherman", "Maximum Yapping"
+  ];
 
-  const seriesRacers: number[] = [];
+  const countries = [
+    "GBR", "ITA", "USA", "GER", "FRA", "ESP",
+    "MLT", "SWE", "NOR", "DEN", "AUS", "RUS"
+  ];
 
-  let firstId: number;
-  for (const racer of pack.racers) {
-    const id = nextRacerId();
-    if (!firstId) {
-      firstId = id;
-    }
-    racers[id] = {
-      id: id,
-      ...racer,
-    };
-    seriesRacers.push(id);
-  }
+  const racers = Array.from({ length: competitors }, (_, i) => ({
+    name: `${names[i % names.length]} ${i + 1}`,
+    number: `${countries[i % countries.length]} ${1000 + i * 37}`
+  }));
 
-  const finishboards: Finishboard[] = [];
-  for (const packedBoard of pack.finishboards) {
-    const newBoard = {};
-    for (let i = 0; i < packedBoard.length; i++) {
-      newBoard[firstId + i] = packedBoard[i];
-    }
-    finishboards.push(newBoard);
-  }
+  const finishboards = Array.from({ length: races }, (_, race) =>
+    Array.from({ length: competitors }, (_, sailor): FinishboardEntry => {
+      const chaos = Math.random();
 
-  const seriesId = nextRacerId();
-  const newSeries: Series = {
-    id: seriesId,
-    name: pack.name,
-    finishboards: finishboards,
-    draftFinishboard: null,
-    racers: seriesRacers,
+      // recurring "professional disaster" sailors
+      if ((sailor === 13 || sailor === 42 || sailor === 99) && race % 3 === 0)
+        return "DSQ";
+
+      if (chaos < 0.015)
+        return Object.keys(dsqs)[Math.floor(Math.random() * Object.keys(dsqs).length)] as FinishboardEntry;
+
+      return sailor + 1;
+    }).sort(() => Math.random() - 0.5)
+  );
+
+  return {
+    name: name,
+    racers,
+    finishboards
   };
-
-  setStoredObject("racers", racers);
-  setStoredObject("series", { ...series, [seriesId]: newSeries });
-
-  return seriesId;
 }
+
