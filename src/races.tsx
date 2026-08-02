@@ -1,4 +1,4 @@
-import { Button, Divider, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableBody, TableRow, TableCell, Table, TableHeader } from "@fluentui/react-components";
+import { Button, Divider, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableBody, TableRow, TableCell, Table, TableHeader, Badge, CounterBadge } from "@fluentui/react-components";
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,6 +14,25 @@ export default function RacesOverviewState() {
     e.stopPropagation();
     alert("oh im not implemented");
   };
+
+  const EditDraftButton = () => {
+    const style = { width: 175, };
+    const click = () => navigate("new");
+
+    if (series.draftFinishboard) {
+      const count = Object.entries(series.draftFinishboard).length;
+      if (count > 0) {
+        return <Button onClick={() => navigate("new")}
+                       icon={<CounterBadge count={count} />}
+                       iconPosition="after"
+                       style={style}>
+          Edit Draft
+        </Button>
+      }
+    }
+
+    return <Button onClick={click} style={style}>New Race</Button>
+  }
 
   return (
     <Layout>
@@ -58,8 +77,7 @@ export default function RacesOverviewState() {
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <div style={{ flex: 1 }} />
-          <Button onClick={() => navigate("..")}>Back</Button>
-          <Button onClick={() => navigate("new")}>New Race</Button>
+          <EditDraftButton />
         </div>
       </Content>
     </Layout>
