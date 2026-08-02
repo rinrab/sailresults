@@ -24,8 +24,8 @@ export default function ResultsOverview({ seriesId }) {
           {scoreboard.slice(0, 3).map((racer, index) =>
             <TableRow key={index}>
               <TableCell style={{ width: 20 }}>{emojis[index]}</TableCell>
-              <TableCell>{formatString(racer.racer.number)}</TableCell>
               <TableCell>{formatString(racer.racer.name)}</TableCell>
+              <TableCell>{formatString(racer.racer.number)}</TableCell>
             </TableRow>
           )}
         </TableBody>
