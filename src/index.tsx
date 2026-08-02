@@ -748,6 +748,11 @@ function findLastPlace(finishboard: Finishboard) {
 function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank, setEditingRank }) {
   const [query, setQuery] = useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const editingRowRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    editingRowRef.current?.scrollIntoView();
+  });
 
   const FinishBoardSuggestions = () => {
     const remainingRacers = currentRacers.filter(racer => ! draft[racer.id]);
@@ -871,7 +876,7 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank
             </DataGridHeader>
             <DataGridBody<Racer>>
               {({ item, rowId }) => (
-                <DataGridRow key={rowId} style={getRowStyle(item)}>
+                <DataGridRow key={rowId} style={getRowStyle(item)} ref={(item == editingRank) && editingRowRef}>
                   {(column) => (
                     <DataGridCell style={getColumnStyle(column.columnId)}>
                       {column.renderCell(item)}
