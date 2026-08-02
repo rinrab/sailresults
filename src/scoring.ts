@@ -125,7 +125,7 @@ export function sortFinishboard(finishboard: Finishboard) {
       return evaluateRealScore(aValue, BIGBIGnumber) 
            - evaluateRealScore(bValue, BIGBIGnumber);
     })
-  return sorted.map(([key,]) => key);
+  return sorted.map(([key,]) => parseInt(key));
 }
 
 export function findLastPlace(finishboard: Finishboard) {

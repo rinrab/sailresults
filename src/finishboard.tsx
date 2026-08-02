@@ -1,4 +1,4 @@
-import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem } from "@fluentui/react-components";
+import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, TableRow, TableCell, Table, TableHeaderCell, TableHeader, TableBody } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, CheckmarkRegular, DismissRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -58,10 +58,6 @@ function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditin
   const done = () => {
     setEditingRank(null);
   };
-  const cancel = () => {
-    setEditingRank(null);
-    setDraft(setFinishboardPosition(draft, editingRank, revertValue));
-  };
 
   return <form onSubmit={done}>
     <Text block>Adjust position of {racers[editingRank].name} {racers[editingRank].number} from {revertValue}</Text>
@@ -69,9 +65,8 @@ function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditin
       <Input ref={inputRef} style={{ flex: 1 }} type="number"
              value={editingValue} onChange={e => setValue(e.target.value)}
              min={1} max={findLastPlace(draft) - 1}
-             onBlur={cancel} />
+             onBlur={done} />
        <Button onClick={done} icon={<CheckmarkRegular />} />
-       <Button onClick={cancel} icon={<DismissRegular />} />
     </div>
   </form>
 }
@@ -113,116 +108,99 @@ function FinishboardSuggestions({ draft, currentRacers, query }) {
   }
 }
 
-function FinishboardTable({ racers, draft, setDraft, editingRank, setEditingRank }) {
-  const editingRowRef = React.useRef<HTMLDivElement>(null);
+function FinishboardRow({ rank, racer, move, setPosition, editing }) {
+  const ref = React.useRef<HTMLTableRowElement>(null);
   React.useEffect(() => {
-    editingRowRef.current?.scrollIntoView();
+    if (editing) {
+      ref.current.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+        behavior: "smooth",
+      });
+    }
   });
 
+  const getRowStyle = () => {
+    if (editing) {
+      return {
+        backgroundColor: tokens.colorSubtleBackgroundPressed,
+        color: tokens.colorNeutralForeground1Pressed,
+      };
+    } else {
+      return {};
+    }
+  }
+
+  return (
+    <TableRow ref={ref} style={getRowStyle()}>
+      <TableCell>{rank}</TableCell>
+      <TableCell>{formatString(racer.name)}</TableCell>
+      <TableCell>{formatString(racer.number)}</TableCell>
+      <TableCell>
+        <div style={{ justifyContent: "end", width: "100%", display: "flex" }}>
+          <Menu>
+            <MenuTrigger>
+              <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                      onClick={(e) => e.stopPropagation()} />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                <MenuItem onClick={move}>Move</MenuItem>
+                <Menu>
+                  <MenuTrigger disableButtonEnhancement>
+                    <MenuItem>Disqualify</MenuItem>
+                  </MenuTrigger>
+                  <MenuPopover>
+                    <MenuList>
+                      {Object.entries(dsqs).map(([name, desc]) =>
+                        <MenuItem key={name}
+                                  subText={desc}
+                                  icon={ (name == rank) && <CheckmarkRegular /> }
+                                  onClick={() => setPosition(name as FinishboardEntry)}
+                          >{name}</MenuItem>
+                      )}
+                    </MenuList>
+                  </MenuPopover>
+                </Menu>
+                <MenuItem onClick={() => setPosition(null)}>Delete</MenuItem>
+              </MenuList>
+            </MenuPopover>
+          </Menu>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function FinishboardTable({ racers, draft, setDraft, editingRank, setEditingRank }) {
   if (Object.entries(draft).length == 0) {
     return <Text>The finishboard is empty.</Text>
   } else {
-    const columns = [
-      createTableColumn<number>({
-        columnId: "rank",
-        renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Rank</Text>,
-        renderCell: (racerId) => <Text style={{ width: "100%" }} align="end">{draft[racerId]}</Text>
-      }),
-      createTableColumn<number>({
-        columnId: "name",
-        renderHeaderCell: () => "Name",
-        renderCell: (racerId) => formatString(racers[racerId].name),
-      }),
-      createTableColumn<number>({
-        columnId: "number",
-        renderHeaderCell: () => "Number",
-        renderCell: (racerId) => formatString(racers[racerId].number),
-      }),
-      createTableColumn<number>({
-        columnId: "actions",
-        renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Actions</Text>,
-        renderCell: (racerId) =>
-          <div style={{ justifyContent: "end", width: "100%", display: "flex" }}>
-            <Menu>
-              <MenuTrigger>
-                <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                        onClick={(e) => e.stopPropagation()} />
-              </MenuTrigger>
-              <MenuPopover>
-                <MenuList>
-                  <MenuItem onClick={() => setEditingRank(racerId)}>Move</MenuItem>
-                  <Menu>
-                    <MenuTrigger disableButtonEnhancement>
-                      <MenuItem onClick={(e) => e.stopPropagation()}>Disqualify</MenuItem>
-                    </MenuTrigger>
-                    <MenuPopover>
-                      <MenuList>
-                        {Object.entries(dsqs).map(([name, desc]) =>
-                          <MenuItem key={name}
-                                    subText={desc}
-                                    icon={ (name == draft[racerId]) && <CheckmarkRegular /> }
-                                    onClick={() => setDraft(setFinishboardPosition(draft, racerId, name as FinishboardEntry))}
-                            >{name}</MenuItem>
-                        )}
-                      </MenuList>
-                    </MenuPopover>
-                  </Menu>
-                  <MenuItem onClick={() => setDraft(setFinishboardPosition(draft, racerId, null))}>Delete</MenuItem>
-                </MenuList>
-              </MenuPopover>
-            </Menu>
-          </div>
-      }),
-    ];
-
-    const getColumnStyle = (columnId) => {
-      if (columnId == "rank") {
-        return { maxWidth: "40px", };
-      } else if (columnId == "actions") {
-        return { maxWidth: "70px", };
-      } else {
-        return {};
-      }
-    };
-
-    const getRowStyle = (id) => {
-      if (id == editingRank) {
-        return {
-          backgroundColor: tokens.colorSubtleBackgroundPressed,
-          color: tokens.colorNeutralForeground1Pressed,
-        };
-      } else {
-        return {};
-      }
-    }
-
     return (
       <div style={{ overflow: "auto", flex: "auto" }}>
-        <DataGrid
-          items={sortFinishboard(draft)}
-          columns={columns}
-          focusMode="none">
-          <DataGridHeader>
-            <DataGridRow>
-              {( column ) => (
-                <DataGridHeaderCell style={getColumnStyle(column.columnId)}>
-                  {column.renderHeaderCell()}
-                </DataGridHeaderCell>
-              )}
-            </DataGridRow>
-          </DataGridHeader>
-          <DataGridBody<Racer>>
-            {({ item, rowId }) => (
-              <DataGridRow key={rowId} style={getRowStyle(item)} ref={(item == editingRank) && editingRowRef}>
-                {(column) => (
-                  <DataGridCell style={getColumnStyle(column.columnId)}>
-                    {column.renderCell(item)}
-                  </DataGridCell>
-                )}
-              </DataGridRow>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell style={{ maxWidth: 40 }}>Rank</TableHeaderCell>
+              <TableHeaderCell>Name</TableHeaderCell>
+              <TableHeaderCell>Number</TableHeaderCell>
+              <TableHeaderCell style={{ maxWidth: 40 }}></TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortFinishboard(draft).map((racerId) => {
+              const setPosition = (value: FinishboardEntry) =>
+                  setDraft(setFinishboardPosition(draft, racerId, value));
+
+              return <FinishboardRow 
+                key={racerId} rank={draft[racerId]} racer={racers[racerId]} 
+                setPosition={setPosition}
+                move={() => setEditingRank(racerId)}
+                editing={editingRank == racerId} />
+              }
             )}
-          </DataGridBody>
-        </DataGrid>
+          </TableBody>
+        </Table>
       </div>
     );
   }
