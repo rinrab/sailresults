@@ -39,7 +39,6 @@ export default function RacesOverviewState() {
       <NavBar>
         <NavBarItem title={ series.name } to=".." />
         <NavBarItem title="Races" to="" />
-        <NavBarItem title="Overview" to="" />
       </NavBar>
       <Content>
         <div style={{ overflow: "auto", flex: 1 }}>

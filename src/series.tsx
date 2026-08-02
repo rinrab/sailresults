@@ -57,7 +57,6 @@ export function SeriesOverviewState() {
     <Layout>
       <NavBar>
         <NavBarItem title={series.name} to="" />
-        <NavBarItem title="Overview" to="" />
       </NavBar>
       <Content>
         <div style={{ overflow: "auto" }}>
