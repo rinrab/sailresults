@@ -1,5 +1,5 @@
-import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, Link, TableBody, TableRow, TableCell, Table, TableHeader, TableHeaderCell } from "@fluentui/react-components";
-import { CheckmarkCircle16Regular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, MoreVerticalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
+import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, Link, TableBody, TableRow, TableCell, Table, TableHeader, TableHeaderCell, MenuGroup, Dialog, DialogTrigger, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions } from "@fluentui/react-components";
+import { CheckmarkCircle16Regular, CheckmarkRegular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, MoreVerticalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  Component, ErrorInfo, Fragment, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Routes, Route, useNavigate, useParams, HashRouter } from "react-router-dom";
@@ -535,11 +535,71 @@ function FinishBoardStatus({ currentRacers, draft }) {
   }
 }
 
+function normaliseFinishboard(finishboard: Finishboard): Finishboard {
+  const result = {};
+  const sortedKeys = sortFinishboard(finishboard);
+  console.log(sortedKeys);
+  let rank = 1;
+
+  for (const key of sortedKeys) {
+    const value = finishboard[key];
+    if (typeof(value) == "number") {
+      result[key] = rank;
+      rank++;
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
+function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditingRank }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+  });
+  const [editingValue, setEditingValue] = useState(draft[editingRank]);
+
+  const setValue = (value) => {
+    setEditingValue(value);
+    const parsed = parseInt(value);
+    if (isNaN(parsed)) {
+      return;
+    }
+
+    const copy = { ...draft };
+
+    if (parsed > draft[editingRank]) {
+      copy[editingRank] = parsed + 0.5;
+    } else {
+      copy[editingRank] = parsed - 0.5;
+    }
+
+    const result = normaliseFinishboard(copy); 
+
+    console.log(result);
+    setDraft(result);
+  }
+
+  if (editingRank) {
+    return <form onSubmit={() => setEditingRank(null)}>
+      <Text block>Adjust position of {racers[editingRank].name} {racers[editingRank].number}</Text>
+      <Input ref={inputRef} style={{ width: "100%" }} type="number"
+             value={editingValue} onChange={e => setValue(e.target.value)}
+             min={1} max={findLastPlace(draft) - 1} />
+    </form>
+  } else {
+    return <></>
+  }
+}
+
 function NewRaceState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
   const [series, setSeries] = useSeries(parseInt(seriesId));
   const [racers] = useRacers();
+  const [editingRank, setEditingRank] = useState(null);
 
   const draft = series.draftFinishboard ?? {};
   const setDraft = (value) => setSeries({ ...series, draftFinishboard: value });
@@ -556,8 +616,13 @@ function NewRaceState() {
       <Content>
         <div style={{ flex: "auto", overflow: "auto" }}>
           <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                             draft={draft} setDraft={setDraft} />
+                             draft={draft} setDraft={setDraft}
+                             setEditingRank={setEditingRank} />
         </div>
+        {editingRank &&
+          <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
+                                 editingRank={editingRank} setEditingRank={setEditingRank} />
+        }
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <div style={{ flex: "1 1 300px", margin: "auto" }}>
             {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
@@ -588,6 +653,7 @@ function EditRaceState() {
   const { seriesId, raceId } = useParams();
   const [series, setSeries] = useSeries(parseInt(seriesId));
   const [racers] = useRacers();
+  const [editingRank, setEditingRank] = useState(null);
 
   const draft = series.finishboards[raceId];
   const setDraft = (value) => {
@@ -608,8 +674,13 @@ function EditRaceState() {
       <Content>
         <div style={{ flex: "auto", overflow: "auto" }}>
           <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                             draft={draft} setDraft={setDraft} />
+                             draft={draft} setDraft={setDraft}
+                             setEditingRank={setEditingRank} />
         </div>
+        {editingRank &&
+          <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
+                                 editingRank={editingRank} setEditingRank={setEditingRank} />
+        }
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <div style={{ flex: "1 1 300px", margin: "auto" }}>
             {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
@@ -646,7 +717,7 @@ function findLastPlace(finishboard: Finishboard) {
   return result;
 }
 
-function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
+function FinishboardEditor({ currentRacers, racers, draft, setDraft, setEditingRank }) {
   const [query, setQuery] = useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -700,10 +771,36 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
         createTableColumn<number>({
           columnId: "actions",
           renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Actions</Text>,
-          renderCell: (racerId) => <div style={{ display: "flex", gap: 8, width: "100%" }}>
-            <div style={{ flex: "auto" }} />
-            <Button icon={<DeleteRegular />} style={{ flex: "1" }} appearance="transparent" />
-          </div>,
+          renderCell: (racerId) =>
+            <div style={{ justifyContent: "end", width: "100%", display: "flex" }}>
+              <Menu>
+                <MenuTrigger>
+                  <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                          onClick={(e) => e.stopPropagation()} />
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    <MenuItem onClick={() => setEditingRank(racerId)}>Move</MenuItem>
+                    <Menu>
+                      <MenuTrigger disableButtonEnhancement>
+                        <MenuItem onClick={(e) => e.stopPropagation()}>Disqualify</MenuItem>
+                      </MenuTrigger>
+                      <MenuPopover>
+                        <MenuList>
+                          {Object.entries(dsqs).map(([name, desc]) =>
+                            <MenuItem key={name}
+                                      subText={desc}
+                                      icon={ (name == draft[racerId]) && <CheckmarkRegular /> }
+                              >{name}</MenuItem>
+                          )}
+                        </MenuList>
+                      </MenuPopover>
+                    </Menu>
+                    <MenuItem>Delete</MenuItem>
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            </div>
         }),
       ];
 
@@ -757,7 +854,7 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
       flexDirection: "column",
       gap: 8
     }}>
-      <div style={{ position: "relative" }}>
+      <div>
         <Combobox
           ref={inputRef}
           style={{ width: "100%", maxWidth: "100%" }} 
@@ -779,7 +876,7 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
           <FinishBoardSuggestions />
         </Combobox>
       </div>
-      <div style={{ flex: "auto", overflow: "auto" }}>
+      <div style={{ flex: "auto" }}>
         <FinishboardTable />
       </div>
     </div>
