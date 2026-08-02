@@ -284,7 +284,7 @@ export function NewRaceState() {
                 draftFinishboard: null,
                 finishboards: [...series.finishboards, draft]
               })
-              navigate("../..");
+              navigate("..");
             }}>Done</Button>
           </div>
         </div>
