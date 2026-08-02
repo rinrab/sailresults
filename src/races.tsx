@@ -2,7 +2,8 @@ import { Button, Divider, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableB
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem, useSeries } from "./common";
+import { Content, Layout, NavBar, NavBarItem } from "./common";
+import { useSeries } from "./storage";
 
 export default function RacesOverviewState() {
   const navigate = useNavigate();

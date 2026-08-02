@@ -1,9 +1,11 @@
 import { Button, Divider, Input, Text } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem, nextRacerId, Series, useLocalStorage, useSeries, useSeriesList } from "./common";
+import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
 import ResultsOverview from "./results-overview";
+import { Series } from "./scoring";
+import { useLocalStorage, nextRacerId, useSeriesList, useSeries } from "./storage";
 
 export function NewSeriesState() {
   const [draft, setDraft] = useLocalStorage<Series>("draft-series", () => ({

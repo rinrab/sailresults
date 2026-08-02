@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { Content, dsqs, Layout, NavBar, NavBarItem } from "./common";
+import { Content, Layout, NavBar, NavBarItem } from "./common";
 import React from "react";
 import { Link, Text } from "@fluentui/react-components";
+import { dsqs } from "./scoring";
 
 export function DocsIndex() {
   const navigate = useNavigate();

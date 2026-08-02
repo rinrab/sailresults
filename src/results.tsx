@@ -2,7 +2,9 @@ import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGr
 import { Delete16Regular, Edit16Regular, MoreHorizontalRegular, New16Regular } from "@fluentui/react-icons";
 import React, {   } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, evaluateScoreboard, formatString, Layout, NavBar, NavBarItem, useRacers, useSeries } from "./common";
+import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
+import { evaluateScoreboard } from "./scoring";
+import { useSeries, useRacers } from "./storage";
 
 function ResultsPrint({ scoreboard, racers, series }) {
   return (

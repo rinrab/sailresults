@@ -2,7 +2,9 @@ import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, Da
 import { CheckmarkCircle16Regular, CheckmarkRegular, DismissRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, dsqs, Finishboard, FinishboardEntry, formatString, Layout, NavBar, NavBarItem, Racer, racerMatches, setFinishboardPosition, sortFinishboard, useRacers, useSeries } from "./common";
+import { Content, formatString, Layout, NavBar, NavBarItem, racerMatches } from "./common";
+import { setFinishboardPosition, Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
+import { useSeries, useRacers } from "./storage";
 
 function FinishBoardStatus({ currentRacers, draft }) {
   const remainingRacers = currentRacers.filter(racer => ! draft[racer.id]);

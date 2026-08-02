@@ -1,6 +1,8 @@
 import { Text, TableBody, TableRow, TableCell, Table } from "@fluentui/react-components";
 import React from "react";
-import { evaluateScoreboard, formatString, useRacers, useSeries } from "./common";
+import { formatString } from "./common";
+import { useRacers, useSeries } from "./storage";
+import { evaluateScoreboard } from "./scoring";
 
 export default function ResultsOverview({ seriesId }) {
   const [series] = useSeries(seriesId);

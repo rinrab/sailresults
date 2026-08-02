@@ -2,8 +2,10 @@ import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem,
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem, nextRacerId, Racer, useRacers, useSeries } from "./common";
+import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
+import { Racer } from "./scoring";
+import { useSeries, useRacers, nextRacerId } from "./storage";
 
 function RacersList({ series, racers, updateRacer, deleteRacer }) {
   if (series.racers.length == 0) {

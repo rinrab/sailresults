@@ -2,8 +2,10 @@ import { Button, Divider, Text, Card, Body1, CardFooter } from "@fluentui/react-
 import { Open16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem, Series, useSeriesList } from "./common";
+import { Content, Layout, NavBar, NavBarItem } from "./common";
 import ResultsOverview from "./results-overview";
+import { useSeriesList } from "./storage";
+import { Series } from "./scoring";
 
 function SeriesCard({ series }) {
   const navigate = useNavigate();
