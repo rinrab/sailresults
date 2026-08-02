@@ -564,33 +564,41 @@ function normaliseFinishboard(finishboard: Finishboard): Finishboard {
   return result;
 }
 
+function setFinishboardPosition(
+  finishboard: Finishboard,
+  racerId: number,
+  position: FinishboardEntry | null,
+) {
+  let copy = { ...finishboard };
+  delete copy[racerId];
+
+  copy = normaliseFinishboard(copy);
+
+  if (typeof(position) == "number") {
+    /* kind of spaghety variation but i couldn't really care less as far is it
+     * works fine */
+    copy[racerId] = position - 0.5;
+  } else if (position) {
+    copy[racerId] = position;
+  }
+
+  return normaliseFinishboard(copy);
+}
+
 function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditingRank }) {
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     inputRef.current?.focus();
   });
   const [editingValue, setEditingValue] = useState(draft[editingRank]);
-  const [revertValue, setRevertValue] = useState(draft[editingRank]);
+  const [revertValue] = useState(draft[editingRank]);
 
   const setValue = (value) => {
     setEditingValue(value);
     const parsed = parseInt(value);
-    if (isNaN(parsed)) {
-      return;
+    if (! isNaN(parsed)) {
+      setDraft(setFinishboardPosition(draft, editingRank, parsed));
     }
-
-    const copy = { ...draft };
-
-    if (parsed > draft[editingRank]) {
-      copy[editingRank] = parsed + 0.5;
-    } else {
-      copy[editingRank] = parsed - 0.5;
-    }
-
-    const result = normaliseFinishboard(copy); 
-
-    console.log(result);
-    setDraft(result);
   }
 
   const done = () => {
@@ -598,6 +606,7 @@ function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditin
   };
   const cancel = () => {
     setEditingRank(null);
+    setDraft(setFinishboardPosition(draft, editingRank, revertValue));
   };
 
   return <form onSubmit={done}>
@@ -810,12 +819,13 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank
                             <MenuItem key={name}
                                       subText={desc}
                                       icon={ (name == draft[racerId]) && <CheckmarkRegular /> }
+                                      onClick={() => setDraft(setFinishboardPosition(draft, racerId, name as FinishboardEntry))}
                               >{name}</MenuItem>
                           )}
                         </MenuList>
                       </MenuPopover>
                     </Menu>
-                    <MenuItem>Delete</MenuItem>
+                    <MenuItem onClick={() => setDraft(setFinishboardPosition(draft, racerId, null))}>Delete</MenuItem>
                   </MenuList>
                 </MenuPopover>
               </Menu>
