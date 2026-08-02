@@ -80,28 +80,7 @@ export default function ResultsState() {
   for (let i = 0; i < series.finishboards.length; i++) {
     columns.push(createTableColumn({
       columnId: "race" + i,
-      renderHeaderCell: () => (
-        <div style={{ width: "100%", display: "flex" }}>
-          <Text style={{ flex: "1", margin: "auto" }}>{i + 1}</Text>
-          <div>
-            <Menu>
-              <MenuTrigger disableButtonEnhancement>
-                <Button icon={<MoreHorizontalRegular />} appearance="transparent" />
-              </MenuTrigger>
-              <MenuPopover>
-                <MenuList>
-                  <MenuItem onClick={() => navigate(`../races/new`)}
-                            icon={<New16Regular />}>New Race</MenuItem>
-                  <MenuItem onClick={() => navigate(`../races/${i}/edit`)}
-                            icon={ <Edit16Regular /> }>Edit Race</MenuItem>
-                  <MenuItem onClick={() => alert("dont kill me :(")}
-                            icon={ <Delete16Regular /> }>Delete Race</MenuItem>
-                </MenuList>
-              </MenuPopover>
-            </Menu>
-          </div>
-        </div>
-      ),
+      renderHeaderCell: () => <Text style={{ width: "100%" }} align="center">R{i + 1}</Text>,
       renderCell: (index: number) => {
         const { finishboardEntry, realScore } = scoreboard[index].scores[i];
         return <div style={{ width: "100%", textAlign: "center" }}>

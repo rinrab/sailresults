@@ -314,7 +314,7 @@ export function EditRaceState() {
       <NavBar>
         <NavBarItem title={series.name} to="../../.." />
         <NavBarItem title="Races" to="../.." />
-        <NavBarItem title={`Race ${parseInt(raceId) + 1}`} to="" />
+        <NavBarItem title={`R${parseInt(raceId) + 1}`} to="" />
       </NavBar>
       <Content>
         <RacerPicker currentRacers={currentRacers} draft={draft} setDraft={setDraft} />

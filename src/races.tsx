@@ -56,7 +56,7 @@ export default function RacesOverviewState() {
               {series.finishboards.map((finishboard, index) => (
                 <TableRow key={index} style={{ cursor: "pointer" }}
                           onClick={() => navigate(`${index}/edit`)}>
-                  <TableCell style={{ width: 70, textAlign: "right" }}>Race {index + 1}</TableCell>
+                  <TableCell style={{ width: 70, textAlign: "right" }}>R{index + 1}</TableCell>
                   <TableCell>{Object.entries(finishboard).length} / {series.racers.length}</TableCell>
                   <TableCell style={{ width: 25 }}>
                     <Menu>
