@@ -1,5 +1,5 @@
 import { DataGridProps, Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Divider, FluentProvider, Input, Text, tokens, webLightTheme, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, Card, CardPreview, CardHeader, Body1, CardFooter, MessageBar, MessageBarBody, MessageBarTitle, MessageBarActions, TableColumnSizingOptions, useFluent, useScrollbarWidth, Link, TableBody, TableRow, TableCell, Table, TableHeader, TableHeaderCell, MenuGroup, Dialog, DialogTrigger, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions } from "@fluentui/react-components";
-import { CheckmarkCircle16Regular, CheckmarkRegular, Delete16Regular, DeleteRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, MoreVerticalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
+import { CheckmarkCircle16Regular, CheckmarkRegular, Delete16Regular, DeleteRegular, DismissRegular, Edit16Regular, Home24Filled, MoreHorizontalRegular, MoreVerticalRegular, New16Regular, Open16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React, {  Component, ErrorInfo, Fragment, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Routes, Route, useNavigate, useParams, HashRouter } from "react-router-dom";
@@ -460,16 +460,6 @@ function ResultsState() {
     renderCell: (index: number) => <Text weight="semibold">{scoreboard[index].total}</Text>
   }));
 
-  const renderRow = ({ item, rowId }, style) => (
-    <DataGridRow key={rowId} style={style}>
-      {(column) => (
-        <DataGridCell focusMode="group">
-          {column.renderCell(item)}
-        </DataGridCell>
-      )}
-    </DataGridRow>
-  );
-
   return (
     <Layout>
       <NavBar>
@@ -498,7 +488,15 @@ function ResultsState() {
               </DataGridRow>
             </DataGridHeader>
             <DataGridBody>
-              {renderRow}
+              {({ item, rowId }) => 
+                <DataGridRow key={rowId}>
+                  {(column) => (
+                    <DataGridCell focusMode="group">
+                      {column.renderCell(item)}
+                    </DataGridCell>
+                  )}
+                </DataGridRow>
+              }
             </DataGridBody>
           </DataGrid>
         </div>
@@ -572,6 +570,7 @@ function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditin
     inputRef.current?.focus();
   });
   const [editingValue, setEditingValue] = useState(draft[editingRank]);
+  const [revertValue, setRevertValue] = useState(draft[editingRank]);
 
   const setValue = (value) => {
     setEditingValue(value);
@@ -594,16 +593,24 @@ function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditin
     setDraft(result);
   }
 
-  if (editingRank) {
-    return <form onSubmit={() => setEditingRank(null)}>
-      <Text block>Adjust position of {racers[editingRank].name} {racers[editingRank].number}</Text>
-      <Input ref={inputRef} style={{ width: "100%" }} type="number"
+  const done = () => {
+    setEditingRank(null);
+  };
+  const cancel = () => {
+    setEditingRank(null);
+  };
+
+  return <form onSubmit={done}>
+    <Text block>Adjust position of {racers[editingRank].name} {racers[editingRank].number} from {revertValue}</Text>
+    <div style={{ width: "100%", display: "flex", gap: 8 }}>
+      <Input ref={inputRef} style={{ flex: 1 }} type="number"
              value={editingValue} onChange={e => setValue(e.target.value)}
-             min={1} max={findLastPlace(draft) - 1} />
-    </form>
-  } else {
-    return <></>
-  }
+             min={1} max={findLastPlace(draft) - 1}
+             onBlur={cancel} />
+       <Button onClick={done} icon={<CheckmarkRegular />} />
+       <Button onClick={cancel} icon={<DismissRegular />} />
+    </div>
+  </form>
 }
 
 function NewRaceState() {
@@ -629,7 +636,7 @@ function NewRaceState() {
         <div style={{ flex: "auto", overflow: "auto" }}>
           <FinishboardEditor racers={racers} currentRacers={currentRacers}
                              draft={draft} setDraft={setDraft}
-                             setEditingRank={setEditingRank} />
+                             editingRank={editingRank} setEditingRank={setEditingRank} />
         </div>
         {editingRank &&
           <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
@@ -687,7 +694,7 @@ function EditRaceState() {
         <div style={{ flex: "auto", overflow: "auto" }}>
           <FinishboardEditor racers={racers} currentRacers={currentRacers}
                              draft={draft} setDraft={setDraft}
-                             setEditingRank={setEditingRank} />
+                             editingRank={editingRank} setEditingRank={setEditingRank} />
         </div>
         {editingRank &&
           <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
@@ -729,7 +736,7 @@ function findLastPlace(finishboard: Finishboard) {
   return result;
 }
 
-function FinishboardEditor({ currentRacers, racers, draft, setDraft, setEditingRank }) {
+function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank, setEditingRank }) {
   const [query, setQuery] = useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -826,15 +833,16 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft, setEditingR
         }
       };
 
-      const renderRow = ({ item, rowId }) => (
-        <DataGridRow key={rowId}>
-          {(column) => (
-            <DataGridCell style={getColumnStyle(column.columnId)}>
-              {column.renderCell(item)}
-            </DataGridCell>
-          )}
-        </DataGridRow>
-      );
+      const getRowStyle = (id) => {
+        if (id == editingRank) {
+          return {
+            backgroundColor: tokens.colorSubtleBackgroundPressed,
+            color: tokens.colorNeutralForeground1Pressed,
+          };
+        } else {
+          return {};
+        }
+      }
 
       return (
         <div style={{ overflow: "auto", flex: "auto" }}>
@@ -852,7 +860,15 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft, setEditingR
               </DataGridRow>
             </DataGridHeader>
             <DataGridBody<Racer>>
-              {renderRow}
+              {({ item, rowId }) => (
+                <DataGridRow key={rowId} style={getRowStyle(item)}>
+                  {(column) => (
+                    <DataGridCell style={getColumnStyle(column.columnId)}>
+                      {column.renderCell(item)}
+                    </DataGridCell>
+                  )}
+                </DataGridRow>
+              )}
             </DataGridBody>
           </DataGrid>
         </div>
