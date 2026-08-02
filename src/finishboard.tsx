@@ -188,151 +188,151 @@ function findLastPlace(finishboard: Finishboard) {
   return result;
 }
 
-function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank, setEditingRank }) {
-  const [query, setQuery] = React.useState("");
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const editingRowRef = React.useRef<HTMLDivElement>(null);
+function FinishboardSuggestions({ draft, currentRacers, query }) {
+  const remainingRacers = currentRacers.filter(racer => ! draft[racer.id]);
+  const filteredItems = remainingRacers.filter(item => racerMatches(item, query));
 
+  const itemStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 12px",
+  };
+
+  if (remainingRacers.length == 0) {
+    return <><Text style={itemStyle}>
+      The finish board is completed!</Text></>
+  } else if (filteredItems.length == 0) {
+    return <><Text style={itemStyle}>
+      No racers matched by this query.</Text></>
+  } else {
+    return (<>
+      {filteredItems.map(item => {
+        const text = `${item.name} ${item.number}`;
+        return <Option key={item.id} text={text} value={item.id.toString()}>{text}</Option>;
+      })}
+    </>)
+  }
+}
+
+function FinishboardTable({ racers, draft, setDraft, editingRank, setEditingRank }) {
+  const editingRowRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     editingRowRef.current?.scrollIntoView();
   });
 
-  const FinishBoardSuggestions = () => {
-    const remainingRacers = currentRacers.filter(racer => ! draft[racer.id]);
-    const filteredItems = remainingRacers.filter(item => racerMatches(item, query));
+  if (Object.entries(draft).length == 0) {
+    return <Text>The finishboard is empty.</Text>
+  } else {
+    const columns = [
+      createTableColumn<number>({
+        columnId: "rank",
+        renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Rank</Text>,
+        renderCell: (racerId) => <Text style={{ width: "100%" }} align="end">{draft[racerId]}</Text>
+      }),
+      createTableColumn<number>({
+        columnId: "name",
+        renderHeaderCell: () => "Name",
+        renderCell: (racerId) => formatString(racers[racerId].name),
+      }),
+      createTableColumn<number>({
+        columnId: "number",
+        renderHeaderCell: () => "Number",
+        renderCell: (racerId) => formatString(racers[racerId].number),
+      }),
+      createTableColumn<number>({
+        columnId: "actions",
+        renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Actions</Text>,
+        renderCell: (racerId) =>
+          <div style={{ justifyContent: "end", width: "100%", display: "flex" }}>
+            <Menu>
+              <MenuTrigger>
+                <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                        onClick={(e) => e.stopPropagation()} />
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  <MenuItem onClick={() => setEditingRank(racerId)}>Move</MenuItem>
+                  <Menu>
+                    <MenuTrigger disableButtonEnhancement>
+                      <MenuItem onClick={(e) => e.stopPropagation()}>Disqualify</MenuItem>
+                    </MenuTrigger>
+                    <MenuPopover>
+                      <MenuList>
+                        {Object.entries(dsqs).map(([name, desc]) =>
+                          <MenuItem key={name}
+                                    subText={desc}
+                                    icon={ (name == draft[racerId]) && <CheckmarkRegular /> }
+                                    onClick={() => setDraft(setFinishboardPosition(draft, racerId, name as FinishboardEntry))}
+                            >{name}</MenuItem>
+                        )}
+                      </MenuList>
+                    </MenuPopover>
+                  </Menu>
+                  <MenuItem onClick={() => setDraft(setFinishboardPosition(draft, racerId, null))}>Delete</MenuItem>
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+          </div>
+      }),
+    ];
 
-    const itemStyle = {
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      padding: "8px 12px",
+    const getColumnStyle = (columnId) => {
+      if (columnId == "rank") {
+        return { maxWidth: "40px", };
+      } else if (columnId == "actions") {
+        return { maxWidth: "70px", };
+      } else {
+        return {};
+      }
     };
 
-    if (remainingRacers.length == 0) {
-      return <><Text style={itemStyle}>
-        The finish board is completed!</Text></>
-    } else if (filteredItems.length == 0) {
-      return <><Text style={itemStyle}>
-        No racers matched by this query.</Text></>
-    } else {
-      return (<>
-        {filteredItems.map(item => {
-          const text = `${item.name} ${item.number}`;
-          return <Option key={item.id} text={text} value={item.id.toString()}>{text}</Option>;
-        })}
-      </>)
-    }
-  }
-
-  const FinishboardTable = () => {
-    if (Object.entries(draft).length == 0) {
-      return <Text>The finishboard is empty.</Text>
-    } else {
-      const columns = [
-        createTableColumn<number>({
-          columnId: "rank",
-          renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Rank</Text>,
-          renderCell: (racerId) => <Text style={{ width: "100%" }} align="end">{draft[racerId]}</Text>
-        }),
-        createTableColumn<number>({
-          columnId: "name",
-          renderHeaderCell: () => "Name",
-          renderCell: (racerId) => formatString(racers[racerId].name),
-        }),
-        createTableColumn<number>({
-          columnId: "number",
-          renderHeaderCell: () => "Number",
-          renderCell: (racerId) => formatString(racers[racerId].number),
-        }),
-        createTableColumn<number>({
-          columnId: "actions",
-          renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Actions</Text>,
-          renderCell: (racerId) =>
-            <div style={{ justifyContent: "end", width: "100%", display: "flex" }}>
-              <Menu>
-                <MenuTrigger>
-                  <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                          onClick={(e) => e.stopPropagation()} />
-                </MenuTrigger>
-                <MenuPopover>
-                  <MenuList>
-                    <MenuItem onClick={() => setEditingRank(racerId)}>Move</MenuItem>
-                    <Menu>
-                      <MenuTrigger disableButtonEnhancement>
-                        <MenuItem onClick={(e) => e.stopPropagation()}>Disqualify</MenuItem>
-                      </MenuTrigger>
-                      <MenuPopover>
-                        <MenuList>
-                          {Object.entries(dsqs).map(([name, desc]) =>
-                            <MenuItem key={name}
-                                      subText={desc}
-                                      icon={ (name == draft[racerId]) && <CheckmarkRegular /> }
-                                      onClick={() => setDraft(setFinishboardPosition(draft, racerId, name as FinishboardEntry))}
-                              >{name}</MenuItem>
-                          )}
-                        </MenuList>
-                      </MenuPopover>
-                    </Menu>
-                    <MenuItem onClick={() => setDraft(setFinishboardPosition(draft, racerId, null))}>Delete</MenuItem>
-                  </MenuList>
-                </MenuPopover>
-              </Menu>
-            </div>
-        }),
-      ];
-
-      const getColumnStyle = (columnId) => {
-        if (columnId == "rank") {
-          return { maxWidth: "40px", };
-        } else if (columnId == "actions") {
-          return { maxWidth: "70px", };
-        } else {
-          return {};
-        }
-      };
-
-      const getRowStyle = (id) => {
-        if (id == editingRank) {
-          return {
-            backgroundColor: tokens.colorSubtleBackgroundPressed,
-            color: tokens.colorNeutralForeground1Pressed,
-          };
-        } else {
-          return {};
-        }
+    const getRowStyle = (id) => {
+      if (id == editingRank) {
+        return {
+          backgroundColor: tokens.colorSubtleBackgroundPressed,
+          color: tokens.colorNeutralForeground1Pressed,
+        };
+      } else {
+        return {};
       }
+    }
 
-      return (
-        <div style={{ overflow: "auto", flex: "auto" }}>
-          <DataGrid
-            items={sortFinishboard(draft)}
-            columns={columns}
-            focusMode="none">
-            <DataGridHeader>
-              <DataGridRow>
-                {( column ) => (
-                  <DataGridHeaderCell style={getColumnStyle(column.columnId)}>
-                    {column.renderHeaderCell()}
-                  </DataGridHeaderCell>
+    return (
+      <div style={{ overflow: "auto", flex: "auto" }}>
+        <DataGrid
+          items={sortFinishboard(draft)}
+          columns={columns}
+          focusMode="none">
+          <DataGridHeader>
+            <DataGridRow>
+              {( column ) => (
+                <DataGridHeaderCell style={getColumnStyle(column.columnId)}>
+                  {column.renderHeaderCell()}
+                </DataGridHeaderCell>
+              )}
+            </DataGridRow>
+          </DataGridHeader>
+          <DataGridBody<Racer>>
+            {({ item, rowId }) => (
+              <DataGridRow key={rowId} style={getRowStyle(item)} ref={(item == editingRank) && editingRowRef}>
+                {(column) => (
+                  <DataGridCell style={getColumnStyle(column.columnId)}>
+                    {column.renderCell(item)}
+                  </DataGridCell>
                 )}
               </DataGridRow>
-            </DataGridHeader>
-            <DataGridBody<Racer>>
-              {({ item, rowId }) => (
-                <DataGridRow key={rowId} style={getRowStyle(item)} ref={(item == editingRank) && editingRowRef}>
-                  {(column) => (
-                    <DataGridCell style={getColumnStyle(column.columnId)}>
-                      {column.renderCell(item)}
-                    </DataGridCell>
-                  )}
-                </DataGridRow>
-              )}
-            </DataGridBody>
-          </DataGrid>
-        </div>
-      );
-    }
+            )}
+          </DataGridBody>
+        </DataGrid>
+      </div>
+    );
   }
+}
+
+function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank, setEditingRank }) {
+  const [query, setQuery] = React.useState("");
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   return (
     <div style={{ 
@@ -359,11 +359,12 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank
             }
           }}
         >
-          <FinishBoardSuggestions />
+          <FinishboardSuggestions draft={draft} query={query} currentRacers={currentRacers} />
         </Combobox>
       </div>
       <div style={{ flex: "auto" }}>
-        <FinishboardTable />
+        <FinishboardTable racers={racers} draft={draft} setDraft={setDraft}
+                          editingRank={editingRank} setEditingRank={setEditingRank} />
       </div>
     </div>
   )
