@@ -384,6 +384,45 @@ function formatString(str: string) {
   return (str == "") ? "-" : str;
 }
 
+function ResultsPrint({ scoreboard, racers, series }) {
+  return (
+    <div>
+      <h1>{series.name}</h1>
+      <table style={{ width: "100%" }}>
+        <thead>
+          <tr>
+            <th style={{ textAlign: "right" }}>Rank</th>
+            <th>Name</th>
+            <th>Number</th>
+            {series.finishboards.map((_, index) =>
+              <th key={index} style={{ textAlign: "center" }}>R{index + 1}</th>
+            )}
+            <th style={{ textAlign: "right" }}>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {scoreboard.map((row, racerIndex) =>
+            <tr key={racerIndex}>
+              <td style={{ textAlign: "right" }}>{racerIndex + 1}</td>
+              <td>{formatString(row.racer.name)}</td>
+              <td>{formatString(row.racer.number)}</td>
+              {row.scores.map((score, scoreIndex) =>
+                <td key={scoreIndex} style={{ textAlign: "center" }}>
+                  <Text>{score.finishboardEntry}</Text>
+                  {score.finishboardEntry != score.realScore &&
+                    <Text><br />{score.realScore}</Text>
+                  }
+                </td>)
+              }
+              <td style={{ textAlign: "right", fontWeight: "bolder" }}>{row.total}</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 function ResultsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
@@ -461,12 +500,12 @@ function ResultsState() {
   }));
 
   return (
-    <Layout>
+    <Layout print={<ResultsPrint racers={racers} scoreboard={scoreboard} series={series} />}>
       <NavBar>
         <NavBarItem title={series.name} to=".." />
         <NavBarItem title="Results" to="" />
       </NavBar>
-      <Content>
+      <Content screenOnly>
         <div style={{ overflow: "auto", flex: "auto" }}>
           <DataGrid
             items={scoreboard.map((_, i) => i)}
@@ -502,6 +541,7 @@ function ResultsState() {
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("../races/new")}>New Race</Button>
+          <Button onClick={() => window.print()}>Print</Button>
         </div>
       </Content>
     </Layout>
@@ -986,13 +1026,10 @@ class ErrorBoundary extends Component<
   }
 }
 
-function Layout({ children }) {
-  return <div style={{
-      height: "100%",
-      display: "flex",
-      flexDirection: "column"
-    }}>
-    { children }
+function Layout({ children, print = undefined }) {
+  return <div className="layout">
+    {children}
+    {print && <div className="print-only">{print}</div>}
   </div>;
 }
 
@@ -1003,7 +1040,7 @@ function NavBar({ children }) {
     padding: "4px 8px",
     backgroundColor: tokens.colorNeutralBackground4,
     display: "flex",
-  }}>
+  }} className="screen-only">
     <Breadcrumb style={{ flex: 1 }}>
       <BreadcrumbItem>
         <BreadcrumbButton onClick={() => navigate("/")}>
@@ -1025,15 +1062,17 @@ function NavBarItem({ title, to }) {
   </>
 }
 
-function Content({ children }) {
-  return <div style={{
-    flex: "1",
-    padding: "8px",
-    minHeight: "0",
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  }}>
+function Content({ children, screenOnly = false }) {
+  return <div
+    className={screenOnly ? "screen-only" : ""}
+    style={{
+      flex: "1",
+      padding: "8px",
+      minHeight: "0",
+      display: "flex",
+      flexDirection: "column",
+      gap: "8px",
+    }}>
     { children }
   </div>
 }
