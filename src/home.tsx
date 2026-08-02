@@ -1,4 +1,4 @@
-import { Button, Divider, Text, Card, Body1, CardFooter } from "@fluentui/react-components";
+import { Button, Divider, Text, Card, Body1, CardFooter, MenuTrigger, Menu, MenuPopover, MenuItem } from "@fluentui/react-components";
 import { Open16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { Content, Layout, NavBar, NavBarItem } from "./common";
 import ResultsOverview from "./results-overview";
 import { useSeriesList } from "./storage";
 import { Series } from "./scoring";
+import { importSeries, PackedSeries, samples } from "./sample-data";
 
 function SeriesCard({ series }) {
   const navigate = useNavigate();
@@ -36,6 +37,11 @@ export default function StartState() {
   const navigate = useNavigate();
   const [series, _] = useSeriesList();
 
+  const createSample = (sample: PackedSeries) => {
+    const id = importSeries(sample);
+    navigate(`/series/${id}`);
+  };
+
   return (
     <Layout>
       <NavBar>
@@ -50,10 +56,21 @@ export default function StartState() {
                       onClick={() => navigate("docs")}>
                 Read the docs
               </Button>
-              <Button style={{ width: 200 }} 
+              <Button style={{ width: 200, marginRight: 8 }} 
                       onClick={() => navigate(`/series/new`)}>
                 Create New Series
               </Button>
+              <Menu>
+                <MenuTrigger>
+                  <Button style={{ width: 200 }}>Sample regattas</Button>
+                </MenuTrigger>
+                <MenuPopover>
+                  {samples.map((sample, index) =>
+                    <MenuItem onClick={() => createSample(sample)}
+                              key={index}>{sample.name}</MenuItem>
+                  )}
+                </MenuPopover>
+              </Menu>
             </div>
           </div>
           <Divider style={{ margin: "8px 0" }} />
