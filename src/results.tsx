@@ -19,7 +19,7 @@ function ResultsPrint({ scoreboard, racers, series }) {
             {series.finishboards.map((_, index) =>
               <th key={index} style={{ textAlign: "center" }}>R{index + 1}</th>
             )}
-            <th style={{ textAlign: "right" }}>Total</th>
+            <th style={{ textAlign: "center" }}>Total</th>
           </tr>
         </thead>
         <tbody>
@@ -36,7 +36,7 @@ function ResultsPrint({ scoreboard, racers, series }) {
                   }
                 </td>)
               }
-              <td style={{ textAlign: "right", fontWeight: "bolder" }}>{row.total}</td>
+              <td style={{ textAlign: "center", fontWeight: "bolder" }}>{row.total}</td>
             </tr>
           )}
         </tbody>
@@ -74,7 +74,8 @@ export default function ResultsState() {
     "rank": { idealWidth: 35, minWidth: 35 },
     "name": {},
     "number": {},
-    "total": {},
+    "total": { idealWidth: 70, minWidth: 70, },
+    "nothing": { idealWidth: 0, minWidth: 0 },
   };
 
   for (let i = 0; i < series.finishboards.length; i++) {
@@ -96,9 +97,18 @@ export default function ResultsState() {
 
   columns.push(createTableColumn({
     columnId: "total",
-    renderHeaderCell: () => "Total",
-    renderCell: (index: number) => <Text weight="semibold">{scoreboard[index].total}</Text>
+    renderHeaderCell: () => (
+      <Text style={{ width: "100%" }}
+            align="center">Total</Text>
+    ),
+    renderCell: (index: number) => (
+      <Text style={{ width: "100%" }}
+        align="center"
+        weight="semibold">
+        {scoreboard[index].total}</Text>
+    )
   }));
+  columns.push(createTableColumn({ columnId: "nothing" }));
 
   return (
     <Layout print={<ResultsPrint racers={racers} scoreboard={scoreboard} series={series} />}>
@@ -114,9 +124,7 @@ export default function ResultsState() {
             getRowId={(item) => item}
             focusMode="none"
             resizableColumns
-            resizableColumnsOptions={{
-              autoFitColumns: true,
-            }}
+            noNativeElements
             columnSizingOptions={columnSizingOptions} >
             <DataGridHeader>
               <DataGridRow>
