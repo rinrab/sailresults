@@ -1,4 +1,4 @@
-import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, TableRow, TableCell, Table, TableHeaderCell, TableHeader, TableBody } from "@fluentui/react-components";
+import { Option, Button, Combobox, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, TableRow, TableCell, Table, TableHeaderCell, TableHeader, TableBody, OptionOnSelectData } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, CheckmarkRegular, DismissRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -206,44 +206,36 @@ function FinishboardTable({ racers, draft, setDraft, editingRank, setEditingRank
   }
 }
 
-function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank, setEditingRank }) {
+function RacerPicker({ currentRacers, draft, setDraft}) {
   const [query, setQuery] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  const onOptionSelect = (_, data: OptionOnSelectData) => {
+    if (data.optionValue) {
+      const id = parseInt(data.optionValue);
+      setDraft({
+        ...draft,
+        [id]: findLastPlace(draft),
+      });
+      setQuery("");
+    }
+  };
+
   return (
-    <div style={{ 
-      display: "flex",
-      flexDirection: "column",
-      gap: 8
-    }}>
-      <div>
-        <Combobox
-          ref={inputRef}
-          style={{ width: "100%", maxWidth: "100%" }} 
-          placeholder="Start typing to fill the finish board in..."
-          value={query}
-          onInput={(e) => setQuery(e.currentTarget.value)} 
-          selectedOptions={[]}
-          onOptionSelect={(_, data) => {
-            if (data.optionValue) {
-              const id = parseInt(data.optionValue);
-              setDraft({
-                ...draft,
-                [id]: findLastPlace(draft),
-              });
-              setQuery("");
-            }
-          }}
-        >
-          <FinishboardSuggestions draft={draft} query={query} currentRacers={currentRacers} />
-        </Combobox>
-      </div>
-      <div style={{ flex: "auto" }}>
-        <FinishboardTable racers={racers} draft={draft} setDraft={setDraft}
-                          editingRank={editingRank} setEditingRank={setEditingRank} />
-      </div>
+    <div>
+      <Combobox
+        ref={inputRef}
+        style={{ width: "100%" }}
+        placeholder="Start typing to fill the finish board in..."
+        value={query}
+        onInput={(e) => setQuery(e.currentTarget.value)}
+        selectedOptions={[]}
+        onOptionSelect={onOptionSelect}
+      >
+        <FinishboardSuggestions draft={draft} query={query} currentRacers={currentRacers} />
+      </Combobox>
     </div>
-  )
+  );
 }
 
 /* public API */
@@ -267,10 +259,10 @@ export function NewRaceState() {
         <NavBarItem title="New Race" to="" />
       </NavBar>
       <Content>
+        <RacerPicker currentRacers={currentRacers} draft={draft} setDraft={setDraft} />
         <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                             draft={draft} setDraft={setDraft}
-                             editingRank={editingRank} setEditingRank={setEditingRank} />
+          <FinishboardTable racers={racers} draft={draft} setDraft={setDraft}
+                            editingRank={editingRank} setEditingRank={setEditingRank} />
         </div>
         {editingRank &&
           <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
@@ -325,10 +317,10 @@ export function EditRaceState() {
         <NavBarItem title={`Race ${parseInt(raceId) + 1}`} to="" />
       </NavBar>
       <Content>
+        <RacerPicker currentRacers={currentRacers} draft={draft} setDraft={setDraft} />
         <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                             draft={draft} setDraft={setDraft}
-                             editingRank={editingRank} setEditingRank={setEditingRank} />
+          <FinishboardTable racers={racers} draft={draft} setDraft={setDraft}
+                            editingRank={editingRank} setEditingRank={setEditingRank} />
         </div>
         {editingRank &&
           <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
