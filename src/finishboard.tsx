@@ -76,108 +76,6 @@ function FinishboardRankEditor({ racers, draft, setDraft, editingRank, setEditin
   </form>
 }
 
-export function NewRaceState() {
-  const navigate = useNavigate();
-  const { seriesId } = useParams();
-  const [series, setSeries] = useSeries(parseInt(seriesId));
-  const [racers] = useRacers();
-  const [editingRank, setEditingRank] = React.useState(null);
-
-  const draft = series.draftFinishboard ?? {};
-  const setDraft = (value) => setSeries({ ...series, draftFinishboard: value });
-
-  const currentRacers = series.racers.map(id => racers[id]);
-
-  return (
-    <Layout>
-      <NavBar>
-        <NavBarItem title={series.name} to="../.." />
-        <NavBarItem title="Races" to=".." />
-        <NavBarItem title="New Race" to="" />
-      </NavBar>
-      <Content>
-        <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                             draft={draft} setDraft={setDraft}
-                             editingRank={editingRank} setEditingRank={setEditingRank} />
-        </div>
-        {editingRank &&
-          <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
-                                 editingRank={editingRank} setEditingRank={setEditingRank} />
-        }
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <div style={{ flex: "1 1 300px", margin: "auto" }}>
-            {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button style={{ flex: "auto", width: "120px" }}
-                    onClick={() => navigate(`..`)}>Close</Button>
-            <Button style={{ flex: "auto", width: "120px" }}
-                    onClick={() => setDraft({})}>Delete Draft</Button>
-            <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={Object.entries(draft).length == 0} onClick={() => {
-              setSeries({
-                ...series,
-                draftFinishboard: null,
-                finishboards: [...series.finishboards, draft]
-              })
-              navigate("../..");
-            }}>Done</Button>
-          </div>
-        </div>
-      </Content>
-    </Layout>
-  )
-}
-
-export function EditRaceState() {
-  const navigate = useNavigate();
-  const { seriesId, raceId } = useParams();
-  const [series, setSeries] = useSeries(parseInt(seriesId));
-  const [racers] = useRacers();
-  const [editingRank, setEditingRank] = React.useState(null);
-
-  const draft = series.finishboards[raceId];
-  const setDraft = (value) => {
-    const copy = [...series.finishboards];
-    copy[raceId] = value;
-    setSeries({ ...series, finishboards: copy });
-  };
-
-  const currentRacers = series.racers.map(id => racers[id]);
-
-  return (
-    <Layout>
-      <NavBar>
-        <NavBarItem title={series.name} to="../../.." />
-        <NavBarItem title="Races" to="../.." />
-        <NavBarItem title={`Race ${parseInt(raceId) + 1}`} to="" />
-      </NavBar>
-      <Content>
-        <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardEditor racers={racers} currentRacers={currentRacers}
-                             draft={draft} setDraft={setDraft}
-                             editingRank={editingRank} setEditingRank={setEditingRank} />
-        </div>
-        {editingRank &&
-          <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
-                                 editingRank={editingRank} setEditingRank={setEditingRank} />
-        }
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <div style={{ flex: "1 1 300px", margin: "auto" }}>
-            {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={draft.length == 0}
-                    onClick={() => navigate("../..")}>Done</Button>
-          </div>
-        </div>
-      </Content>
-    </Layout>
-  )
-}
-
 function findLastPlace(finishboard: Finishboard) {
   let result = 1;
   for (const rank of Object.values(finishboard)) {
@@ -367,5 +265,108 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft, editingRank
                           editingRank={editingRank} setEditingRank={setEditingRank} />
       </div>
     </div>
+  )
+}
+
+/* public API */
+export function NewRaceState() {
+  const navigate = useNavigate();
+  const { seriesId } = useParams();
+  const [series, setSeries] = useSeries(parseInt(seriesId));
+  const [racers] = useRacers();
+  const [editingRank, setEditingRank] = React.useState(null);
+
+  const draft = series.draftFinishboard ?? {};
+  const setDraft = (value) => setSeries({ ...series, draftFinishboard: value });
+
+  const currentRacers = series.racers.map(id => racers[id]);
+
+  return (
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.name} to="../.." />
+        <NavBarItem title="Races" to=".." />
+        <NavBarItem title="New Race" to="" />
+      </NavBar>
+      <Content>
+        <div style={{ flex: "auto", overflow: "auto" }}>
+          <FinishboardEditor racers={racers} currentRacers={currentRacers}
+                             draft={draft} setDraft={setDraft}
+                             editingRank={editingRank} setEditingRank={setEditingRank} />
+        </div>
+        {editingRank &&
+          <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
+                                 editingRank={editingRank} setEditingRank={setEditingRank} />
+        }
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ flex: "1 1 300px", margin: "auto" }}>
+            {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    onClick={() => navigate(`..`)}>Close</Button>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    onClick={() => setDraft({})}>Delete Draft</Button>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    disabled={Object.entries(draft).length == 0} onClick={() => {
+              setSeries({
+                ...series,
+                draftFinishboard: null,
+                finishboards: [...series.finishboards, draft]
+              })
+              navigate("../..");
+            }}>Done</Button>
+          </div>
+        </div>
+      </Content>
+    </Layout>
+  )
+}
+
+export function EditRaceState() {
+  const navigate = useNavigate();
+  const { seriesId, raceId } = useParams();
+  const [series, setSeries] = useSeries(parseInt(seriesId));
+  const [racers] = useRacers();
+  const [editingRank, setEditingRank] = React.useState(null);
+
+  const draft = series.finishboards[raceId];
+  const setDraft = (value) => {
+    const copy = [...series.finishboards];
+    copy[raceId] = value;
+    setSeries({ ...series, finishboards: copy });
+  };
+
+  const currentRacers = series.racers.map(id => racers[id]);
+
+  return (
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.name} to="../../.." />
+        <NavBarItem title="Races" to="../.." />
+        <NavBarItem title={`Race ${parseInt(raceId) + 1}`} to="" />
+      </NavBar>
+      <Content>
+        <div style={{ flex: "auto", overflow: "auto" }}>
+          <FinishboardEditor racers={racers} currentRacers={currentRacers}
+                             draft={draft} setDraft={setDraft}
+                             editingRank={editingRank} setEditingRank={setEditingRank} />
+        </div>
+        {editingRank &&
+          <FinishboardRankEditor racers={racers} draft={draft} setDraft={setDraft}
+                                 editingRank={editingRank} setEditingRank={setEditingRank} />
+        }
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ flex: "1 1 300px", margin: "auto" }}>
+            {<FinishBoardStatus currentRacers={currentRacers} draft={draft} />}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    disabled={draft.length == 0}
+                    onClick={() => navigate("../..")}>Done</Button>
+          </div>
+        </div>
+      </Content>
+    </Layout>
   )
 }
