@@ -1,12 +1,20 @@
-import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Text, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, TableColumnSizingOptions } from "@fluentui/react-components";
-import { Delete16Regular, Edit16Regular, MoreHorizontalRegular, New16Regular } from "@fluentui/react-icons";
-import React, {   } from "react";
+import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Text, TableColumnSizingOptions } from "@fluentui/react-components";
+import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
-import { evaluateScoreboard } from "./scoring";
+import { EvaluatedScore, evaluateScoreboard } from "./scoring";
 import { useSeries, useRacers } from "./storage";
 
-function ResultsPrint({ scoreboard, racers, series }) {
+function ScoreCell({ score }: { score: EvaluatedScore }) {
+  return <>
+    <Text>{score.finishboardEntry}</Text>
+    {score.finishboardEntry != score.realScore &&
+      <Text><br />{score.realScore}</Text>
+    }
+  </>
+}
+
+function ResultsPrint({ scoreboard, series }) {
   return (
     <div>
       <h1>{series.name}</h1>
@@ -30,12 +38,8 @@ function ResultsPrint({ scoreboard, racers, series }) {
               <td>{formatString(row.racer.number)}</td>
               {row.scores.map((score, scoreIndex) =>
                 <td key={scoreIndex} style={{ textAlign: "center" }}>
-                  <Text>{score.finishboardEntry}</Text>
-                  {score.finishboardEntry != score.realScore &&
-                    <Text><br />{score.realScore}</Text>
-                  }
-                </td>)
-              }
+                  <ScoreCell score={score} />
+                </td>)}
               <td style={{ textAlign: "center", fontWeight: "bolder" }}>{row.total}</td>
             </tr>
           )}
@@ -82,15 +86,11 @@ export default function ResultsState() {
     columns.push(createTableColumn({
       columnId: "race" + i,
       renderHeaderCell: () => <Text style={{ width: "100%" }} align="center">R{i + 1}</Text>,
-      renderCell: (index: number) => {
-        const { finishboardEntry, realScore } = scoreboard[index].scores[i];
-        return <div style={{ width: "100%", textAlign: "center" }}>
-          <Text>{finishboardEntry}</Text>
-          {finishboardEntry != realScore.toString() &&
-            <Text><br />{scoreboard[index].scores[i].realScore}</Text>
-          }
+      renderCell: (index: number) => (
+        <div style={{ width: "100%", textAlign: "center" }}>
+          <ScoreCell score={scoreboard[index].scores[i]} />
         </div>
-      },
+      )
     }));
     columnSizingOptions["race" + i] = { idealWidth: 40, minWidth: 40 };
   }
@@ -111,7 +111,7 @@ export default function ResultsState() {
   columns.push(createTableColumn({ columnId: "nothing" }));
 
   return (
-    <Layout print={<ResultsPrint racers={racers} scoreboard={scoreboard} series={series} />}>
+    <Layout print={<ResultsPrint scoreboard={scoreboard} series={series} />}>
       <NavBar>
         <NavBarItem title={series.name} to=".." />
         <NavBarItem title="Results" to="" />
