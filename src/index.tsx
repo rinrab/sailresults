@@ -71,41 +71,68 @@ interface Racer {
   number: string;
 }
 
+interface EvaluatedScore {
+  realScore: number,
+  finishboardEntry: FinishboardEntry,
+};
+
 interface EvaluatedRacer {
   racer: Racer,
-  scores: number[],
+  scores: EvaluatedScore[],
   total: number,
+}
+
+const dsqs = {
+  "DNC": "Did not come",
+  "DNS": "Did not start",
+  "DNF": "Did not finish",
+  "NSC": "Did not sail the course",
+  "UFD": "Uniform flag disqualification; rule 30.3",
+  "BFD": "Black flag disqualification; rule 30.4",
+  "RET": "Retired",
+  "DSQ": "Disqualification",
+};
+
+type FinishboardEntry = number | "DNC" | "DNS" | "DNF" | "NSC" | "UFD" | "BFD" | "RET" | "DSQ";
+type Finishboard = { 
+  [racerId: number]: FinishboardEntry
 }
 
 interface Series {
   id: number;
   name: string;
   racers: number[];
-  finishboards: number[][];
-  draftFinishboard: number[] | null;
+  finishboards: Finishboard[];
+  draftFinishboard: Finishboard | null;
+}
+
+function evaluateRealScore(entry: FinishboardEntry, racersCount: number) { 
+  if (typeof(entry) == "number") {
+    return entry;
+  } else {
+    return racersCount + 1;
+  }
 }
 
 function evaluateScoreboard(
   racers: { [id: number]: Racer },
   series: Series,
-  finishBoards: number[][]
+  finishBoards: Finishboard[]
 ) {
   const result: EvaluatedRacer[] = [];
   for (const racerId of series.racers) {
-    const scores: number[] = [];
+    const scores: EvaluatedScore[] = [];
     let total = 0;
 
     for (const board of finishBoards) {
-      const index = board.findIndex(item => item == racerId); 
-      if (index == -1) {
-        total += series.racers.length + 1;
-        scores.push(-1);
-      } else {
-        /* plus-one to convert from index to real score that is used for
-         * further calculations */
-        total += index + 1;
-        scores.push(index + 1);
-      }
+      const entry = board[racerId] ?? "DNC"; 
+      const realScore = evaluateRealScore(entry, series.racers.length);
+
+      total += realScore;
+      scores.push({ 
+        finishboardEntry: entry,
+        realScore: realScore,
+      });
     }
 
     result.push({
@@ -341,14 +368,6 @@ function StartState() {
   );
 }
 
-function formatRaceScore(score: number) {
-  if (score < 0) {
-    return "DNS";
-  } else {
-    return score.toString();
-  }
-}
-
 function formatString(str: string) {
   return (str == "") ? "-" : str;
 }
@@ -385,7 +404,7 @@ function ResultsState() {
     "total": {},
   };
 
-  for (let i = 0; i < scoreboard[0].scores.length; i++) {
+  for (let i = 0; i < series.finishboards.length; i++) {
     columns.push(createTableColumn({
       columnId: "race" + i,
       renderHeaderCell: () => (
@@ -410,9 +429,15 @@ function ResultsState() {
           </div>
         </div>
       ),
-      renderCell: (index: number) => <Text style={{ width: "100%" }} align="end">
-        {formatRaceScore(scoreboard[index].scores[i])}
-      </Text>,
+      renderCell: (index: number) => {
+        const { finishboardEntry, realScore } = scoreboard[index].scores[i];
+        return <div style={{ width: "100%", textAlign: "center" }}>
+          <Text>{finishboardEntry}</Text>
+          {finishboardEntry != realScore.toString() &&
+            <Text><br />{scoreboard[index].scores[i].realScore}</Text>
+          }
+        </div>
+      },
     }));
     columnSizingOptions["race" + i] = { idealWidth: 40, minWidth: 40 };
   }
@@ -478,9 +503,9 @@ function racerMatches(racer: Racer, query: string) {
 }
 
 function FinishBoardStatus({ currentRacers, draft }) {
-  const remainingRacers = currentRacers.filter(racer => ! draft.includes(racer.id));
+  const remainingRacers = currentRacers.filter(racer => ! draft[racer.id]);
 
-  if (draft.length == 0) {
+  if (Object.entries(draft).length == 0) {
     return <div>
       <Warning16Regular style={{
         color: tokens.colorPaletteDarkOrangeForeground1,
@@ -516,7 +541,7 @@ function NewRaceState() {
   const [series, setSeries] = useSeries(parseInt(seriesId));
   const [racers] = useRacers();
 
-  const draft = series.draftFinishboard ?? [];
+  const draft = series.draftFinishboard ?? {};
   const setDraft = (value) => setSeries({ ...series, draftFinishboard: value });
 
   const currentRacers = series.racers.map(id => racers[id]);
@@ -541,9 +566,9 @@ function NewRaceState() {
             <Button style={{ flex: "auto", width: "120px" }}
                     onClick={() => navigate(`..`)}>Close</Button>
             <Button style={{ flex: "auto", width: "120px" }}
-                    onClick={() => setDraft([])}>Delete Draft</Button>
+                    onClick={() => setDraft({})}>Delete Draft</Button>
             <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={draft.length == 0} onClick={() => {
+                    disabled={Object.entries(draft).length == 0} onClick={() => {
               setSeries({
                 ...series,
                 draftFinishboard: null,
@@ -600,12 +625,33 @@ function EditRaceState() {
   )
 }
 
+function sortFinishboard(finishboard: Finishboard) {
+  const entries = Object.entries(finishboard);
+  const BIGBIGnumber = 676767;
+  const sorted = entries.sort(
+    ([, aValue], [, bValue]) => {
+      return evaluateRealScore(aValue, BIGBIGnumber) 
+           - evaluateRealScore(bValue, BIGBIGnumber);
+    })
+  return sorted.map(([key,]) => key);
+}
+
+function findLastPlace(finishboard: Finishboard) {
+  let result = 1;
+  for (const rank of Object.values(finishboard)) {
+    if (typeof(rank) == "number" && rank + 1 > result) {
+      result = rank + 1;
+    }
+  }
+  return result;
+}
+
 function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
   const [query, setQuery] = useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const FinishBoardSuggestions = () => {
-    const remainingRacers = currentRacers.filter(racer => ! draft.includes(racer.id));
+    const remainingRacers = currentRacers.filter(racer => ! draft[racer.id]);
     const filteredItems = remainingRacers.filter(item => racerMatches(item, query));
 
     const itemStyle = {
@@ -632,29 +678,29 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
   }
 
   const FinishboardTable = () => {
-    if (draft.length == 0) {
+    if (Object.entries(draft).length == 0) {
       return <Text>The finishboard is empty.</Text>
     } else {
       const columns = [
         createTableColumn<number>({
           columnId: "rank",
           renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Rank</Text>,
-          renderCell: (index) => <Text style={{ width: "100%" }} align="end">{index + 1}</Text>
+          renderCell: (racerId) => <Text style={{ width: "100%" }} align="end">{draft[racerId]}</Text>
         }),
         createTableColumn<number>({
           columnId: "name",
           renderHeaderCell: () => "Name",
-          renderCell: (index) => formatString(racers[draft[index]].name),
+          renderCell: (racerId) => formatString(racers[racerId].name),
         }),
         createTableColumn<number>({
           columnId: "number",
           renderHeaderCell: () => "Number",
-          renderCell: (index) => formatString(racers[draft[index]].number),
+          renderCell: (racerId) => formatString(racers[racerId].number),
         }),
         createTableColumn<number>({
           columnId: "actions",
           renderHeaderCell: () => <Text style={{ width: "100%" }} align="end">Actions</Text>,
-          renderCell: (index) => <div style={{ display: "flex", gap: 8, width: "100%" }}>
+          renderCell: (racerId) => <div style={{ display: "flex", gap: 8, width: "100%" }}>
             <div style={{ flex: "auto" }} />
             <Button icon={<DeleteRegular />} style={{ flex: "1" }} appearance="transparent" />
           </div>,
@@ -684,7 +730,7 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
       return (
         <div style={{ overflow: "auto", flex: "auto" }}>
           <DataGrid
-            items={draft.map((_, index) => index)}
+            items={sortFinishboard(draft)}
             columns={columns}
             focusMode="none">
             <DataGridHeader>
@@ -721,7 +767,11 @@ function FinishboardEditor({ currentRacers, racers, draft, setDraft }) {
           selectedOptions={[]}
           onOptionSelect={(_, data) => {
             if (data.optionValue) {
-              setDraft([...draft, parseInt(data.optionValue)]);
+              const id = parseInt(data.optionValue);
+              setDraft({
+                ...draft,
+                [id]: findLastPlace(draft),
+              });
               setQuery("");
             }
           }}
@@ -1005,7 +1055,7 @@ function RacesOverviewState() {
                 <TableRow key={index} style={{ cursor: "pointer" }}
                           onClick={() => navigate(`${index}/edit`)}>
                   <TableCell style={{ width: 70, textAlign: "right" }}>Race {index + 1}</TableCell>
-                  <TableCell>{finishboard.length} / {series.racers.length}</TableCell>
+                  <TableCell>{Object.entries(finishboard).length} / {series.racers.length}</TableCell>
                   <TableCell style={{ width: 25 }}>
                     <Menu>
                       <MenuTrigger>
