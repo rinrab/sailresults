@@ -7,6 +7,38 @@ import EditableText from "./editable-text";
 import { Racer } from "./scoring";
 import { useSeries, useRacers, nextRacerId } from "./storage";
 
+function Row({ racer, updateRacer, deleteRacer }) {
+  return (
+    <TableRow>
+      <TableCell>
+        <EditableText value={racer.name} compact
+                      setValue={(value) => updateRacer({
+                        ...racer,
+                        name: value,
+                      })} />
+      </TableCell>
+      <TableCell>
+        <EditableText value={racer.number} compact
+                      setValue={(value) => updateRacer({
+                        ...racer,
+                        number: value,
+                      })} />
+      </TableCell>
+      <TableCell style={{ width: 25 }}>
+        <Menu>
+          <MenuTrigger>
+            <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                    onClick={(e) => e.stopPropagation()} />
+          </MenuTrigger>
+          <MenuPopover>
+            <MenuItem onClick={() => deleteRacer(racer.id)}>Delete</MenuItem>
+          </MenuPopover>
+        </Menu>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 function RacersList({ series, racers, updateRacer, deleteRacer }) {
   if (series.racers.length == 0) {
     return <Text>No racers added.</Text>;
@@ -22,33 +54,8 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
         </TableHeader>
         <TableBody>
           {series.racers.map(id => (
-            <TableRow key={id.toString()}>
-              <TableCell>
-                <EditableText value={racers[id].name} compact
-                              setValue={(value) => updateRacer({
-                                          ...racers[id],
-                                          name: value,
-                                        })} />
-              </TableCell>
-              <TableCell>
-                <EditableText value={racers[id].number} compact
-                              setValue={(value) => updateRacer({
-                                          ...racers[id],
-                                          number: value,
-                                        })} />
-              </TableCell>
-              <TableCell style={{ width: 25 }}>
-                <Menu>
-                  <MenuTrigger>
-                    <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                            onClick={(e) => e.stopPropagation()} />
-                  </MenuTrigger>
-                  <MenuPopover>
-                    <MenuItem onClick={() => deleteRacer(id)}>Delete</MenuItem>
-                  </MenuPopover>
-                </Menu>
-              </TableCell>
-            </TableRow>
+            <Row key={id} racer={racers[id]}
+                 updateRacer={updateRacer} deleteRacer={deleteRacer} />
           ))}
         </TableBody>
       </Table>
