@@ -6,10 +6,11 @@ import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
 import { Racer } from "./scoring";
 import { useSeries, useRacers, nextRacerId } from "./storage";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
-function Row({ racer, updateRacer, deleteRacer }) {
+function Row({ racer, style, updateRacer, deleteRacer }) {
   return (
-    <TableRow>
+    <TableRow style={style}>
       <TableCell>
         <EditableText value={racer.name} compact
                       setValue={(value) => updateRacer({
@@ -40,25 +41,41 @@ function Row({ racer, updateRacer, deleteRacer }) {
 }
 
 function RacersList({ series, racers, updateRacer, deleteRacer }) {
+  const parentRef = React.useRef(null);
+  const virtualizer = useVirtualizer({
+    count: series.racers.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 44,
+  });
+
   if (series.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
     return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHeaderCell>Name</TableHeaderCell>
-            <TableHeaderCell>Number</TableHeaderCell>
-            <TableHeaderCell style={{ width: 25 }}></TableHeaderCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {series.racers.map(id => (
-            <Row key={id} racer={racers[id]}
-                 updateRacer={updateRacer} deleteRacer={deleteRacer} />
-          ))}
-        </TableBody>
-      </Table>
+      <div ref={parentRef} style={{ overflow: "auto", flex: 1 }}>
+        <div ref={virtualizer.containerRef} 
+             style={{ 
+               height: virtualizer.getTotalSize(),
+               position: "relative",
+             }}>
+          <Table>
+            <TableBody>
+              {virtualizer.getVirtualItems().map((row, index) =>
+                <Row key={row.key} racer={racers[series.racers[index]]}
+                     style={{
+                       height: row.size,
+                       position: 'absolute',
+                       top: 0,
+                       left: 0,
+                       width: '100%',
+                       transform: `translateY(${row.start}px)`,
+                     }}
+                     updateRacer={updateRacer} deleteRacer={deleteRacer} />
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     )
   };
 }
@@ -126,13 +143,11 @@ export default function EditCompetitorsState() {
                   style={{ flex: "1 1 70px" }}>Add</Button>
         </form>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
-        <div style={{ flex: "auto", overflow: "auto" }}>
-          <RacersList
-            series={series}
-            racers={racers}
-            updateRacer={updateRacer}
-            deleteRacer={deleteRacer} />
-        </div>
+        <RacersList
+          series={series}
+          racers={racers}
+          updateRacer={updateRacer}
+          deleteRacer={deleteRacer} />
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("..")}>Done</Button>
         </div>
