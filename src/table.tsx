@@ -6,6 +6,7 @@ export interface Column<T> {
   header: string;
   cell: (row: T) => React.ReactElement;
   size?: number;
+  minsize?: number;
 }
 
 export interface SailTableProps<T> {
@@ -23,17 +24,28 @@ export function SailTable<T>(props: SailTableProps<T>) {
     overscan: 10,
   });
 
-  const getCellStyles = (size: number) => {
-    if (size) {
-      return { display: "flex", alignItems: "center", width: size };
-    } else {
-      return { display: "flex", alignItems: "center", flex: 1 };
+  const getCellStyles = (col: Column<T>) => {
+    const style: React.CSSProperties = {
+       display: "flex",
+       alignItems: "center",
     }
+
+    if (col.size) {
+      style.width = col.size;
+    } else {
+      style.flex = 1;
+    }
+
+    if (col.minsize) {
+      style.minWidth = col.minsize;
+    }
+
+    return style;
   };
 
   return (
     <div ref={parentRef} style={{ overflow: "auto", flex: 1 }}>
-      <Table>
+      <Table style={{ display: "block", width: "fit-content" }}>
         <TableHeader style={{
           display: "grid", 
           position: "sticky",
@@ -46,7 +58,7 @@ export function SailTable<T>(props: SailTableProps<T>) {
               return (
                 <TableCell
                   key={index}
-                  style={getCellStyles(col.size)}>
+                  style={getCellStyles(col)}>
                   {col.header}
                 </TableCell>
               )
@@ -72,7 +84,7 @@ export function SailTable<T>(props: SailTableProps<T>) {
                 {props.columns.map((col, index) => (
                   <TableCell
                     key={index}
-                    style={getCellStyles(col.size)}>
+                    style={getCellStyles(col)}>
                     {col.cell(row)}
                   </TableCell>
                 ))}

@@ -24,6 +24,7 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
   const columns: Column<Racer>[] = [
     {
       header: "Name",
+      minsize: 120,
       cell: (row) => {
         return <EditableText
           value={row.name}
@@ -32,6 +33,7 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
     },
     {
       header: "Number",
+      minsize: 120,
       cell: (row) => {
         return <EditableText
           value={row.number}
@@ -40,7 +42,7 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
     },
     {
       header: "",
-      size: 35,
+      size: 32,
       cell: (row) => {
         return <ActionsCell deleteFn={() => deleteRacer(row.id)} />
       }
