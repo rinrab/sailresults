@@ -1,4 +1,4 @@
-import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableBody, TableRow, TableCell, Table, TableHeader, TableHeaderCell } from "@fluentui/react-components";
+import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableBody, TableRow, TableCell, Table, TableHeader, TableHeaderCell, tokens } from "@fluentui/react-components";
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,74 +7,122 @@ import EditableText from "./editable-text";
 import { Racer } from "./scoring";
 import { useSeries, useRacers, nextRacerId } from "./storage";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { ColumnDef, getCoreRowModel, useReactTable, flexRender } from "@tanstack/react-table";
 
-function Row({ racer, style, updateRacer, deleteRacer }) {
-  return (
-    <TableRow style={style}>
-      <TableCell>
-        <EditableText value={racer.name} compact
-                      setValue={(value) => updateRacer({
-                        ...racer,
-                        name: value,
-                      })} />
-      </TableCell>
-      <TableCell>
-        <EditableText value={racer.number} compact
-                      setValue={(value) => updateRacer({
-                        ...racer,
-                        number: value,
-                      })} />
-      </TableCell>
-      <TableCell style={{ width: 25 }}>
-        <Menu>
-          <MenuTrigger>
-            <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                    onClick={(e) => e.stopPropagation()} />
-          </MenuTrigger>
-          <MenuPopover>
-            <MenuItem onClick={() => deleteRacer(racer.id)}>Delete</MenuItem>
-          </MenuPopover>
-        </Menu>
-      </TableCell>
-    </TableRow>
-  );
+function ActionsCell({ deleteFn }) {
+  return <Menu>
+    <MenuTrigger>
+      <Button icon={<MoreVerticalRegular />} appearance="transparent"
+              onClick={(e) => e.stopPropagation()} />
+    </MenuTrigger>
+    <MenuPopover>
+      <MenuItem onClick={deleteFn}>Delete</MenuItem>
+    </MenuPopover>
+  </Menu>
 }
 
 function RacersList({ series, racers, updateRacer, deleteRacer }) {
+  const columns = React.useMemo<ColumnDef<Racer>[]>(() => [
+    {
+      header: "Name",
+      accessorKey: "name",
+    },
+    {
+      header: "Number",
+      accessorKey: "number",
+    },
+    {
+      header: "",
+      accessorKey: "id",
+      size: 35,
+      cell: (info) => <ActionsCell deleteFn={() => deleteRacer(info.getValue())} />
+    }
+  ], []);
+
+  const data = React.useMemo(
+    () => series.racers.map(item => racers[item]),
+    [series, racers],
+  )
+
+  const table = useReactTable({
+    columns: columns,
+    data: data,
+    getCoreRowModel: getCoreRowModel(),
+    defaultColumn: {
+      size: 0
+    }
+  });
+
+  const { rows } = table.getRowModel();
+
   const parentRef = React.useRef(null);
   const virtualizer = useVirtualizer({
-    count: series.racers.length,
+    count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 44,
+    overscan: 10,
   });
+
+  const getCellStyles = (size: number) => {
+    if (size) {
+      return { width: size };
+    } else {
+      return { flex: 1 }
+    }
+  };
 
   if (series.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
     return (
       <div ref={parentRef} style={{ overflow: "auto", flex: 1 }}>
-        <div ref={virtualizer.containerRef} 
-             style={{ 
-               height: virtualizer.getTotalSize(),
-               position: "relative",
-             }}>
-          <Table>
-            <TableBody>
-              {virtualizer.getVirtualItems().map((row, index) =>
-                <Row key={row.key} racer={racers[series.racers[index]]}
-                     style={{
-                       height: row.size,
-                       position: 'absolute',
-                       top: 0,
-                       left: 0,
-                       width: '100%',
-                       transform: `translateY(${row.start}px)`,
-                     }}
-                     updateRacer={updateRacer} deleteRacer={deleteRacer} />
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <Table>
+          <TableHeader style={{
+            display: "grid", 
+            position: "sticky",
+            top: 0,
+            zIndex: 1,
+            background: tokens.colorNeutralBackground1Selected,
+          }}>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} style={{ display: "flex" }}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableCell
+                      key={header.id}
+                      style={getCellStyles(header.column.columnDef.size)}>
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableCell>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody style={{ 
+            display: "grid",
+            height: virtualizer.getTotalSize(),
+            position: "relative",
+            width: "100%",
+          }}>
+            {virtualizer.getVirtualItems().map((item) =>
+              <TableRow key={item.key} style={{
+                  display: "flex",
+                  height: item.size,
+                  position: "absolute",
+                  width: "100%",
+                  transform: `translateY(${item.start}px)`,
+                }}>
+                {rows[item.index].getAllCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    style={getCellStyles(cell.column.columnDef.size)}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     )
   };
