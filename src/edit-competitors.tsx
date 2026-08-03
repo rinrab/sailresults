@@ -22,26 +22,39 @@ function ActionsCell({ deleteFn }) {
 }
 
 function RacersList({ series, racers, updateRacer, deleteRacer }) {
-  const columns = React.useMemo<ColumnDef<Racer>[]>(() => [
+  const columns = React.useMemo<ColumnDef<any>[]>(() => [
     {
       header: "Name",
-      accessorKey: "name",
+      cell: (info) => {
+        const row = info.row.original; 
+        return <EditableText
+          value={row.racer.name}
+          setValue={(value) => row.updateRacer({ ...row.racer, name: value, })}  />
+      }
     },
     {
       header: "Number",
-      accessorKey: "number",
+      cell: (info) => {
+        const row = info.row.original; 
+        return <EditableText
+          value={row.racer.number}
+          setValue={(value) => row.updateRacer({ ...row.racer, number: value, })}  />
+      }
     },
     {
       header: "",
-      accessorKey: "id",
+      id: "actions",
       size: 35,
-      cell: (info) => <ActionsCell deleteFn={() => deleteRacer(info.getValue())} />
+      cell: (info) => {
+        const row = info.row.original; 
+        return <ActionsCell deleteFn={() => row.deleteRacer(row.racer.id)} />
+      }
     }
   ], []);
 
   const data = React.useMemo(
-    () => series.racers.map(item => racers[item]),
-    [series, racers],
+    () => series.racers.map(item => ({ racer: racers[item], updateRacer, deleteRacer })),
+    [series.racers, racers],
   )
 
   const table = useReactTable({
@@ -71,6 +84,8 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
     }
   };
 
+  React.useEffect(() => console.log("remount"));
+
   if (series.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
@@ -86,10 +101,10 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
           }}>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} style={{ display: "flex" }}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, index) => {
                   return (
                     <TableCell
-                      key={header.id}
+                      key={index}
                       style={getCellStyles(header.column.columnDef.size)}>
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableCell>
@@ -105,16 +120,16 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
             width: "100%",
           }}>
             {virtualizer.getVirtualItems().map((item) =>
-              <TableRow key={item.key} style={{
+              <TableRow key={rows[item.index].original.racer.id} style={{
                   display: "flex",
                   height: item.size,
                   position: "absolute",
                   width: "100%",
                   transform: `translateY(${item.start}px)`,
                 }}>
-                {rows[item.index].getAllCells().map((cell) => (
+                {rows[item.index].getAllCells().map((cell, cellIndex) => (
                   <TableCell
-                    key={cell.id}
+                    key={cellIndex}
                     style={getCellStyles(cell.column.columnDef.size)}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

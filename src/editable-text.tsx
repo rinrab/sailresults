@@ -34,7 +34,7 @@ export default function EditableText({ value, setValue, rejectEmpty = false, com
   };
 
   if (editing) {
-    return <form style={{ display: "flex", gap: 8 }}
+    return <form style={{ display: "flex", gap: 8, width: "100%" }}
                  onSubmit={stopEdit}>
       <Input ref={inputRef} style={{ flex: 1, width: 0 }}
              value={editingValue}
@@ -42,7 +42,7 @@ export default function EditableText({ value, setValue, rejectEmpty = false, com
       {! compact && <Button onClick={() => setEditing(false)}>Done</Button>}
     </form>
   } else {
-    return <div style={{ display: "flex" }}>
+    return <div style={{ display: "flex", width: "100%" }}>
       <Text style={{ flex: 1, marginRight: 8 }}>{formatString(value)}</Text>
       <Link onClick={startEdit}>Edit</Link>
     </div>;
