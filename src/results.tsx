@@ -1,4 +1,4 @@
-import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Text, TableColumnSizingOptions } from "@fluentui/react-components";
+import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Text, TableColumnSizingOptions, TableRow, TableCell, TableHeaderCell, TableHeader, Table, TableBody } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
@@ -49,66 +49,40 @@ function ResultsPrint({ scoreboard, series }) {
   );
 };
 
+function Cell({ width, align = "left", bold = false, children }) {
+  return (
+    <TableCell style={{
+      minWidth: width,
+      textAlign: align as any,
+      fontWeight: bold ? "bold" : "normal",
+    }}>
+      {children}
+    </TableCell>
+  );
+}
+
+function ResultRow({ rank, row }) {
+  return (
+    <TableRow>
+      <Cell width={40} align="right">{rank}</Cell>
+      <Cell width={150}>{formatString(row.racer.name)}</Cell>
+      <Cell width={120}>{formatString(row.racer.number)}</Cell>
+      {row.scores.map((score, scoreIndex) =>
+        <Cell key={scoreIndex} width={40} align="center">
+          <ScoreCell score={score} />
+        </Cell>)}
+      <Cell width={70} bold align="center">{row.total}</Cell>
+    </TableRow>
+  );
+}
+
+
 export default function ResultsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
   const [series] = useSeries(parseInt(seriesId));
   const [racers] = useRacers();
   const scoreboard = evaluateScoreboard(racers, series, series.finishboards);
-
-  const columns = [
-    createTableColumn({
-      columnId: "rank",
-      renderHeaderCell: () => "Rank",
-      renderCell: (index: number) => <Text style={{ width: "100%" }} align="end">{index + 1}</Text>,
-    }),
-    createTableColumn({
-      columnId: "name",
-      renderHeaderCell: () => "Name",
-      renderCell: (index: number) => formatString(scoreboard[index].racer.name),
-    }),
-    createTableColumn({
-      columnId: "number",
-      renderHeaderCell: () => "Number",
-      renderCell: (index: number) => formatString(scoreboard[index].racer.number),
-    }),
-  ];
-
-  const columnSizingOptions: TableColumnSizingOptions = {
-    "rank": { idealWidth: 35, minWidth: 35 },
-    "name": {},
-    "number": {},
-    "total": { idealWidth: 70, minWidth: 70, },
-    "nothing": { idealWidth: 0, minWidth: 0 },
-  };
-
-  for (let i = 0; i < series.finishboards.length; i++) {
-    columns.push(createTableColumn({
-      columnId: "race" + i,
-      renderHeaderCell: () => <Text style={{ width: "100%" }} align="center">R{i + 1}</Text>,
-      renderCell: (index: number) => (
-        <div style={{ width: "100%", textAlign: "center" }}>
-          <ScoreCell score={scoreboard[index].scores[i]} />
-        </div>
-      )
-    }));
-    columnSizingOptions["race" + i] = { idealWidth: 40, minWidth: 40 };
-  }
-
-  columns.push(createTableColumn({
-    columnId: "total",
-    renderHeaderCell: () => (
-      <Text style={{ width: "100%" }}
-            align="center">Total</Text>
-    ),
-    renderCell: (index: number) => (
-      <Text style={{ width: "100%" }}
-        align="center"
-        weight="semibold">
-        {scoreboard[index].total}</Text>
-    )
-  }));
-  columns.push(createTableColumn({ columnId: "nothing" }));
 
   return (
     <Layout print={<ResultsPrint scoreboard={scoreboard} series={series} />}>
@@ -118,35 +92,24 @@ export default function ResultsState() {
       </NavBar>
       <Content screenOnly>
         <div style={{ overflow: "auto", flex: "auto" }}>
-          <DataGrid
-            items={scoreboard.map((_, i) => i)}
-            columns={columns}
-            getRowId={(item) => item}
-            focusMode="none"
-            resizableColumns
-            noNativeElements
-            columnSizingOptions={columnSizingOptions} >
-            <DataGridHeader>
-              <DataGridRow>
-                {( column ) => (
-                  <DataGridHeaderCell>
-                    {column.renderHeaderCell()}
-                  </DataGridHeaderCell>
+          <Table style={{ tableLayout: "auto" }}>
+            <TableHeader>
+              <TableRow>
+                <Cell width={40} align="right">Rank</Cell>
+                <Cell width={150}>Name</Cell>
+                <Cell width={120}>Number</Cell>
+                {series.finishboards.map((_, index) =>
+                  <Cell key={index} width={40} align="center">R{index + 1}</Cell>
                 )}
-              </DataGridRow>
-            </DataGridHeader>
-            <DataGridBody>
-              {({ item, rowId }) => 
-                <DataGridRow key={rowId}>
-                  {(column) => (
-                    <DataGridCell focusMode="group">
-                      {column.renderCell(item)}
-                    </DataGridCell>
-                  )}
-                </DataGridRow>
-              }
-            </DataGridBody>
-          </DataGrid>
+                <Cell width={70} align="center">Total</Cell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {scoreboard.map((row, index) =>
+                <ResultRow key={index} rank={index + 1} row={row} />
+              )}
+            </TableBody>
+          </Table>
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("../races/new")}>New Race</Button>
