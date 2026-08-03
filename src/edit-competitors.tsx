@@ -65,9 +65,9 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
 
   const getCellStyles = (size: number) => {
     if (size) {
-      return { width: size };
+      return { display: "flex", alignItems: "center", width: size };
     } else {
-      return { flex: 1 }
+      return { display: "flex", alignItems: "center", flex: 1 };
     }
   };
 
