@@ -1,4 +1,4 @@
-import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableBody, TableRow, TableCell, Table, TableHeader, TableHeaderCell, tokens } from "@fluentui/react-components";
+import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem } from "@fluentui/react-components";
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,8 +6,7 @@ import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
 import { Racer } from "./scoring";
 import { useSeries, useRacers, nextRacerId } from "./storage";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { ColumnDef, getCoreRowModel, useReactTable, flexRender } from "@tanstack/react-table";
+import { Column, SailTable } from "./table";
 
 function ActionsCell({ deleteFn }) {
   return <Menu>
@@ -22,125 +21,44 @@ function ActionsCell({ deleteFn }) {
 }
 
 function RacersList({ series, racers, updateRacer, deleteRacer }) {
-  const columns = React.useMemo<ColumnDef<any>[]>(() => [
+  const columns: Column<Racer>[] = [
     {
       header: "Name",
-      cell: (info) => {
-        const row = info.row.original; 
+      cell: (row) => {
         return <EditableText
-          value={row.racer.name}
-          setValue={(value) => row.updateRacer({ ...row.racer, name: value, })}  />
+          value={row.name}
+          setValue={(value) => updateRacer({ ...row, name: value, })} />
       }
     },
     {
       header: "Number",
-      cell: (info) => {
-        const row = info.row.original; 
+      cell: (row) => {
         return <EditableText
-          value={row.racer.number}
-          setValue={(value) => row.updateRacer({ ...row.racer, number: value, })}  />
+          value={row.number}
+          setValue={(value) => updateRacer({ ...row, number: value, })} />
       }
     },
     {
       header: "",
-      id: "actions",
       size: 35,
-      cell: (info) => {
-        const row = info.row.original; 
-        return <ActionsCell deleteFn={() => row.deleteRacer(row.racer.id)} />
+      cell: (row) => {
+        return <ActionsCell deleteFn={() => deleteRacer(row.id)} />
       }
     }
-  ], []);
+  ];
 
   const data = React.useMemo(
-    () => series.racers.map(item => ({ racer: racers[item], updateRacer, deleteRacer })),
+    () => series.racers.map(id => racers[id]),
     [series.racers, racers],
   )
-
-  const table = useReactTable({
-    columns: columns,
-    data: data,
-    getCoreRowModel: getCoreRowModel(),
-    defaultColumn: {
-      size: 0
-    }
-  });
-
-  const { rows } = table.getRowModel();
-
-  const parentRef = React.useRef(null);
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 44,
-    overscan: 10,
-  });
-
-  const getCellStyles = (size: number) => {
-    if (size) {
-      return { display: "flex", alignItems: "center", width: size };
-    } else {
-      return { display: "flex", alignItems: "center", flex: 1 };
-    }
-  };
-
-  React.useEffect(() => console.log("remount"));
 
   if (series.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return (
-      <div ref={parentRef} style={{ overflow: "auto", flex: 1 }}>
-        <Table>
-          <TableHeader style={{
-            display: "grid", 
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-            background: tokens.colorNeutralBackground1Selected,
-          }}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} style={{ display: "flex" }}>
-                {headerGroup.headers.map((header, index) => {
-                  return (
-                    <TableCell
-                      key={index}
-                      style={getCellStyles(header.column.columnDef.size)}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableCell>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody style={{ 
-            display: "grid",
-            height: virtualizer.getTotalSize(),
-            position: "relative",
-            width: "100%",
-          }}>
-            {virtualizer.getVirtualItems().map((item) =>
-              <TableRow key={rows[item.index].original.racer.id} style={{
-                  display: "flex",
-                  height: item.size,
-                  position: "absolute",
-                  width: "100%",
-                  transform: `translateY(${item.start}px)`,
-                }}>
-                {rows[item.index].getAllCells().map((cell, cellIndex) => (
-                  <TableCell
-                    key={cellIndex}
-                    style={getCellStyles(cell.column.columnDef.size)}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    )
-  };
+    return <SailTable<Racer> columns={columns}
+                             data={data}
+                             getKey={row => row.id} />
+  }
 }
 
 export default function EditCompetitorsState() {
