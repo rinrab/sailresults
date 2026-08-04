@@ -3,12 +3,13 @@ import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
-import { useSeries } from "./storage";
+import { StorageContext } from "./storage";
 
 export default function RacesOverviewState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
-  const [series] = useSeries(parseInt(seriesId));
+  const storage = React.useContext(StorageContext);
+  const series = storage.openSeries(parseInt(seriesId));
 
   const deleteClick = (e) => {
     e.stopPropagation();
@@ -19,16 +20,16 @@ export default function RacesOverviewState() {
     const style = { width: 175, };
     const click = () => navigate("new");
 
-    if (series.draftFinishboard) {
-      const count = Object.entries(series.draftFinishboard).length;
-      if (count > 0) {
-        return <Button onClick={() => navigate("new")}
-                       icon={<CounterBadge count={count} />}
-                       iconPosition="after"
-                       style={style}>
-          Edit Draft
-        </Button>
-      }
+    const draft = series.openDraft();
+
+    const count = Object.entries(draft.board).length;
+    if (count > 0) {
+      return <Button onClick={() => navigate("new")}
+                     icon={<CounterBadge count={count} />}
+                     iconPosition="after"
+                     style={style}>
+        Edit Draft
+      </Button>
     }
 
     return <Button onClick={click} style={style}>New Race</Button>
@@ -37,7 +38,7 @@ export default function RacesOverviewState() {
   return (
     <Layout>
       <NavBar>
-        <NavBarItem title={ series.name } to=".." />
+        <NavBarItem title={ series.current.name } to=".." />
         <NavBarItem title="Races" to="" />
       </NavBar>
       <Content>
@@ -53,11 +54,11 @@ export default function RacesOverviewState() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {series.finishboards.map((finishboard, index) => (
+              {series.current.finishboards.map((finishboard, index) => (
                 <TableRow key={index} style={{ cursor: "pointer" }}
                           onClick={() => navigate(`${index}/edit`)}>
                   <TableCell style={{ width: 70, textAlign: "right" }}>R{index + 1}</TableCell>
-                  <TableCell>{Object.entries(finishboard).length} / {series.racers.length}</TableCell>
+                  <TableCell>{Object.entries(finishboard).length} / {series.current.racers.length}</TableCell>
                   <TableCell style={{ width: 25 }}>
                     <Menu>
                       <MenuTrigger>

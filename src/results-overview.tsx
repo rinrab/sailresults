@@ -1,20 +1,23 @@
 import { Text, TableBody, TableRow, TableCell, Table } from "@fluentui/react-components";
 import React from "react";
 import { formatString } from "./common";
-import { useRacers, useSeries } from "./storage";
-import { evaluateScoreboard } from "./scoring";
+import { evaluateScoreboard, Series } from "./scoring";
+import { StorageContext } from "./storage";
 
-export default function ResultsOverview({ seriesId }) {
-  const [series] = useSeries(seriesId);
-  const [racers] = useRacers();
+export default function ResultsOverview(props: { series: Series }) {
+  const storage = React.useContext(StorageContext);
 
-  if (series.finishboards.length == 0) {
+  if (props.series.finishboards.length == 0) {
     return <div>
       <Text block>Results overview cannot be displayed.</Text>
       <Text block>There are no races yet.</Text>
     </div>
   } else {
-    const scoreboard = evaluateScoreboard(racers, series, series.finishboards);
+    const scoreboard = evaluateScoreboard(
+      storage.listRacers(),
+      props.series,
+      props.series.finishboards
+    );
 
     const emojis = ["🥇", "🥈", "🥉"];
 

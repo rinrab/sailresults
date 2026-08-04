@@ -4,8 +4,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
-import { Racer } from "./scoring";
-import { useSeries, useRacers, nextRacerId } from "./storage";
+import { StorageContext, IRacerEditor, ISeriesEditor } from "./storage";
 import { Column, SailTable } from "./table";
 
 function ActionsCell({ deleteFn }) {
@@ -20,15 +19,17 @@ function ActionsCell({ deleteFn }) {
   </Menu>
 }
 
-function RacersList({ series, racers, updateRacer, deleteRacer }) {
-  const columns: Column<Racer>[] = [
+function RacersList(props: { series: ISeriesEditor }) {
+  const storage = React.useContext(StorageContext);
+
+  const columns: Column<IRacerEditor>[] = [
     {
       header: "Name",
       minsize: 120,
       cell: (row) => {
         return <EditableText
-          value={row.name}
-          setValue={(value) => updateRacer({ ...row, name: value, })} />
+          value={row.current.name}
+          setValue={(value) => row.setName(value)} />
       }
     },
     {
@@ -36,70 +37,47 @@ function RacersList({ series, racers, updateRacer, deleteRacer }) {
       minsize: 120,
       cell: (row) => {
         return <EditableText
-          value={row.number}
-          setValue={(value) => updateRacer({ ...row, number: value, })} />
+          value={row.current.number}
+          setValue={(value) => row.setNumber(value)} />
       }
     },
     {
       header: "",
       size: 32,
       cell: (row) => {
-        return <ActionsCell deleteFn={() => deleteRacer(row.id)} />
+        return <ActionsCell deleteFn={row.kill()} />
       }
     }
   ];
 
-  const data = React.useMemo(
-    () => series.racers.map(id => racers[id]),
-    [series.racers, racers],
-  )
-
-  if (series.racers.length == 0) {
+  if (props.series.current.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return <SailTable<Racer> columns={columns}
-                             data={data}
-                             getKey={row => row.id} />
+    return <SailTable<number, IRacerEditor> 
+      columns={columns}
+      keys={props.series.current.racers}
+      map={id => storage.openRacer(id)} />
   }
 }
 
 export default function EditCompetitorsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
-  const [series, setSeries] = useSeries(parseInt(seriesId));
-  const [racers, setRacers] = useRacers();
+  const storage = React.useContext(StorageContext);
+  const series = storage.openSeries(parseInt(seriesId));
 
   const [name, setName] = React.useState("");
   const [number, setNumber] = React.useState("");
 
-  const addRacer = (racer: Racer) => {
-    setRacers({
-      ...racers,
-      [racer.id]: racer,
-    });
-    setSeries({
-      ...series,
-      racers: [...series.racers, racer.id],
-    });
-  };
-  const updateRacer = (value: Racer) => {
-    const copy = { ...racers };
-    copy[value.id] = value;
-    setRacers(copy);
-  };
-  const deleteRacer = (id: number) => {
-    setSeries({
-      ...series,
-      racers: series.racers.filter(item => item != id),
-    });
+  const addRacer = (name: string, number: string) => {
+    const racer = storage.newRacer();
+    racer.setName(name);
+    racer.setNumber(number);
+    series.addRacer(racer.current.id);
   };
 
   const submit = () => {
-    addRacer({
-        id: nextRacerId(),
-        name: name.trim(),
-        number: number.trim(),
-    });
+    addRacer(name.trim(), number.trim());
 
     /* clear inputs */
     setName("");
@@ -109,7 +87,7 @@ export default function EditCompetitorsState() {
   return (
     <Layout>
       <NavBar>
-        <NavBarItem title={series.name} to=".." />
+        <NavBarItem title={series.current.name} to=".." />
         <NavBarItem title="Competitors" to="" />
       </NavBar>
       <Content>
@@ -126,11 +104,7 @@ export default function EditCompetitorsState() {
                   style={{ flex: "1 1 70px" }}>Add</Button>
         </form>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
-        <RacersList
-          series={series}
-          racers={racers}
-          updateRacer={updateRacer}
-          deleteRacer={deleteRacer} />
+        <RacersList series={series} />
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("..")}>Done</Button>
         </div>
