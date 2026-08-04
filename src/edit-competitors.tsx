@@ -45,7 +45,7 @@ function RacersList(props: { series: ISeriesEditor }) {
       header: "",
       size: 32,
       cell: (row) => {
-        return <ActionsCell deleteFn={row.kill()} />
+        return <ActionsCell deleteFn={() => props.series.removeRacer(row.current.id)} />
       }
     }
   ];
@@ -70,7 +70,8 @@ export default function EditCompetitorsState() {
   const [number, setNumber] = React.useState("");
 
   const addRacer = (name: string, number: string) => {
-    const racer = storage.newRacer();
+    const id = storage.newRacer();
+    const racer = storage.openRacer(id);
     racer.setName(name);
     racer.setNumber(number);
     series.addRacer(racer.current.id);
