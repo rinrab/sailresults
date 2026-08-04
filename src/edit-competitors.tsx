@@ -75,7 +75,7 @@ export default function EditCompetitorsState() {
     const racer = storage.openRacer(id);
     racer.setName(name);
     racer.setNumber(number);
-    series.addRacer(racer.current.id);
+    series.addRacer(id);
   };
 
   const submit = () => {
