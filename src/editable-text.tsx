@@ -9,7 +9,6 @@ export default function EditableText({ value, setValue, rejectEmpty = false, com
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    console.log(value)
     inputRef.current?.focus();
   });
 

@@ -46,8 +46,6 @@ export function SeriesOverviewState() {
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
   
-  console.log("update");
-
   return (
     <Layout>
       <NavBar>

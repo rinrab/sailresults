@@ -80,7 +80,6 @@ export function evaluateScoreboard(
 export function normaliseFinishboard(finishboard: Finishboard): Finishboard {
   const result = {};
   const sortedKeys = sortFinishboard(finishboard);
-  console.log(sortedKeys);
   let rank = 1;
 
   for (const key of sortedKeys) {

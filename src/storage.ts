@@ -176,7 +176,6 @@ export function openSeries(): SeriesCollection {
 }
 
 export function saveSeries(series: SeriesCollection) {
-  console.log(series)
   const result = {};
   for (const value of Object.values(series)) {
     result[value.id] = {
@@ -185,7 +184,6 @@ export function saveSeries(series: SeriesCollection) {
       finishboards: value.finishboards,
       draftFinishboard: value.draftFinishboard,
     };
-    console.log(value.finishboards);
   }
   saveKey(SERIES_KEY, result);
 }
