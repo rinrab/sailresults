@@ -45,15 +45,17 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
 
   return (
     <div ref={parentRef} style={{ overflow: "auto", flex: 1 }}>
-      <Table style={{ display: "block", width: "fit-content" }}>
+      <Table style={{}}>
         <TableHeader style={{
           display: "grid", 
           position: "sticky",
           top: 0,
           zIndex: 1,
-          background: tokens.colorNeutralBackground1Selected,
         }}>
-          <TableRow style={{ display: "flex" }}>
+          <TableRow style={{
+            display: "flex",
+            background: tokens.colorNeutralBackground1Selected,
+          }}>
             {props.columns.map((col, index) => {
               return (
                 <TableCell
