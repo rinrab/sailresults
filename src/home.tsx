@@ -6,7 +6,7 @@ import { Content, Layout, NavBar, NavBarItem } from "./common";
 import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
 import { samples } from "./sample-data";
-import { PackedSeries } from "./storage";
+import { importSeries, PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
 
 function SeriesCard(props: { series: Series }) {
@@ -40,7 +40,7 @@ export default function StartState() {
   const series = storage.listSeries();
 
   const createSample = (sample: PackedSeries) => {
-    const id = storage.importSeries(sample);
+    const id = importSeries(storage, sample);
     navigate(`/series/${id}`);
   };
 
