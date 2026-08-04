@@ -291,7 +291,10 @@ export function NewRaceState() {
                     onClick={() => draft.clear()}>Delete Draft</Button>
             <Button style={{ flex: "auto", width: "120px" }}
                     disabled={Object.entries(draft).length == 0}
-                    onClick={() => {series.promoteDraft}}>Done</Button>
+                    onClick={() => {
+                      series.promoteDraft();
+                      navigate("..");
+                    }}>Done</Button>
           </div>
         </div>
       </Content>
