@@ -109,7 +109,7 @@ function ensureArray(value: any): any[] {
   }
 }
 
-function openRacers(): RacersCollection {
+export function openRacers(): RacersCollection {
   const stored = ensureObject(openKey(RACERS_KEY) ?? {});
   const result: RacersCollection = {};
 
@@ -124,7 +124,7 @@ function openRacers(): RacersCollection {
   return result;
 }
 
-function saveRacers(racers: RacersCollection) {
+export function saveRacers(racers: RacersCollection) {
   const obj = {};
 
   for (const value of Object.values(racers)) {
@@ -149,7 +149,7 @@ function openFinishboard(value: any) {
   return board;
 }
 
-function openSeries(): SeriesCollection {
+export function openSeries(): SeriesCollection {
   const stored = ensureObject(openKey(SERIES_KEY) ?? {});
   const result: SeriesCollection = {};
 
@@ -175,7 +175,7 @@ function openSeries(): SeriesCollection {
   return result;
 }
 
-function saveSeries(series: SeriesCollection) {
+export function saveSeries(series: SeriesCollection) {
   console.log(series)
   const result = {};
   for (const value of Object.values(series)) {
@@ -280,31 +280,13 @@ function getRacerEditor(racer: Racer, update: Mutator<Racer>): IRacerEditor {
   };
 }
 
-function openLocalStorage() {
-  let racers = openRacers();
-  let series = openSeries() 
-
-  return getStorageEditor(
-     () => racers,
-     (mutate) => {
-       racers = mutate(racers);
-       saveRacers(racers);
-     },
-     () => series, 
-     (mutate) => {
-       series = mutate(series);
-       saveSeries(series);
-     },
-  );
-}
-
 function nextGlobalId() {
   const id = openKey(GLOBAL_ID_KEY) ?? 67;
   saveKey(GLOBAL_ID_KEY, id + 1);
   return id;
 }
 
-function getStorageEditor(
+export function getStorageEditor(
   getRacers: () => RacersCollection,
   updateRacers: Mutator<RacersCollection>,
   getSeries: () => SeriesCollection,
@@ -412,6 +394,3 @@ function getStorageEditor(
     nextGlobalId: nextGlobalId,
   };
 }
-
-export const StorageContext =
-  React.createContext<IStorage>(openLocalStorage());

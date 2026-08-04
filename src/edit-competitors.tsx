@@ -4,7 +4,8 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
-import { StorageContext, IRacerEditor, ISeriesEditor } from "./storage";
+import { IRacerEditor, ISeriesEditor } from "./storage";
+import { StorageContext } from "./storage-context";
 import { Column, SailTable } from "./table";
 
 function ActionsCell({ deleteFn }) {

@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
 import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
-import { ISeriesEditor, StorageContext } from "./storage";
+import { StorageContext } from "./storage-context";
 
 function ScoreCell(props: { score: EvaluatedScore }) {
   return <>

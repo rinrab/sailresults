@@ -3,7 +3,7 @@ import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
-import { StorageContext } from "./storage";
+import { StorageContext } from "./storage-context";
 
 export default function RacesOverviewState() {
   const navigate = useNavigate();

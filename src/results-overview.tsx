@@ -2,7 +2,7 @@ import { Text, TableBody, TableRow, TableCell, Table } from "@fluentui/react-com
 import React from "react";
 import { formatString } from "./common";
 import { evaluateScoreboard, Series } from "./scoring";
-import { StorageContext } from "./storage";
+import { StorageContext } from "./storage-context";
 
 export default function ResultsOverview(props: { series: Series }) {
   const storage = React.useContext(StorageContext);

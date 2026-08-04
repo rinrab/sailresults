@@ -3,8 +3,9 @@ import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warnin
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, NavBarItem, racerMatches } from "./common";
-import { setFinishboardPosition, Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
-import { StorageContext, ISeriesEditor, IBoardEditor } from "./storage";
+import {  Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
+import { IBoardEditor, ISeriesEditor } from "./storage";
+import { StorageContext } from "./storage-context";
 
 function FinishBoardStatus(props: { draft: IBoardEditor }) {
   const remainingRacers = props.draft.getRemaining();

@@ -6,7 +6,8 @@ import { Content, Layout, NavBar, NavBarItem } from "./common";
 import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
 import { samples } from "./sample-data";
-import { PackedSeries, StorageContext } from "./storage";
+import { PackedSeries } from "./storage";
+import { StorageContext } from "./storage-context";
 
 function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
 import ResultsOverview from "./results-overview";
-import { StorageContext } from "./storage";
+import { StorageContext } from "./storage-context";
 
 export function NewSeriesState() {
   const navigate = useNavigate();
