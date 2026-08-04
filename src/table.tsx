@@ -9,22 +9,22 @@ export interface Column<T> {
   minsize?: number;
 }
 
-export interface SailTableProps<T> {
-  columns: Column<T>[];
-  data: T[];
-  getKey: (row: T) => string | number;
+export interface SailTableProps<KeyT, ValueT> {
+  columns: Column<ValueT>[];
+  keys: KeyT[];
+  map: (key: KeyT) => ValueT;
 }
 
-export function SailTable<T>(props: SailTableProps<T>) {
+export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
   const parentRef = React.useRef(null);
   const virtualizer = useVirtualizer({
-    count: props.data.length,
+    count: props.keys.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 44,
     overscan: 10,
   });
 
-  const getCellStyles = (col: Column<T>) => {
+  const getCellStyles = (col: Column<ValueT>) => {
     const style: React.CSSProperties = {
        display: "flex",
        alignItems: "center",
@@ -72,9 +72,10 @@ export function SailTable<T>(props: SailTableProps<T>) {
           width: "100%",
         }}>
           {virtualizer.getVirtualItems().map((item) => {
-            const row = props.data[item.index];
+            const key = props.keys[item.index];
+            const value = props.map(key);
             return (
-              <TableRow key={props.getKey(row)} style={{
+              <TableRow key={key as any} style={{
                 display: "flex",
                 height: item.size,
                 position: "absolute",
@@ -85,7 +86,7 @@ export function SailTable<T>(props: SailTableProps<T>) {
                   <TableCell
                     key={index}
                     style={getCellStyles(col)}>
-                    {col.cell(row)}
+                    {col.cell(value)}
                   </TableCell>
                 ))}
               </TableRow>

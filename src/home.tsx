@@ -4,11 +4,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
 import ResultsOverview from "./results-overview";
-import { useSeriesList } from "./storage";
 import { Series } from "./scoring";
-import { importSeries, PackedSeries, samples } from "./sample-data";
+import { samples } from "./sample-data";
+import { PackedSeries } from "./storage";
+import { StorageContext } from "./storage-context";
 
-function SeriesCard({ series }) {
+function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();
 
   return (
@@ -19,15 +20,15 @@ function SeriesCard({ series }) {
       marginBottom: 8}}
     >
       <Body1 as="h5" style={{ margin: 0, fontWeight: "bold" }}>
-        {series.name}
+        {props.series.name}
       </Body1>
-      <Text>{3} races / {series.racers.length} competitors</Text>
+      <Text>{3} races / {props.series.racers.length} competitors</Text>
 
-      <ResultsOverview seriesId={series.id} />
+      <ResultsOverview series={props.series} />
       
       <CardFooter>
         <Button appearance="primary" icon={<Open16Regular />}
-                onClick={() => navigate(`/series/${series.id}/`)}>Open</Button>
+                onClick={() => navigate(`/series/${props.series.id}/`)}>Open</Button>
       </CardFooter>
     </Card>
   );
@@ -35,10 +36,11 @@ function SeriesCard({ series }) {
 
 export default function StartState() {
   const navigate = useNavigate();
-  const [series, _] = useSeriesList();
+  const storage = React.useContext(StorageContext);
+  const series = storage.listSeries();
 
   const createSample = (sample: PackedSeries) => {
-    const id = importSeries(sample);
+    const id = storage.importSeries(sample);
     navigate(`/series/${id}`);
   };
 

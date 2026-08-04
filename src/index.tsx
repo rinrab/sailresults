@@ -10,40 +10,43 @@ import EditCompetitorsState from "./edit-competitors";
 import { NewSeriesState, SeriesOverviewState } from "./series";
 import StartState from "./home";
 import RacesOverviewState from "./races";
+import { StorageProvider } from "./storage-context";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
 function App() {
   return (
     <ErrorBoundary>
-      <HashRouter>
-        <Routes>
-          <Route>
-            <Route index element={<StartState />} />
-            <Route path="series">
-              <Route path="new" element={<NewSeriesState />} />
-              <Route path=":seriesId">
-                <Route index element={<SeriesOverviewState />} />
-                <Route path="results" element={<ResultsState />} />
-                <Route path="competitors" element={<EditCompetitorsState />} />
-                <Route path="races">
-                  <Route index element={<RacesOverviewState />} />
-                  <Route path="new" element={<NewRaceState />} />
-                  <Route path=":raceId">
-                    <Route path="edit" element={<EditRaceState />} />
+      <StorageProvider>
+        <HashRouter>
+          <Routes>
+            <Route>
+              <Route index element={<StartState />} />
+              <Route path="series">
+                <Route path="new" element={<NewSeriesState />} />
+                <Route path=":seriesId">
+                  <Route index element={<SeriesOverviewState />} />
+                  <Route path="results" element={<ResultsState />} />
+                  <Route path="competitors" element={<EditCompetitorsState />} />
+                  <Route path="races">
+                    <Route index element={<RacesOverviewState />} />
+                    <Route path="new" element={<NewRaceState />} />
+                    <Route path=":raceId">
+                      <Route path="edit" element={<EditRaceState />} />
+                    </Route>
                   </Route>
                 </Route>
               </Route>
+              <Route path="docs">
+                <Route index element={<DocsIndex />} />
+                <Route path="about" element={<DocsAbout />} />
+                <Route path="quick-start" element={<DocsQuickStart />} />
+                <Route path="scoring" element={<DocsScoring />} />
+              </Route>
             </Route>
-            <Route path="docs">
-              <Route index element={<DocsIndex />} />
-              <Route path="about" element={<DocsAbout />} />
-              <Route path="quick-start" element={<DocsQuickStart />} />
-              <Route path="scoring" element={<DocsScoring />} />
-            </Route>
-          </Route>
-        </Routes>
-      </HashRouter>
+          </Routes>
+        </HashRouter>
+      </StorageProvider>
     </ErrorBoundary>
   );
 }

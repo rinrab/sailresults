@@ -1,37 +1,37 @@
-import { Button, createTableColumn, DataGrid, DataGridBody, DataGridCell, DataGridHeader, DataGridHeaderCell, DataGridRow, Text, TableColumnSizingOptions, TableRow, TableCell, TableHeaderCell, TableHeader, Table, TableBody } from "@fluentui/react-components";
+import { Button, Text, TableRow, TableCell, TableHeader, Table, TableBody } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
-import { EvaluatedScore, evaluateScoreboard } from "./scoring";
-import { useSeries, useRacers } from "./storage";
+import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
+import { StorageContext } from "./storage-context";
 
-function ScoreCell({ score }: { score: EvaluatedScore }) {
+function ScoreCell(props: { score: EvaluatedScore }) {
   return <>
-    <Text>{score.finishboardEntry}</Text>
-    {score.finishboardEntry != score.realScore &&
-      <Text><br />{score.realScore}</Text>
+    <Text>{props.score.finishboardEntry}</Text>
+    {props.score.finishboardEntry != props.score.realScore &&
+      <Text><br />{props.score.realScore}</Text>
     }
   </>
 }
 
-function ResultsPrint({ scoreboard, series }) {
+function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
   return (
     <div>
-      <h1>{series.name}</h1>
+      <h1>{props.series.name}</h1>
       <table style={{ width: "100%" }}>
         <thead>
           <tr>
             <th style={{ textAlign: "right" }}>Rank</th>
             <th>Name</th>
             <th>Number</th>
-            {series.finishboards.map((_, index) =>
+            {props.series.finishboards.map((_, index) =>
               <th key={index} style={{ textAlign: "center" }}>R{index + 1}</th>
             )}
             <th style={{ textAlign: "center" }}>Total</th>
           </tr>
         </thead>
         <tbody>
-          {scoreboard.map((row, racerIndex) =>
+          {props.scoreboard.map((row, racerIndex) =>
             <tr key={racerIndex}>
               <td style={{ textAlign: "right" }}>{racerIndex + 1}</td>
               <td>{formatString(row.racer.name)}</td>
@@ -80,14 +80,15 @@ function ResultRow({ rank, row }) {
 export default function ResultsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
-  const [series] = useSeries(parseInt(seriesId));
-  const [racers] = useRacers();
-  const scoreboard = evaluateScoreboard(racers, series, series.finishboards);
+  const storage = React.useContext(StorageContext);
+  const series = storage.openSeries(parseInt(seriesId));
+  const racers = storage.listRacers();
+  const scoreboard = evaluateScoreboard(racers, series.current, series.current.finishboards);
 
   return (
-    <Layout print={<ResultsPrint scoreboard={scoreboard} series={series} />}>
+    <Layout print={<ResultsPrint scoreboard={scoreboard} series={series.current} />}>
       <NavBar>
-        <NavBarItem title={series.name} to=".." />
+        <NavBarItem title={series.current.name} to=".." />
         <NavBarItem title="Results" to="" />
       </NavBar>
       <Content screenOnly>
@@ -98,7 +99,7 @@ export default function ResultsState() {
                 <Cell width={40} align="right">Rank</Cell>
                 <Cell width={150}>Name</Cell>
                 <Cell width={120}>Number</Cell>
-                {series.finishboards.map((_, index) =>
+                {series.current.finishboards.map((_, index) =>
                   <Cell key={index} width={40} align="center">R{index + 1}</Cell>
                 )}
                 <Cell width={70} align="center">Total</Cell>

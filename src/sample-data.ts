@@ -1,59 +1,11 @@
-import { dsqs, Finishboard, FinishboardEntry, Racer, Series } from "./scoring";
-import { getStoredObject, nextRacerId, setStoredObject } from "./storage";
-
-export interface PackedSeries {
-  name: string;
-  racers: { name: string, number: string }[];
-  finishboards: FinishboardEntry[][];
-};
-
-export function importSeries(pack: PackedSeries, ) {
-  const racers = getStoredObject<{ [key: number]: Racer }>("racers", () => ({}));
-  const series = getStoredObject<{ [key: number]: Series }>("series", () => ({}));
-
-  const seriesRacers: number[] = [];
-
-  let firstId: number;
-  for (const racer of pack.racers) {
-    const id = nextRacerId();
-    if (!firstId) {
-      firstId = id;
-    }
-    racers[id] = {
-      id: id,
-      ...racer,
-    };
-    seriesRacers.push(id);
-  }
-
-  const finishboards: Finishboard[] = [];
-  for (const packedBoard of pack.finishboards) {
-    const newBoard = {};
-    for (let i = 0; i < packedBoard.length; i++) {
-      newBoard[firstId + i] = packedBoard[i];
-    }
-    finishboards.push(newBoard);
-  }
-
-  const seriesId = nextRacerId();
-  const newSeries: Series = {
-    id: seriesId,
-    name: pack.name,
-    finishboards: finishboards,
-    draftFinishboard: null,
-    racers: seriesRacers,
-  };
-
-  setStoredObject("racers", racers);
-  setStoredObject("series", { ...series, [seriesId]: newSeries });
-
-  return seriesId;
-}
+import { dsqs, FinishboardEntry } from "./scoring";
+import { PackedSeries } from "./storage";
 
 /*           ### THE DATA ###
  *
  * !!! chatgpt generated slop warning !!!
 */
+
 export const samples: PackedSeries[] = [
   {
     name: "Catastrophic Tacking Championship",
