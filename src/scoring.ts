@@ -13,6 +13,7 @@ export interface EvaluatedRacer {
   racer: Racer,
   scores: EvaluatedScore[],
   total: number,
+  rank: number,
 }
 
 export const dsqs = {
@@ -114,9 +115,22 @@ export function evaluateScoreboard(
       racer: racers[racerId],
       scores: scores,
       total: total,
+      rank: 1,
     });
   }
-  return result.sort((a, b) => compareEvaluatedRacers(a, b));
+
+  result.sort((a, b) => compareEvaluatedRacers(a, b));
+
+  let rank = 1;
+  for (let i = 1; i < result.length; i++) {
+    const diff = compareEvaluatedRacers(result[i - 1], result[i]);
+    if (diff != 0) {
+      rank = i + 1;
+    }
+    result[i].rank = rank;
+  }
+
+  return result;
 }
 
 export function normaliseFinishboard(finishboard: Finishboard): Finishboard {

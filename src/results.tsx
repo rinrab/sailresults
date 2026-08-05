@@ -61,17 +61,17 @@ function Cell({ width, align = "left", bold = false, children }) {
   );
 }
 
-function ResultRow({ rank, row }) {
+function ResultRow(props: { row: EvaluatedRacer }) {
   return (
     <TableRow>
-      <Cell width={40} align="right">{rank}</Cell>
-      <Cell width={150}>{formatString(row.racer.name)}</Cell>
-      <Cell width={120}>{formatString(row.racer.number)}</Cell>
-      {row.scores.map((score, scoreIndex) =>
+      <Cell width={40} align="right">{props.row.rank}</Cell>
+      <Cell width={150}>{formatString(props.row.racer.name)}</Cell>
+      <Cell width={120}>{formatString(props.row.racer.number)}</Cell>
+      {props.row.scores.map((score, scoreIndex) =>
         <Cell key={scoreIndex} width={40} align="center">
           <ScoreCell score={score} />
         </Cell>)}
-      <Cell width={70} bold align="center">{row.total}</Cell>
+      <Cell width={70} bold align="center">{props.row.total}</Cell>
     </TableRow>
   );
 }
@@ -107,7 +107,7 @@ export default function ResultsState() {
             </TableHeader>
             <TableBody>
               {scoreboard.map((row, index) =>
-                <ResultRow key={index} rank={index + 1} row={row} />
+                <ResultRow key={index} row={row} />
               )}
             </TableBody>
           </Table>
