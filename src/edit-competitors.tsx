@@ -1,63 +1,48 @@
-import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem } from "@fluentui/react-components";
-import { MoreVerticalRegular } from "@fluentui/react-icons";
+import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Card, CardHeader } from "@fluentui/react-components";
+import { MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
 import EditableText from "./editable-text";
-import { IRacerEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
-import { Column, SailTable } from "./table";
-
-function ActionsCell({ deleteFn }) {
-  return <Menu>
-    <MenuTrigger>
-      <Button icon={<MoreVerticalRegular />} appearance="transparent"
-              onClick={(e) => e.stopPropagation()} />
-    </MenuTrigger>
-    <MenuPopover>
-      <MenuItem onClick={deleteFn}>Delete</MenuItem>
-    </MenuPopover>
-  </Menu>
-}
+import { ISeriesEditor } from "./storage";
 
 function RacersList(props: { series: ISeriesEditor }) {
   const storage = React.useContext(StorageContext);
 
-  const columns: Column<IRacerEditor>[] = [
-    {
-      header: "Name",
-      minsize: 120,
-      cell: (row) => {
-        return <EditableText
-          value={row.current.name}
-          setValue={(value) => row.setName(value)} />
-      }
-    },
-    {
-      header: "Number",
-      minsize: 120,
-      cell: (row) => {
-        return <EditableText
-          value={row.current.number}
-          setValue={(value) => row.setNumber(value)} />
-      }
-    },
-    {
-      header: "",
-      size: 32,
-      cell: (row) => {
-        return <ActionsCell deleteFn={() => props.series.removeRacer(row.current.id)} />
-      }
-    }
-  ];
-
   if (props.series.current.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return <SailTable<number, IRacerEditor> 
-      columns={columns}
-      keys={props.series.current.racers}
-      map={id => storage.openRacer(id)} />
+    return <div>
+      {props.series.current.racers.map((id) => {
+        const racer = storage.openRacer(id);
+        return <Card key={id} style={{ marginBottom: 8 }}>
+          <CardHeader action={
+            <Menu>
+              <MenuTrigger>
+                <Button appearance="transparent"
+                        icon={<MoreHorizontalRegular />} />
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuItem onClick={() => props.series.removeRacer(id)}>Delete</MenuItem>
+              </MenuPopover>
+            </Menu>
+            }
+            description={
+              <div style={{ width: "100%" }}>
+                <EditableText title="Name" 
+                              value={racer.current.name}
+                              setValue={(value) => racer.setName(value)} />
+                <div style={{ height: 8 }} />
+                <EditableText title="Number" 
+                              value={racer.current.number}
+                              setValue={(value) => racer.setNumber(value)} />
+              </div>
+            }
+            ></CardHeader>
+        </Card>
+      })}
+    </div>
   }
 }
 

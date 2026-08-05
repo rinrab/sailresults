@@ -57,11 +57,9 @@ export function SeriesOverviewState() {
           <Divider style={{ margin: "8px 0" }} />
 
           <Text block size={500} style={{ margin: "8px 0" }} >Settings</Text>
-          <Text weight="semibold">Name</Text>
-          <div style={{ maxWidth: 300 }}>
-            <EditableText rejectEmpty value={series.current.name}
-                          setValue={value => series.setName(value)} />
-          </div>
+          <EditableText rejectEmpty title="Name"
+                        value={series.current.name}
+                        setValue={value => series.setName(value)} />
 
           <Divider style={{ margin: "8px 0" }} />
           <Text block size={500} style={{ margin: "8px 0" }} >Results</Text>

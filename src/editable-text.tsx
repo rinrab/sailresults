@@ -2,7 +2,7 @@ import { Button, Input, Text, Link } from "@fluentui/react-components";
 import React from "react";
 import { formatString } from "./common";
 
-export default function EditableText({ value, setValue, rejectEmpty = false, compact = false }) {
+export default function EditableText({ value, setValue, rejectEmpty = false, compact = false, title }) {
   const [editing, setEditing] = React.useState(false);
   const [editingValue, setEditingValue] = React.useState();
   const [revertValue, setRevertValue] = React.useState();
@@ -33,17 +33,31 @@ export default function EditableText({ value, setValue, rejectEmpty = false, com
   };
 
   if (editing) {
-    return <form style={{ display: "flex", gap: 8, width: "100%" }}
-                 onSubmit={stopEdit}>
-      <Input ref={inputRef} style={{ flex: 1, width: 0 }}
-             value={editingValue}
-             onBlur={stopEdit} onChange={onChange} />
-      {! compact && <Button onClick={() => setEditing(false)}>Done</Button>}
+    return <form onSubmit={stopEdit}
+                 style={{
+                   display: "flex",
+                   width: "100%",
+                   height: 40,
+                   alignItems: "center",
+                 }}>
+      <div style={{ 
+        flex: 1,
+        display: "flex",
+        gap: 8,
+      }}>
+        <Input ref={inputRef} style={{ flex: 1, width: 0 }}
+               value={editingValue}
+               onBlur={stopEdit} onChange={onChange} />
+        {! compact && <Button onClick={() => setEditing(false)}>Done</Button>}
+      </div>
     </form>
   } else {
-    return <div style={{ display: "flex", width: "100%" }}>
-      <Text style={{ flex: 1, marginRight: 8 }}>{formatString(value)}</Text>
-      <Link onClick={startEdit}>Edit</Link>
+    return <div style={{ width: "100%", height: 40 }}>
+      <div style={{ display: "flex" }}>
+        <b style={{ marginRight: 4 }}>{title}</b>
+        <Link onClick={startEdit}>Edit</Link>
+      </div>
+      <Text>{formatString(value)}</Text>
     </div>;
   }
 };
