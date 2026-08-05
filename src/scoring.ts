@@ -47,6 +47,48 @@ export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) 
   }
 }
 
+function compareEvaluatedRacers(left: EvaluatedRacer, right: EvaluatedRacer): number {
+  /* let's pretend they are the same for both left and right */
+  const racesCount = left.scores.length;
+
+  /* we don't wanna deal with that */
+  if (racesCount == 0) {
+    return 0;
+  }
+
+  /* handle easy out */
+  if (left.total != right.total) {
+    return left.total - right.total;
+  }
+
+  /* If there is a series-score tie between two or more boats, each boat’s
+   * race scores shall be listed in order of best to worst, and at the first
+   * point(s) where there is a difference the tie shall be broken in favour of
+   * the boat(s) with the best score(s). No excluded scores shall be used.
+   *
+   * reference: A8.1 */
+  const leftSorted = [...left.scores].sort((a, b) => a.realScore - b.realScore);
+  const rightSorted = [...right.scores].sort((a, b) => a.realScore - b.realScore);
+
+  for (let i = 0; i < racesCount; i++) {
+    const diff = leftSorted[i].realScore - rightSorted[i].realScore;
+    if (diff != 0) {
+      return diff;
+    }
+  }
+
+  /* If a tie remains between two or more boats, they shall be ranked in
+   * order of their scores in the last race. Any remaining ties shall be broken
+   * by using the tied boats’ scores in the next-to-last race and so on until
+   * all ties are broken. These scores shall be used even if some of them are
+   * excluded scores. 
+   *
+   * reference: A8.2 */
+
+  return left.scores[racesCount - 1].realScore -
+         right.scores[racesCount - 1].realScore;
+}
+
 export function evaluateScoreboard(
   racers: { [id: number]: Racer },
   series: Series,
@@ -74,7 +116,7 @@ export function evaluateScoreboard(
       total: total,
     });
   }
-  return result.sort((a, b) => a.total - b.total);
+  return result.sort((a, b) => compareEvaluatedRacers(a, b));
 }
 
 export function normaliseFinishboard(finishboard: Finishboard): Finishboard {
