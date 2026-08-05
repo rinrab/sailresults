@@ -13,7 +13,7 @@ function RacersList(props: { series: ISeriesEditor }) {
   if (props.series.current.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return <div>
+    return <div style={{ overflow: "auto", flex: 1 }}>
       {props.series.current.racers.map((id) => {
         const racer = storage.openRacer(id);
         return <Card key={id} style={{ marginBottom: 8 }}>
