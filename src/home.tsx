@@ -11,6 +11,7 @@ import { StorageContext } from "./storage-context";
 
 function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();
+  const storage = React.useContext(StorageContext);
 
   return (
     <Card appearance="filled"
@@ -36,7 +37,7 @@ function SeriesCard(props: { series: Series }) {
             <MenuPopover>
               <MenuItem onClick={(e) => {
                 e.stopPropagation();
-                alert("not implemented");
+                storage.deleteSeries(props.series.id);
               }}>Delete</MenuItem>
             </MenuPopover>
           </Menu>

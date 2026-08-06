@@ -7,6 +7,7 @@ export interface IStorage {
 
   newSeries: (name: string) => number;
   openSeries: (id: number) => ISeriesEditor;
+  deleteSeries: (id: number) => void;
 
   nextGlobalId: () => number;
 
@@ -323,6 +324,12 @@ export function getStorageEditor(
         throw new Error("series does not exist");
       }
     },
+
+    deleteSeries: (id) => updateSeries((old) => {
+      const copy = { ...old };
+      delete copy[id];
+      return copy;
+    }),
 
     newRacer: () => {
       const id = nextGlobalId();
