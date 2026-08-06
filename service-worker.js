@@ -22,7 +22,14 @@ const fetchWithTimeout = (request, timeout = 3000) => {
 self.addEventListener('fetch', (event) => {
   const getResponseAsync = async () => {
     try {
-      return await fetchWithTimeout(event.request);
+      const response = await fetchWithTimeout(event.request);
+
+      if (response.ok) {
+        const cache = await caches.open("v1");
+        cache.put(event.request, response);
+      }
+
+      return response;
     } catch {
       return await caches.match(event.request);
     }
