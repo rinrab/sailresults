@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="724"
+   height="256"
+   viewBox="0 0 191.55833 67.733335"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   sodipodi:docname="wide.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.73386633"
+     inkscape:cx="370.63971"
+     inkscape:cy="209.16616"
+     inkscape:window-width="2560"
+     inkscape:window-height="1416"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect5"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="display:inline;fill:#003380;stroke-width:0.413072"
+       id="rect2"
+       width="67.73333"
+       height="67.73333"
+       x="-18.309422"
+       y="80.039635"
+       sodipodi:type="rect"
+       inkscape:path-effect="#path-effect5"
+       d="M -1.1094208,80.039635 H 32.223907 c 9.528801,0 17.200001,7.6712 17.200001,17.2 v 33.333325 c 0,9.5288 -7.6712,17.2 -17.200001,17.2 H -1.1094208 c -9.5288002,0 -17.2000012,-7.6712 -17.2000012,-17.2 V 97.239635 c 0,-9.5288 7.671201,-17.2 17.2000012,-17.2 z"
+       rx="17.200001"
+       transform="translate(18.309422,-80.039635)" />
+    <path
+       style="fill:#ffffff;stroke-width:0.488297"
+       d="m 11.030192,58.57393 c 6.70654,1.20587 21.96073,0.80757 38.20204,0.34562 6.27562,-1.12003 9.60795,-3.57503 10.56149,-7.68179 -0.10669,-0.34988 -0.19285,-0.24787 -0.61155,-0.27463 -15.44852,-0.98667 -27.96739,-1.38788 -49.2163905,-0.4534 -1.16936,0.91253 -1.15419,7.14694 1.0644105,8.06419 z"
+       id="path5"
+       sodipodi:nodetypes="cccsccc" />
+    <path
+       style="fill:#ffffff;stroke-width:0.264583"
+       d="M 53.107912,50.60018 C 68.910892,13.12227 51.632202,6.9871303 49.477092,6.4161203 38.510202,2.645809 31.784712,5.736545 23.892402,14.4411 c -10.32437,11.38692 -10.05811,11.9822 -10.5971,18.76409 -0.14178,4.6922 1.36855,7.06243 2.77813,9.6573 2.68201,2.66241 8.06511,9.00792 18.27673,7.12832 z"
+       id="path6"
+       sodipodi:nodetypes="ccscccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.9389px;font-family:'0xProto Nerd Font Mono';-inkscape-font-specification:'0xProto Nerd Font Mono, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;direction:ltr;fill:#b42b6f;fill-opacity:1;stroke-width:0.995;stroke-dasharray:none"
+       x="42.552734"
+       y="-6.7779412"
+       id="text6"
+       transform="rotate(31.268332)"><tspan
+         id="tspan6"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.9389px;font-family:'0xProto Nerd Font Mono';-inkscape-font-specification:'0xProto Nerd Font Mono, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#b42b6f;fill-opacity:1;stroke-width:0.995;stroke-dasharray:none"
+         x="42.552734"
+         y="-6.7779412"
+         sodipodi:role="line">1.</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.9389px;font-family:'0xProto Nerd Font Mono';-inkscape-font-specification:'0xProto Nerd Font Mono, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#b42b6f;fill-opacity:1;stroke-width:0.995;stroke-dasharray:none"
+         x="42.552734"
+         y="8.1456842"
+         id="tspan7"
+         sodipodi:role="line">2.</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.9389px;font-family:'0xProto Nerd Font Mono';-inkscape-font-specification:'0xProto Nerd Font Mono, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#b42b6f;fill-opacity:1;stroke-width:0.995;stroke-dasharray:none"
+         x="42.552734"
+         y="23.069309"
+         id="tspan8"
+         sodipodi:role="line">DSQ</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;writing-mode:lr-tb;direction:ltr;fill:#2c89a0;stroke-width:0.264583"
+       x="218.54584"
+       y="114.56458"
+       id="text9"><tspan
+         sodipodi:role="line"
+         id="tspan9"
+         style="stroke-width:0.264583"
+         x="218.54584"
+         y="114.56458" /></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:24.5321px;font-family:'0xProto Nerd Font Mono';-inkscape-font-specification:'0xProto Nerd Font Mono, Bold';writing-mode:lr-tb;direction:ltr;fill:#b42b6f;stroke-width:2.76014"
+       x="76.729156"
+       y="31.749996"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="stroke-width:2.76014"
+         x="76.729156"
+         y="31.749996">SAIL</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:2.76014"
+         x="76.729156"
+         y="62.415123"
+         id="tspan2" /></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:24.5321px;font-family:'0xProto Nerd Font Mono';-inkscape-font-specification:'0xProto Nerd Font Mono, Bold';writing-mode:lr-tb;direction:ltr;fill:#003380;fill-opacity:1;stroke-width:2.76014"
+       x="76.729156"
+       y="54.186119"
+       id="text1-6"><tspan
+         sodipodi:role="line"
+         style="fill:#003380;fill-opacity:1;stroke-width:2.76014"
+         x="76.729156"
+         y="54.186119"
+         id="tspan2-9">RESULTS</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:8.84354px;font-family:'0xProto Nerd Font Mono';-inkscape-font-specification:'0xProto Nerd Font Mono, Bold';writing-mode:lr-tb;direction:ltr;fill:#b42b6f;stroke-width:0.995"
+       x="80.759483"
+       y="46.869343"
+       id="text3"><tspan
+         sodipodi:role="line"
+         id="tspan3"
+         style="stroke-width:0.995"
+         x="80.759483"
+         y="46.869343" /></text>
+  </g>
+</svg>
