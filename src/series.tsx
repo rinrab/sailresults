@@ -12,7 +12,8 @@ export function NewSeriesState() {
 
   const [name, setName] = React.useState("");
 
-  const done = () => {
+  const done = (e) => {
+    e.preventDefault();
     const id = storage.newSeries(name);
     navigate(`/series/${id}/`);
   };
