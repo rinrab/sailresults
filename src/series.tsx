@@ -1,8 +1,8 @@
-import { Button, Divider, Field, Input, Text } from "@fluentui/react-components";
+import { Button, Card, CardHeader, Divider, Field, Input, Text } from "@fluentui/react-components";
+import { ChevronRight24Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
-import EditableText from "./editable-text";
 import ResultsOverview from "./results-overview";
 import { StorageContext } from "./storage-context";
 
@@ -53,25 +53,31 @@ export function SeriesOverviewState() {
       </NavBar>
       <Content>
         <div style={{ overflow: "auto" }}>
-          <Text block size={700}>Series Overview</Text>
-          <Divider style={{ margin: "8px 0" }} />
+          <h2>Series Overview</h2>
 
-          <Button onClick={() => navigate("config")} style={{ width: "200px", margin: "8px 0" }}>Change Configuration</Button>
+          <Card onClick={() => navigate("results")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Results</h3>}
+                        description={<ResultsOverview series={series.current} />}
+                        action={<ChevronRight24Regular /> } />
+          </Card>
 
-          <Divider style={{ margin: "8px 0" }} />
-          <Text block size={500} style={{ margin: "8px 0" }} >Results</Text>
-          <ResultsOverview series={series.current} />
-          <Button onClick={() => navigate("results")} style={{ width: "200px", margin: "8px 0" }}>View Full Results</Button>
+          <Card onClick={() => navigate("races")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Races</h3>}
+                        description={<>There are {series.current.finishboards.length} races.</>}
+                        action={<ChevronRight24Regular /> } />
+          </Card>
 
-          <Divider style={{ margin: "8px 0" }} />
-          <Text block size={500}>Competitors</Text>
-          <Text block>{series.current.racers.length} people are racing in this ragatta.</Text>
-          <Button onClick={() => navigate("competitors")} style={{ width: "200px", margin: "8px 0" }}>Edit Competitors</Button>
+          <Card onClick={() => navigate("competitors")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Competitors</h3>}
+                        description={<>{series.current.racers.length} people are racing in this ragatta.</>}
+                        action={<ChevronRight24Regular /> } />
+          </Card>
 
-          <Divider style={{ margin: "8px 0" }} />
-          <Text block size={500}>Races</Text>
-          <Text block>There are {series.current.finishboards.length} races.</Text>
-          <Button onClick={() => navigate("races")} style={{ width: "200px", margin: "8px 0" }}>Edit Races</Button>
+          <Card onClick={() => navigate("config")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Configuration</h3>}
+                        description={<><b>Name:</b>&nbsp;{series.current.name}</>}
+                        action={<ChevronRight24Regular /> } />
+          </Card>
         </div>
       </Content>
     </Layout>
