@@ -1,5 +1,5 @@
-import { Button, Divider, Text, Card, Body1, CardFooter, MenuTrigger, Menu, MenuPopover, MenuItem } from "@fluentui/react-components";
-import { Open16Regular } from "@fluentui/react-icons";
+import { Button, Divider, Text, Card, Body1, CardFooter, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader } from "@fluentui/react-components";
+import { MoreHorizontalRegular, Open16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
@@ -13,23 +13,37 @@ function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();
 
   return (
-    <Card style={{
-      maxWidth: "400px",
-      width: "100%",
-      height: "fit-content",
-      marginBottom: 8}}
-    >
-      <Body1 as="h5" style={{ margin: 0, fontWeight: "bold" }}>
-        {props.series.name}
-      </Body1>
-      <Text>{props.series.finishboards.length} races / {props.series.racers.length} competitors</Text>
+    <Card appearance="filled"
+          onClick={() => navigate(`/series/${props.series.id}/`)}
+          style={{
+            maxWidth: "400px",
+            width: "100%",
+            height: "fit-content",
+            marginBottom: 8
+          }}
+      >
+
+      <CardHeader 
+        header={<b>{props.series.name}</b>}
+        description={<div>{props.series.finishboards.length} races / {props.series.racers.length} competitors</div>}
+        action={
+          <Menu>
+            <MenuTrigger>
+              <Button appearance="transparent"
+                      onClick={(e) => e.stopPropagation()}
+                      icon={<MoreHorizontalRegular />} />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuItem onClick={(e) => {
+                e.stopPropagation();
+                alert("not implemented");
+              }}>Delete</MenuItem>
+            </MenuPopover>
+          </Menu>
+        }
+      />
 
       <ResultsOverview series={props.series} />
-      
-      <CardFooter>
-        <Button appearance="primary" icon={<Open16Regular />}
-                onClick={() => navigate(`/series/${props.series.id}/`)}>Open</Button>
-      </CardFooter>
     </Card>
   );
 }
