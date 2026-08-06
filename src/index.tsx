@@ -6,7 +6,7 @@ import { DocsAbout, DocsIndex, DocsQuickStart, DocsScoring } from "./docs";
 import ResultsState from "./results";
 import { EditRaceState, NewRaceState } from "./finishboard";
 import ErrorBoundary from "./error";
-import EditCompetitorsState from "./edit-competitors";
+import { EditCompetitorState, ListCompetitorsState } from "./edit-competitors";
 import { NewSeriesState, SeriesOverviewState } from "./series";
 import StartState from "./home";
 import RacesOverviewState from "./races";
@@ -27,7 +27,10 @@ function App() {
                 <Route path=":seriesId">
                   <Route index element={<SeriesOverviewState />} />
                   <Route path="results" element={<ResultsState />} />
-                  <Route path="competitors" element={<EditCompetitorsState />} />
+                  <Route path="competitors">
+                    <Route index element={<ListCompetitorsState />} />
+                    <Route path=":racerId" element={<EditCompetitorState />} />
+                  </Route>
                   <Route path="races">
                     <Route index element={<RacesOverviewState />} />
                     <Route path="new" element={<NewRaceState />} />

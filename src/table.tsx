@@ -13,6 +13,7 @@ export interface SailTableProps<KeyT, ValueT> {
   columns: Column<ValueT>[];
   keys: KeyT[];
   map: (key: KeyT) => ValueT;
+  onSelect?: (item: ValueT, key: KeyT) => void;
 }
 
 export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
@@ -77,13 +78,16 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
             const key = props.keys[item.index];
             const value = props.map(key);
             return (
-              <TableRow key={key as any} style={{
-                display: "flex",
-                height: item.size,
-                position: "absolute",
-                width: "100%",
-                transform: `translateY(${item.start}px)`,
-              }}>
+              <TableRow key={key as any}
+                        style={{
+                          display: "flex",
+                          height: item.size,
+                          position: "absolute",
+                          width: "100%",
+                          transform: `translateY(${item.start}px)`,
+                          cursor: props.onSelect ? "pointer" : "default",
+                        }}
+                        onClick={() => props?.onSelect(value, key)}>
                 {props.columns.map((col, index) => (
                   <TableCell
                     key={index}

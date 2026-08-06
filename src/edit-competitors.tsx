@@ -1,52 +1,63 @@
-import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Card, CardHeader } from "@fluentui/react-components";
-import { MoreHorizontalRegular } from "@fluentui/react-icons";
+import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Card, CardHeader, Field } from "@fluentui/react-components";
+import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
-import EditableText from "./editable-text";
 import { StorageContext } from "./storage-context";
-import { ISeriesEditor } from "./storage";
+import { IRacerEditor, ISeriesEditor } from "./storage";
+import { Column, SailTable } from "./table";
+import { Racer } from "./scoring";
+
+function ActionsCell({ deleteFn }) {
+  return <Menu>
+    <MenuTrigger>
+      <Button icon={<MoreVerticalRegular />} appearance="transparent"
+              onClick={(e) => e.stopPropagation()} />
+    </MenuTrigger>
+    <MenuPopover>
+      <MenuItem onClick={(e) => {
+        e.stopPropagation();
+        deleteFn();
+      }}>Delete</MenuItem>
+    </MenuPopover>
+  </Menu>
+}
 
 function RacersList(props: { series: ISeriesEditor }) {
   const storage = React.useContext(StorageContext);
+  const navigate = useNavigate();
+
+  const columns: Column<IRacerEditor>[] = [
+    {
+      header: "Name",
+      minsize: 120,
+      cell: (row) => <Text>{row.current.name}</Text>,
+    },
+    {
+      header: "Number",
+      minsize: 120,
+      cell: (row) => <Text>{row.current.number}</Text>,
+    },
+    {
+      header: "",
+      size: 32,
+      cell: (row) => {
+        return <ActionsCell deleteFn={() => props.series.removeRacer(row.current.id)} />
+      }
+    }
+  ];
 
   if (props.series.current.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return <div style={{ overflow: "auto", flex: 1 }}>
-      {props.series.current.racers.map((id) => {
-        const racer = storage.openRacer(id);
-        return <Card key={id} style={{ marginBottom: 8 }}>
-          <CardHeader action={
-            <Menu>
-              <MenuTrigger>
-                <Button appearance="transparent"
-                        icon={<MoreHorizontalRegular />} />
-              </MenuTrigger>
-              <MenuPopover>
-                <MenuItem onClick={() => props.series.removeRacer(id)}>Delete</MenuItem>
-              </MenuPopover>
-            </Menu>
-            }
-            description={
-              <div style={{ width: "100%" }}>
-                <EditableText title="Name" 
-                              value={racer.current.name}
-                              setValue={(value) => racer.setName(value)} />
-                <div style={{ height: 8 }} />
-                <EditableText title="Number" 
-                              value={racer.current.number}
-                              setValue={(value) => racer.setNumber(value)} />
-              </div>
-            }
-            ></CardHeader>
-        </Card>
-      })}
-    </div>
+    return <SailTable<number, IRacerEditor> 
+      columns={columns}
+      keys={props.series.current.racers}
+      map={id => storage.openRacer(id)}
+      onSelect={(_, racerId) => navigate(racerId.toString())} />
   }
 }
-
-export default function EditCompetitorsState() {
+export function ListCompetitorsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
   const storage = React.useContext(StorageContext);
@@ -94,6 +105,52 @@ export default function EditCompetitorsState() {
         <RacersList series={series} />
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("..")}>Done</Button>
+        </div>
+      </Content>
+    </Layout>
+  );
+}
+
+function getRacerDescription(racer: Racer) {
+  if (racer.name == "" && racer.number == "") {
+    return "<No name>";
+  } else if (racer.name == "") {
+    return racer.number;
+  } else if (racer.number == "") {
+    return racer.name;
+  } else {
+    return `${racer.name} / ${racer.number}`;
+  }
+}
+
+export function EditCompetitorState() {
+  const navigate = useNavigate();
+  const { seriesId, racerId } = useParams();
+  const storage = React.useContext(StorageContext);
+  const series = storage.openSeries(parseInt(seriesId));
+  const racer = storage.openRacer(parseInt(racerId));
+
+  return (
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.current.name} to="../.." />
+        <NavBarItem title="Competitors" to=".." />
+        <NavBarItem title={getRacerDescription(racer.current)} to="" />
+      </NavBar>
+      <Content>
+        <h1>Editing Competitor</h1>
+        <form style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+          <Field style={{ flex: "0" }} label="Name">
+            <Input placeholder="Name" value={racer.current.name}
+                   onChange={e => racer.setName(e.target.value)} />
+          </Field>
+          <Field style={{ flex: "0" }} label="Number">
+            <Input placeholder="Name" value={racer.current.number}
+                   onChange={e => racer.setNumber(e.target.value)} />
+          </Field>
+        </form>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() => navigate("..")}>Back</Button>
         </div>
       </Content>
     </Layout>
