@@ -2,6 +2,9 @@
   "name": "SailResults",
   "description": "Sailing Results Scoring Calculator",
   "icons": [
+    {
+      "src": "./favicon.svg"
+    }
   ],
   "start_url": "/",
   "display": "standalone",
