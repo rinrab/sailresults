@@ -26,13 +26,11 @@ jobs:
         uses: actions/configure-pages@v5
       - run: npm ci
       - run: npx webpack
+      - run: rm -rf node_modules
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: |
-            .
-            !./node_modules
-
+          path: .
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
