@@ -11,11 +11,6 @@ export default function RacesOverviewState() {
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
 
-  const deleteClick = (e) => {
-    e.stopPropagation();
-    alert("oh im not implemented");
-  };
-
   const EditDraftButton = () => {
     const style = { width: 175, };
     const click = () => navigate("new");
@@ -66,7 +61,10 @@ export default function RacesOverviewState() {
                                 onClick={(e) => e.stopPropagation()} />
                       </MenuTrigger>
                       <MenuPopover>
-                        <MenuItem onClick={deleteClick}>Delete</MenuItem>
+                        <MenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          series.deleteBoard(index);
+                        }}>Delete</MenuItem>
                       </MenuPopover>
                     </Menu>
                   </TableCell>

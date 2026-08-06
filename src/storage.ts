@@ -241,9 +241,10 @@ function getSeriesEditor(
       })
     ),
 
-    deleteBoard: (index) => {
-      series.finishboards = series.finishboards.filter((_, i) => i != index);
-    },
+    deleteBoard: (index) => update((old) => ({
+      ...old,
+      finishboards: series.finishboards.filter((_, i) => i != index),
+    })),
 
     promoteDraft: () => update(old => ({
       ...old,
