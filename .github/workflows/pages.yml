@@ -4,6 +4,7 @@ name: Deploy static content to Pages
 on:
   push:
     branches: ["trunk"]
+  workflow_dispatch:
 
 permissions:
   contents: read
