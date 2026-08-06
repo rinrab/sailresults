@@ -1,4 +1,4 @@
-import { Button, Divider, Input, Text } from "@fluentui/react-components";
+import { Button, Divider, Field, Input, Text } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
@@ -56,10 +56,7 @@ export function SeriesOverviewState() {
           <Text block size={700}>Series Overview</Text>
           <Divider style={{ margin: "8px 0" }} />
 
-          <Text block size={500} style={{ margin: "8px 0" }} >Settings</Text>
-          <EditableText rejectEmpty title="Name"
-                        value={series.current.name}
-                        setValue={value => series.setName(value)} />
+          <Button onClick={() => navigate("config")} style={{ width: "200px", margin: "8px 0" }}>Change Configuration</Button>
 
           <Divider style={{ margin: "8px 0" }} />
           <Text block size={500} style={{ margin: "8px 0" }} >Results</Text>
@@ -75,6 +72,35 @@ export function SeriesOverviewState() {
           <Text block size={500}>Races</Text>
           <Text block>There are {series.current.finishboards.length} races.</Text>
           <Button onClick={() => navigate("races")} style={{ width: "200px", margin: "8px 0" }}>Edit Races</Button>
+        </div>
+      </Content>
+    </Layout>
+  );
+}
+
+export function SeriesConfigurationState() {
+  const navigate = useNavigate();
+  const { seriesId } = useParams();
+  const storage = React.useContext(StorageContext);
+  const series = storage.openSeries(parseInt(seriesId));
+  
+  return (
+    <Layout>
+      <NavBar>
+        <NavBarItem title={series.current.name} to=".." />
+        <NavBarItem title="Configuration" to="" />
+      </NavBar>
+      <Content>
+        <div style={{ overflow: "auto", flex: 1 }}>
+          <h1>Series Configuration</h1>
+
+          <Field label="Name">
+            <Input value={series.current.name}
+                   onChange={(e) => series.setName(e.target.value)} />
+          </Field>
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() => navigate("..")}>Back</Button>
         </div>
       </Content>
     </Layout>

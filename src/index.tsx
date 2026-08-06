@@ -7,7 +7,7 @@ import ResultsState from "./results";
 import { EditRaceState, NewRaceState } from "./finishboard";
 import ErrorBoundary from "./error";
 import { EditCompetitorState, ListCompetitorsState } from "./edit-competitors";
-import { NewSeriesState, SeriesOverviewState } from "./series";
+import { NewSeriesState, SeriesConfigurationState, SeriesOverviewState } from "./series";
 import StartState from "./home";
 import RacesOverviewState from "./races";
 import { StorageProvider } from "./storage-context";
@@ -26,6 +26,7 @@ function App() {
                 <Route path="new" element={<NewSeriesState />} />
                 <Route path=":seriesId">
                   <Route index element={<SeriesOverviewState />} />
+                  <Route path="config" element={<SeriesConfigurationState />} />
                   <Route path="results" element={<ResultsState />} />
                   <Route path="competitors">
                     <Route index element={<ListCompetitorsState />} />
