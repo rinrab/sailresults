@@ -85,9 +85,15 @@ function compareEvaluatedRacers(left: EvaluatedRacer, right: EvaluatedRacer): nu
    * excluded scores. 
    *
    * reference: A8.2 */
+  for (let i = racesCount - 1; i >= 0; i--) {
+    const diff = left.scores[i].realScore -
+                 right.scores[i].realScore;
+    if (diff != 0) {
+      return diff;
+    }
+  }
 
-  return left.scores[racesCount - 1].realScore -
-         right.scores[racesCount - 1].realScore;
+  return 0;
 }
 
 export function evaluateScoreboard(
