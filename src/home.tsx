@@ -8,6 +8,7 @@ import { Series } from "./scoring";
 import { samples } from "./sample-data";
 import { importSeries, PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
+import { FeaturesList } from "./docs";
 
 function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();
@@ -91,8 +92,10 @@ export default function StartState() {
       <Content>
         <div style={{ overflow: "auto" }}>
           <div style={{ textAlign: "center" }}>
-            <h1>SailResults</h1>
+            <img src="wide.svg" style={{ height: 64 }} />
           </div>
+          <h2>Features</h2>
+          <FeaturesList />
           <Divider style={{ margin: "8px 0" }} />
           <h2>Recent Series</h2>
           <div style={{

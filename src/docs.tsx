@@ -4,6 +4,17 @@ import React from "react";
 import { Link, Text } from "@fluentui/react-components";
 import { dsqs } from "./scoring";
 
+export function FeaturesList() {
+  return <ul>
+    <li>Simple and convenient user experience.</li>
+    <li>Optimised for mobile devices.</li>
+    <li>Best for small in-club regattas.</li>
+    <li>Free and Open-Source.</li>
+    <li>No registration nor installation needed.</li>
+    <li>No telemetry&trade;</li>
+  </ul>
+}
+
 export function DocsIndex() {
   const navigate = useNavigate();
   return <Layout>
@@ -42,14 +53,7 @@ export function DocsAbout() {
           <p>This is a sailing scoring program. It focues on simplicity and
           minimalistic approach.</p>
           <h3>Features</h3>
-          <ul>
-            <li>Simple and convenient user experience.</li>
-            <li>Optimised for mobile devices.</li>
-            <li>Best for small in-club regattas.</li>
-            <li>Free and Open-Source.</li>
-            <li>No registration nor installation needed.</li>
-            <li>No telemetry&trade;</li>
-          </ul>
+          <FeaturesList />
 
           <h3>Credits</h3>
           <ul>
