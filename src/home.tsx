@@ -22,7 +22,7 @@ function SeriesCard(props: { series: Series }) {
       <Body1 as="h5" style={{ margin: 0, fontWeight: "bold" }}>
         {props.series.name}
       </Body1>
-      <Text>{3} races / {props.series.racers.length} competitors</Text>
+      <Text>{props.series.finishboards.length} races / {props.series.racers.length} competitors</Text>
 
       <ResultsOverview series={props.series} />
       
