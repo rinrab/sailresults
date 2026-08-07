@@ -1,5 +1,6 @@
 {
   "name": "SailResults",
+  "short_name": "SailResults",
   "description": "Sailing Results Scoring Calculator",
   "icons": [
     {
