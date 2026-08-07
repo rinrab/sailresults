@@ -246,11 +246,17 @@ function getSeriesEditor(
       finishboards: series.finishboards.filter((_, i) => i != index),
     })),
 
-    promoteDraft: () => update(old => ({
-      ...old,
-      finishboards: [...old.finishboards, old.draftFinishboard],
-      draftFinishboard: null,
-    })),
+    promoteDraft: () => update(old => {
+      if (! old.draftFinishboard) {
+        throw new Error("the draft is empty");
+      }
+
+      return {
+        ...old,
+        finishboards: [...old.finishboards, old.draftFinishboard],
+        draftFinishboard: null,
+      }
+    }),
 
     openDraft: () => getBoardEditor(
       series,
