@@ -153,12 +153,8 @@ export function openSeries(): SeriesCollection {
   const result: SeriesCollection = {};
 
   for (const [key, value] of Object.entries(stored)) {
-    if (!value) {
-      continue;
-    }
-
     const finishboards = ensureArray(value.finishboards)
-      .map(board => openFinishboard(board));
+      .filter(board => !! board).map(board => openFinishboard(board));
       
     const draft = value.draftFinishboard
       ? openFinishboard(value.draftFinishboard) 
