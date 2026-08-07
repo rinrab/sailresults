@@ -23,9 +23,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="2"
-     inkscape:cx="-10"
-     inkscape:cy="100.75"
+     inkscape:zoom="1"
+     inkscape:cx="-2"
+     inkscape:cy="124.5"
      inkscape:window-width="2560"
      inkscape:window-height="1416"
      inkscape:window-x="0"
@@ -120,15 +120,10 @@
        rx="17.200001"
        transform="translate(18.309426,-80.039628)" />
     <path
-       style="fill:#ffffff;stroke-width:0.488297"
-       d="m 11.030205,58.57394 c 6.706531,1.205867 21.960721,0.807563 38.202038,0.345616 6.275614,-1.120028 9.607945,-3.575026 10.561483,-7.681786 -0.106687,-0.349884 -0.192842,-0.247869 -0.611544,-0.274628 -15.448525,-0.986675 -27.96739,-1.387887 -49.2163938,-0.453405 -1.1693601,0.912532 -1.1541907,7.146944 1.0644168,8.064187 z"
        id="path5"
-       sodipodi:nodetypes="cccsccc" />
-    <path
-       style="fill:#ffffff;stroke-width:0.264583"
-       d="M 53.107924,50.600186 C 68.910897,13.122274 51.632206,6.987135 49.4771,6.4161241 38.510214,2.6458164 31.784725,5.7365518 23.892415,14.441105 13.568037,25.828025 13.834305,26.423309 13.295312,33.205199 c -0.141782,4.692203 1.368549,7.062429 2.778126,9.657296 2.682016,2.662416 8.065115,9.00792 18.276735,7.12832 z"
-       id="path6"
-       sodipodi:nodetypes="ccscccc" />
+       style="fill:#ffffff;stroke-width:0.488297"
+       d="M 40.272994,4.8534505 C 34.192635,5.1257314 29.318562,8.4565987 23.892598,14.440979 13.56822,25.827899 13.834305,26.423318 13.295312,33.205208 c -0.141782,4.692203 1.368548,7.062425 2.778125,9.657292 1.988835,1.9743 5.462831,5.974123 11.289751,7.143233 -5.203873,0.05722 -10.891347,0.217725 -17.397388,0.503845 -1.1693601,0.912532 -1.154073,7.146865 1.064534,8.064108 6.706531,1.205867 21.960486,0.807662 38.201803,0.345715 6.275614,-1.120028 9.608091,-3.574942 10.561629,-7.681702 -0.106687,-0.349884 -0.19263,-0.247642 -0.611332,-0.274401 -2.067936,-0.132077 -4.083652,-0.25399 -6.074565,-0.363286 -6.422415,-0.352572 0,0 0,0 C 68.910842,13.1221 51.632189,6.9871567 49.477083,6.4161458 46.049931,5.2379247 43.036794,4.7296865 40.272994,4.8534505 Z"
+       sodipodi:nodetypes="ssccccccccsccs" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.9389px;font-family:Monospace;-inkscape-font-specification:'Monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;direction:ltr;fill:#b42b6f;stroke-width:0.995;stroke-dasharray:none;fill-opacity:1"
