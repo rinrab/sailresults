@@ -83,3 +83,11 @@ async function registerServiceWorker() {
 };
 
 registerServiceWorker();
+
+function doResize() {
+  const height = window.visualViewport?.height ?? window.innerHeight;
+  document.body.style.height = height + "px";
+}
+
+addEventListener("resize", doResize);
+doResize();
