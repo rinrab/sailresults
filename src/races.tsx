@@ -2,7 +2,7 @@ import { Button, Divider, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableB
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem } from "./common";
+import { Content, Layout, NavBar, NavBarItem, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 
 export default function RacesOverviewState() {
@@ -78,6 +78,7 @@ export default function RacesOverviewState() {
           <EditDraftButton />
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }

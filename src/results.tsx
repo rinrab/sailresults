@@ -1,7 +1,7 @@
 import { Button, Text, TableRow, TableCell, TableHeader, Table, TableBody } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
+import { Content, formatString, Layout, NavBar, NavBarItem, SeriesNavigation } from "./common";
 import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
 import { StorageContext } from "./storage-context";
 
@@ -117,6 +117,7 @@ export default function ResultsState() {
           <Button onClick={() => window.print()}>Print</Button>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }

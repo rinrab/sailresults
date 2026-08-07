@@ -2,7 +2,7 @@ import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuP
 import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, NavBarItem, racerMatches } from "./common";
+import { Content, formatString, Layout, NavBar, NavBarItem, racerMatches, SeriesNavigation } from "./common";
 import {  Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
 import { IBoardEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
@@ -298,6 +298,7 @@ export function NewRaceState() {
           </div>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   )
 }
@@ -340,6 +341,7 @@ export function EditRaceState() {
           </div>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   )
 }

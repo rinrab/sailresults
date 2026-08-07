@@ -2,7 +2,7 @@ import { Button, Card, CardHeader, Divider, Field, Input, Text } from "@fluentui
 import { ChevronRight24Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem } from "./common";
+import { Content, Layout, NavBar, NavBarItem, SeriesNavigation } from "./common";
 import ResultsOverview from "./results-overview";
 import { StorageContext } from "./storage-context";
 
@@ -81,6 +81,7 @@ export function SeriesOverviewState() {
           </Card>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }
@@ -110,6 +111,7 @@ export function SeriesConfigurationState() {
           <Button onClick={() => navigate("..")}>Back</Button>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }

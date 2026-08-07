@@ -2,7 +2,7 @@ import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem,
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem } from "./common";
+import { Content, Layout, NavBar, NavBarItem, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 import { IRacerEditor, ISeriesEditor } from "./storage";
 import { Column, SailTable } from "./table";
@@ -107,6 +107,7 @@ export function ListCompetitorsState() {
           <Button onClick={() => navigate("..")}>Done</Button>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }
@@ -153,6 +154,7 @@ export function EditCompetitorState() {
           <Button onClick={() => navigate("..")}>Back</Button>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }

@@ -1,7 +1,7 @@
-import { tokens, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider } from "@fluentui/react-components";
-import { Home24Filled } from "@fluentui/react-icons";
+import { tokens, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, TabList, Tab, Text } from "@fluentui/react-components";
+import { Flag20Regular, FlagRegular, Home20Regular, Home24Filled, Home24Regular, HomeRegular, People20Regular, PeopleRegular, Settings20Regular, SettingsRegular, Trophy20Regular, Trophy24Regular, TrophyRegular } from "@fluentui/react-icons";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useMatch, useMatches, useNavigate, useParams } from "react-router-dom";
 import { Racer } from "./scoring";
 
 export function formatString(str: string) {
@@ -46,6 +46,40 @@ export function NavBarItem({ title, to }) {
       <BreadcrumbButton onClick={() => navigate(to)}>{title}</BreadcrumbButton>
     </BreadcrumbItem>
   </>
+}
+
+export function SeriesNavigation() {
+  const navigate = useNavigate();
+  const { seriesId, page } = useMatch("/series/:seriesId/:page?/*").params;
+
+  return <TabList style={{ 
+                    backgroundColor: tokens.colorNeutralBackground4,
+                    display: "flex",
+                    justifyContent: "space-around",
+                  }}
+                  onTabSelect={(_, data) => navigate(`/series/${seriesId}/${data.value ?? ""}`)}
+                  selectedValue={page}>
+    <Tab value={undefined}>
+      <Home20Regular />
+      <Text block size={100}>Overview</Text>
+    </Tab>
+    <Tab value="results">
+      <Trophy20Regular />
+      <Text block size={100}>Results</Text>
+    </Tab>
+    <Tab value="races">
+      <Flag20Regular />
+      <Text block size={100}>Races</Text>
+    </Tab>
+    <Tab value="competitors">
+      <People20Regular />
+      <Text block size={100}>Competitors</Text>
+    </Tab>
+    <Tab value="config">
+      <Settings20Regular />
+      <Text block size={100}>Settings</Text>
+    </Tab>
+  </TabList>
 }
 
 export function Content({ children, screenOnly = false }) {
