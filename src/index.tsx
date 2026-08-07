@@ -85,9 +85,8 @@ async function registerServiceWorker() {
 registerServiceWorker();
 
 function doResize() {
-  const height = window.visualViewport?.height ?? window.innerHeight;
-  document.body.style.height = height + "px";
+  document.body.style.height = window.visualViewport.height + "px";
 }
 
-addEventListener("resize", doResize);
+window.visualViewport.addEventListener("resize", doResize);
 doResize();
