@@ -4,7 +4,8 @@
   "description": "Sailing Results Scoring Calculator",
   "icons": [
     {
-      "src": "./favicon.svg"
+      "src": "./favicon.svg",
+      "purpose": "any"
     }
   ],
   "start_url": "/",
