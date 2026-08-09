@@ -92,7 +92,7 @@ export default function StartState() {
       <Content>
         <div style={{ overflow: "auto" }}>
           <div style={{ textAlign: "center" }}>
-            <img src="wide.svg" style={{ height: 64 }} />
+            <img src="/assets/wide.svg" style={{ height: 64 }} />
           </div>
           <h2>Features</h2>
           <FeaturesList />
