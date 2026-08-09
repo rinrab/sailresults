@@ -58,6 +58,7 @@ export function DocsAbout() {
           <h3>Credits</h3>
           <ul>
             <li>Timofei Zhakov - I'm the author, hey guys!</li>
+            <li>Rautu - The idea and early adoption.</li>
             <li>SailWave a great alternative that does a similar job. If you
             look for long enough, you'd find any exotic feature you want.
             It's also free btw.</li>
