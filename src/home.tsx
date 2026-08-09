@@ -1,5 +1,5 @@
-import { Button, Divider, Text, Card, Body1, CardFooter, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, SplitButton, MenuGroupHeader, MenuDivider } from "@fluentui/react-components";
-import { BookQuestionMarkRegular, DocumentAddRegular, MoreHorizontalRegular, NewRegular, Open16Regular } from "@fluentui/react-icons";
+import { Button, Divider, Text, Card, Body1, CardFooter, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, SplitButton, MenuGroupHeader, MenuDivider, tokens, CardPreview } from "@fluentui/react-components";
+import { Add48Regular, AddRegular, BookQuestionMarkRegular, DocumentAddRegular, MoreHorizontalRegular, NewRegular, Open16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
@@ -104,6 +104,12 @@ export default function StartState() {
             flexDirection: "column",
             columnGap: "16px",
             rowGap: "36px" }}>
+            <Card style={{ display: "flex", alignItems: "center", height: 120 }} onClick={() => navigate("/series/new")}>
+              <div style={{ flex: 1 }} />
+              <Add48Regular />
+              <div style={{ flex: 1 }} />
+              <b>Blank new Series</b>
+            </Card>
             {Object.values(series).map((item: Series) => (
               <SeriesCard key={item.id} series={item} />
             ))}
