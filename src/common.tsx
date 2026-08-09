@@ -1,5 +1,5 @@
-import { tokens, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, TabList, Tab, Text } from "@fluentui/react-components";
-import { Flag20Regular, FlagRegular, Home20Regular, Home24Filled, Home24Regular, HomeRegular, People20Regular, PeopleRegular, Settings20Regular, SettingsRegular, Trophy20Regular, Trophy24Regular, TrophyRegular } from "@fluentui/react-icons";
+import { tokens, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, TabList, Tab, Text, Button } from "@fluentui/react-components";
+import { ArrowLeftRegular, Flag20Regular, FlagRegular, Home20Regular, Home24Filled, Home24Regular, HomeRegular, People20Regular, PeopleRegular, Settings20Regular, SettingsRegular, Trophy20Regular, Trophy24Regular, TrophyRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useLocation, useMatch, useMatches, useNavigate, useParams } from "react-router-dom";
 import { Racer } from "./scoring";
@@ -19,33 +19,43 @@ export function Layout({ children, print = undefined }) {
   </div>;
 }
 
-export function NavBar({ children }) {
-  const navigate = useNavigate();
-
+export function NavBarCenter({ title, subtitle }) {
   return <div style={{
-    padding: "4px 8px",
+    padding: "8px 8px",
     backgroundColor: tokens.colorNeutralBackground4,
-    display: "flex",
   }} className="screen-only">
-    <Breadcrumb style={{ flex: 1 }}>
-      <BreadcrumbItem>
-        <BreadcrumbButton onClick={() => navigate("/")}>
-          <Home24Filled />
-        </BreadcrumbButton>
-      </BreadcrumbItem>
-      { children }
-    </Breadcrumb>
+    <Text style={{ width: "100%", textAlign: "center" }} block weight="bold" size={200}>
+      {title}
+    </Text>
+    <Text style={{ width: "100%", textAlign: "center" }} block size={200}>
+      {subtitle}
+    </Text>
   </div>;
 }
 
-export function NavBarItem({ title, to }) {
+export function NavBar({ title, subtitle = undefined, back = ".." }) {
   const navigate = useNavigate();
-  return <>
-    <BreadcrumbDivider />
-    <BreadcrumbItem>
-      <BreadcrumbButton onClick={() => navigate(to)}>{title}</BreadcrumbButton>
-    </BreadcrumbItem>
-  </>
+
+  return <div style={{
+    padding: "8px 8px",
+    backgroundColor: tokens.colorNeutralBackground4,
+    display: "flex",
+    gap: 4,
+  }} className="screen-only">
+    {back && 
+      <Button icon={<ArrowLeftRegular /> }
+              onClick={() => navigate(back)}
+              appearance="transparent" />
+    }
+    <div style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "center" }}>
+      <Text weight="bold" size={200}>
+        {title}
+      </Text>
+      {subtitle && <Text size={200}>
+        {subtitle}
+      </Text>}
+    </div>
+  </div>;
 }
 
 export function SeriesNavigation() {

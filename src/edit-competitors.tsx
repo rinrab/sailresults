@@ -2,7 +2,7 @@ import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem,
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem, SeriesNavigation } from "./common";
+import { Content, Layout, NavBar, NavBarCenter, NavBarItem, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 import { IRacerEditor, ISeriesEditor } from "./storage";
 import { Column, SailTable } from "./table";
@@ -84,10 +84,8 @@ export function ListCompetitorsState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title={series.current.name} to=".." />
-        <NavBarItem title="Competitors" to="" />
-      </NavBar>
+      <NavBarCenter title={series.current.name}
+                    subtitle="Competitors" />
       <Content>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
         <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
@@ -133,11 +131,8 @@ export function EditCompetitorState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title={series.current.name} to="../.." />
-        <NavBarItem title="Competitors" to=".." />
-        <NavBarItem title={getRacerDescription(racer.current)} to="" />
-      </NavBar>
+      <NavBar title={series.current.name}
+              subtitle={getRacerDescription(racer.current)} />
       <Content>
         <h1>Editing Competitor</h1>
         <form style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
@@ -154,7 +149,6 @@ export function EditCompetitorState() {
           <Button onClick={() => navigate("..")}>Back</Button>
         </div>
       </Content>
-      <SeriesNavigation />
     </Layout>
   );
 }

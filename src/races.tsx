@@ -2,7 +2,7 @@ import { Button, Divider, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableB
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem, SeriesNavigation } from "./common";
+import { Content, Layout, NavBarCenter, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 
 export default function RacesOverviewState() {
@@ -32,10 +32,7 @@ export default function RacesOverviewState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title={ series.current.name } to=".." />
-        <NavBarItem title="Races" to="" />
-      </NavBar>
+      <NavBarCenter title={series.current.name} subtitle="Races" />
       <Content>
         <div style={{ overflow: "auto", flex: 1 }}>
           <Text size={700}>Races</Text>
