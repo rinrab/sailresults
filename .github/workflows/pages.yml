@@ -3,7 +3,7 @@ name: Deploy static content to Pages
 
 on:
   push:
-    branches: ["trunk"]
+    branches: ["production"]
   workflow_dispatch:
 
 permissions:
