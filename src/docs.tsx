@@ -3,6 +3,7 @@ import { Content, Layout, NavBar } from "./common";
 import React from "react";
 import { Text } from "@fluentui/react-components";
 import { dsqs } from "./scoring";
+import { version_major, version_minor, revnum } from "./version";
 
 export function FeaturesList() {
   return <ul>
@@ -58,6 +59,11 @@ export function DocsAbout() {
           <li>SailWave a great alternative that does a similar job. If you
           look for long enough, you'd find any exotic feature you want.
           It's also free btw.</li>
+        </ul>
+        <h3>Version</h3>
+        <ul>
+          <li>Version: {version_major}.{version_minor} {revnum == "staging" && ("(in development)")}</li>
+          <li>Subversion revision number: {revnum}</li>
         </ul>
       </div>
     </Content>
