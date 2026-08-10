@@ -2,7 +2,7 @@ import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem,
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarCenter, SeriesNavigation } from "./common";
+import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 import { IRacerEditor, ISeriesEditor } from "./storage";
 import { Column, SailTable } from "./table";
@@ -84,8 +84,8 @@ export function ListCompetitorsState() {
 
   return (
     <Layout>
-      <NavBarCenter title={series.current.name}
-                    subtitle="Competitors" />
+      <NavBar title={series.current.name}
+              subtitle="Competitors" />
       <Content>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
         <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}

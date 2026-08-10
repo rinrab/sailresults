@@ -2,7 +2,7 @@ import { Button, Card, CardHeader, Divider, Field, Input, Text } from "@fluentui
 import { ChevronRight24Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarCenter, SeriesNavigation } from "./common";
+import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import ResultsOverview from "./results-overview";
 import { StorageContext } from "./storage-context";
 
@@ -90,7 +90,7 @@ export function SeriesConfigurationState() {
   
   return (
     <Layout>
-      <NavBarCenter title={series.current.name} subtitle="Configuration" />
+      <NavBar title={series.current.name} subtitle="Configuration" />
       <Content>
         <div style={{ overflow: "auto", flex: 1 }}>
           <h1>Series Configuration</h1>

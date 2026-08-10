@@ -2,7 +2,7 @@ import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuP
 import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, NavBarCenter, racerMatches, SeriesNavigation } from "./common";
+import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
 import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
 import { IBoardEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";

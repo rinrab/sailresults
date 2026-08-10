@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarCenter } from "./common";
+import { Content, Layout, NavBar } from "./common";
 import React from "react";
 import { Text } from "@fluentui/react-components";
 import { dsqs } from "./scoring";
