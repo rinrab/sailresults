@@ -65,30 +65,32 @@ export function SeriesNavigation() {
   return <TabList style={{ 
                     backgroundColor: tokens.colorNeutralBackground4,
                     display: "flex",
-                    justifyContent: "space-around",
+                    justifyContent: "center"
                   }}
                   onTabSelect={(_, data) => navigate(`/series/${seriesId}/${data.value ?? ""}`)}
                   selectedValue={page}>
-    <Tab value={undefined}>
-      <Home20Regular />
-      <Text block size={100}>Overview</Text>
-    </Tab>
-    <Tab value="results">
-      <Trophy20Regular />
-      <Text block size={100}>Results</Text>
-    </Tab>
-    <Tab value="races">
-      <Flag20Regular />
-      <Text block size={100}>Races</Text>
-    </Tab>
-    <Tab value="competitors">
-      <People20Regular />
-      <Text block size={100}>Competitors</Text>
-    </Tab>
-    <Tab value="config">
-      <Settings20Regular />
-      <Text block size={100}>Settings</Text>
-    </Tab>
+    <div style={{ display: "flex", flex: 1, justifyContent: "space-around", maxWidth: 400 }}>
+      <Tab value={undefined}>
+        <Home20Regular />
+        <Text block size={100}>Overview</Text>
+      </Tab>
+      <Tab value="results">
+        <Trophy20Regular />
+        <Text block size={100}>Results</Text>
+      </Tab>
+      <Tab value="races">
+        <Flag20Regular />
+        <Text block size={100}>Races</Text>
+      </Tab>
+      <Tab value="competitors">
+        <People20Regular />
+        <Text block size={100}>Competitors</Text>
+      </Tab>
+      <Tab value="config">
+        <Settings20Regular />
+        <Text block size={100}>Settings</Text>
+      </Tab>
+    </div>
   </TabList>
 }
 
