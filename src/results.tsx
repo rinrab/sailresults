@@ -22,13 +22,14 @@ function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
       <table style={{ width: "100%" }}>
         <thead>
           <tr>
-            <th style={{ textAlign: "right" }}>Rank</th>
+            <th style={{ textAlign: "right" }}>#</th>
             <th>Name</th>
             <th>Number</th>
             {props.series.finishboards.map((_, index) =>
               <th key={index} style={{ textAlign: "center" }}>R{index + 1}</th>
             )}
             <th style={{ textAlign: "center" }}>Total</th>
+            <th style={{ textAlign: "center" }}>Rank</th>
           </tr>
         </thead>
         <tbody>
@@ -42,6 +43,7 @@ function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
                   <ScoreCell score={score} />
                 </td>)}
               <td style={{ textAlign: "center", fontWeight: "bolder" }}>{row.total}</td>
+              <td style={{ textAlign: "center" }}>{row.rank}</td>
             </tr>
           )}
         </tbody>
@@ -60,8 +62,8 @@ export default function ResultsState() {
 
   const columns: Column<EvaluatedRacer>[] = [
     {
-      header: "Rank",
-      cell: (row) => <Text>{row.rank}</Text>,
+      header: "#",
+      cell: (_, index) => <Text>{index + 1}</Text>,
       size: 40,
       align: "end",
     },
@@ -85,6 +87,12 @@ export default function ResultsState() {
       header: <Text weight="bold">Total</Text>,
       size: 70,
       cell: (row) => <Text weight="bold">{row.total}</Text>,
+      align: "center",
+    },
+    {
+      header: "Rank",
+      cell: (row) => <Text>{row.rank}</Text>,
+      size: 40,
       align: "center",
     },
   ];
