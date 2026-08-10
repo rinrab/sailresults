@@ -67,6 +67,7 @@ export function SeriesNavigation() {
                     display: "flex",
                     justifyContent: "center"
                   }}
+                  className="screen-only"
                   onTabSelect={(_, data) => navigate(`/series/${seriesId}/${data.value ?? ""}`)}
                   selectedValue={page}>
     <div style={{ display: "flex", flex: 1, justifyContent: "space-around", maxWidth: 400 }}>
