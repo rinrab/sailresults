@@ -13,7 +13,7 @@ path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("src/version.ts")
 revnum = subprocess.check_output(
     ["svnversion", "."],
     text=True,
-).strip()
+).strip().replace("M", "")
 
 text = path.read_text()
 
