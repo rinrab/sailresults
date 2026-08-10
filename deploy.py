@@ -2,13 +2,12 @@
 
 import re
 import subprocess
-import sys
 from pathlib import Path
 
 subprocess.run(["svn", "switch", "^/sailresults/branches/production"]);
 subprocess.run(["svn", "merge", "^/sailresults/trunk"]);
 
-path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("src/version.ts")
+path = Path("src/version.ts")
 
 revnum = subprocess.check_output(
     ["svnversion", "."],
@@ -29,3 +28,6 @@ if count != 1:
     raise RuntimeError("Could not find revnum declaration")
 
 path.write_text(text)
+
+svn_commit = Path("svn-commit.tmp")
+svn_commit.write_text(f"[deploy.py] publish r{revnum}")
