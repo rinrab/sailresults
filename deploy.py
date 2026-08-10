@@ -18,7 +18,7 @@ text = path.read_text()
 
 text, count = re.subn(
     r'^(export const revnum\s*=\s*)"[^"]*"(;)$',
-    rf'\1"{revnum}"\2',
+    rf'\1"r{revnum}"\2',
     text,
     count=1,
     flags=re.MULTILINE,
