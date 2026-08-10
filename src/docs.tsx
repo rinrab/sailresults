@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarItem } from "./common";
 import React from "react";
-import { Link, Text } from "@fluentui/react-components";
+import { Text } from "@fluentui/react-components";
 import { dsqs } from "./scoring";
 
 export function FeaturesList() {
@@ -11,12 +11,13 @@ export function FeaturesList() {
     <li>Best for small in-club regattas.</li>
     <li>Free and Open-Source.</li>
     <li>No registration nor installation needed.</li>
-    <li>No telemetry&trade;</li>
+    <li>All your data is stored locally.</li>
+    <li>Scoring according to the "Appendix A of the RSS". <Link to="/docs/scoring">Learn More</Link></li>
+    <li>Interactive finish board entry.</li>
   </ul>
 }
 
 export function DocsIndex() {
-  const navigate = useNavigate();
   return <Layout>
     <NavBar>
       <NavBarItem title="Documentation" to="" />
@@ -26,13 +27,13 @@ export function DocsIndex() {
         <h1>Documentation</h1>
         <ul>
           <li>
-            <Link onClick={() => navigate("about")}>About</Link>
+            <Link to="about">About</Link>
           </li>
           <li>
-            <Link onClick={() => navigate("quick-start")}>Quick Start</Link>
+            <Link to="quick-start">Quick Start</Link>
           </li>
           <li>
-            <Link onClick={() => navigate("scoring")}>Scoring</Link>
+            <Link to="scoring">Scoring</Link>
           </li>
         </ul>
       </div>
