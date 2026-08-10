@@ -22,11 +22,8 @@ jobs:
       - run: npm ci
       - run: npx webpack
       - run: rm -rf node_modules
-      - name: Publish to Cloudflare Pages
-        uses: cloudflare/pages-action@1
+      - name: Build & Deploy Worker
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: da686163d8d0e9e497aa54ce3f7e0a57
-          projectName: sailresults
-          directory: .
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
