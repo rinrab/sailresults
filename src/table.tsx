@@ -4,7 +4,7 @@ import React from "react";
 
 export interface Column<T> {
   header: string | React.ReactElement;
-  cell: (row: T) => React.ReactElement;
+  cell: (row: T, index: number) => React.ReactElement;
   size?: number;
   minsize?: number;
   align?: "start" | "center" | "end";
@@ -95,7 +95,7 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
                   <TableCell
                     key={index}
                     style={getCellStyles(col)}>
-                    {col.cell(value)}
+                    {col.cell(value, item.index)}
                   </TableCell>
                 ))}
               </TableRow>

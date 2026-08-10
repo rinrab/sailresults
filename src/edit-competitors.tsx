@@ -29,6 +29,12 @@ function RacersList(props: { series: ISeriesEditor }) {
 
   const columns: Column<IRacerEditor>[] = [
     {
+      header: "#",
+      size: 40,
+      align: "end",
+      cell: (_, index) => <Text>{index + 1}</Text>,
+    },
+    {
       header: "Name",
       minsize: 120,
       cell: (row) => <Text>{row.current.name}</Text>,
