@@ -1,0 +1,32 @@
+name: cloudflare testing
+
+on:
+  push:
+    branches: ["trunk"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - run: npm ci
+      - run: npx webpack
+      - run: rm -rf node_modules
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: da686163d8d0e9e497aa54ce3f7e0a57
+          projectName: sailresults
+          directory: .
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
