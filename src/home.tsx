@@ -105,7 +105,13 @@ export default function StartState() {
             padding: 8,
             columnGap: "16px",
             rowGap: "36px" }}>
-            <Card style={{ display: "flex", alignItems: "center", height: 120 }} onClick={() => navigate("/series/new")}>
+            <Card style={{ 
+                    display: "flex",
+                    alignItems: "center",
+                    height: 120,
+                    maxWidth: "400px",
+                  }}
+                  onClick={() => navigate("/series/new")}>
               <div style={{ flex: 1 }} />
               <Add48Regular />
               <div style={{ flex: 1 }} />
