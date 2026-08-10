@@ -63,7 +63,7 @@ export function DocsAbout() {
         <h3>Version</h3>
         <ul>
           <li>Version: {version_major}.{version_minor} {revnum == "staging" && ("(in development)")}</li>
-          <li>Subversion revision number: {revnum}</li>
+          <li>Subversion revision number: r{revnum}</li>
         </ul>
       </div>
     </Content>
