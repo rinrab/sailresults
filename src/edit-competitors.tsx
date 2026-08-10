@@ -1,8 +1,8 @@
-import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Card, CardHeader, Field } from "@fluentui/react-components";
+import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Field } from "@fluentui/react-components";
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarCenter, NavBarItem, SeriesNavigation } from "./common";
+import { Content, Layout, NavBar, NavBarCenter, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 import { IRacerEditor, ISeriesEditor } from "./storage";
 import { Column, SailTable } from "./table";

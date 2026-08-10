@@ -1,11 +1,10 @@
-import { Button, Divider, Text, Card, Body1, CardFooter, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, SplitButton, MenuGroupHeader, MenuDivider, tokens, CardPreview } from "@fluentui/react-components";
-import { Add48Regular, AddRegular, BookQuestionMarkRegular, DocumentAddRegular, MoreHorizontalRegular, NewRegular, Open16Regular } from "@fluentui/react-icons";
+import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader } from "@fluentui/react-components";
+import { Add48Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem } from "./common";
+import { Content, Layout } from "./common";
 import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
-import { samples } from "./sample-data";
 import { importSeries, PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
 import { FeaturesList } from "./docs";
