@@ -3,7 +3,6 @@ import { Content, Layout, NavBar, NavBarItem } from "./common";
 import React from "react";
 import { Link, Text } from "@fluentui/react-components";
 import { dsqs } from "./scoring";
-import { version_major, version_minor, revnum } from "./version";
 
 export function FeaturesList() {
   return <ul>
@@ -56,21 +55,16 @@ export function DocsAbout() {
           <h3>Features</h3>
           <FeaturesList />
 
-        <h3>Credits</h3>
-        <ul>
-          <li>Timofei Zhakov - I'm the author, hey guys!</li>
-          <li>Rautu - The idea and early adoption.</li>
-          <li>SailWave a great alternative that does a similar job. If you
-          look for long enough, you'd find any exotic feature you want.
-          It's also free btw.</li>
-        </ul>
-        <h3>Version</h3>
-        <ul>
-          <li>Version: {version_major}.{version_minor} {revnum == "staging" && ("(in development)")}</li>
-          <li>Subversion revision number: {revnum}</li>
-        </ul>
-      </div>
-    </Content>
+          <h3>Credits</h3>
+          <ul>
+            <li>Timofei Zhakov - I'm the author, hey guys!</li>
+            <li>Rautu - The idea and early adoption.</li>
+            <li>SailWave a great alternative that does a similar job. If you
+            look for long enough, you'd find any exotic feature you want.
+            It's also free btw.</li>
+          </ul>
+        </div>
+      </Content>
   </Layout>
 }
 
