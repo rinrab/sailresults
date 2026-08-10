@@ -102,6 +102,7 @@ export default function StartState() {
             display: "flex",
             flexWrap: "wrap",
             flexDirection: "column",
+            padding: 8,
             columnGap: "16px",
             rowGap: "36px" }}>
             <Card style={{ display: "flex", alignItems: "center", height: 120 }} onClick={() => navigate("/series/new")}>
