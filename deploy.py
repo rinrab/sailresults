@@ -2,10 +2,18 @@
 
 import re
 import subprocess
+import sys
 from pathlib import Path
 
+if (len(sys.argv) == 1):
+    branch = "trunk";
+elif (len(sys.argv) == 2):
+    branch = f"branches/{sys.argv[1]}";
+else:
+    exit(1);
+
 subprocess.run(["svn", "switch", "^/sailresults/branches/production"]);
-subprocess.run(["svn", "merge", "^/sailresults/trunk"]);
+subprocess.run(["svn", "merge", f"^/sailresults/{branch}"]);
 
 path = Path("src/version.ts")
 
@@ -30,4 +38,4 @@ if count != 1:
 path.write_text(text)
 
 svn_commit = Path("svn-commit.tmp")
-svn_commit.write_text(f"[deploy.py] publish r{revnum}")
+svn_commit.write_text(f"[deploy.py] publish r{revnum} from '{branch}'")
