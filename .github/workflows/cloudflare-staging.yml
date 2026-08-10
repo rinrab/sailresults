@@ -1,4 +1,4 @@
-name: cloudflare testing
+name: cloudflare staging
 
 on:
   push:
