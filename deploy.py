@@ -5,8 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-subprocess.execute(["svn", "switch", "^/sailresults/branches/production"]);
-subprocess.execute(["svn", "merge", "^/sailresults/trunk"]);
+subprocess.run(["svn", "switch", "^/sailresults/branches/production"]);
+subprocess.run(["svn", "merge", "^/sailresults/trunk"]);
 
 path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("src/version.ts")
 
