@@ -88,6 +88,7 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
                           position: "absolute",
                           transform: `translateY(${item.start}px)`,
                           cursor: props.onSelect ? "pointer" : "default",
+                          minWidth: "100%",
                         }}
                         onClick={() => props?.onSelect(value, key)}>
                 {props.columns.map((col, index) => (
