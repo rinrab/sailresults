@@ -62,33 +62,6 @@ export default function StartState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title="Main Menu" to="" />
-        <div style={{ flex: 1 }} />
-        <Menu positioning="below-end">
-          <MenuTrigger>
-            {(triggerProps) => (
-              <SplitButton
-                menuButton={triggerProps}
-                icon={<DocumentAddRegular /> }
-                primaryActionButton={{ onClick: () => navigate("series/new") }} />
-            )}
-          </MenuTrigger>
-
-          <MenuPopover>
-            <MenuItem onClick={() => navigate("series/new")}>Blank new Series</MenuItem>
-            <MenuDivider />
-            <MenuGroupHeader>Sample Regattas</MenuGroupHeader>
-            {samples.map((sample, index) =>
-              <MenuItem onClick={() => createSample(sample)}
-                        key={index}>{sample.name}</MenuItem>
-            )}
-          </MenuPopover>
-        </Menu>
-        <Button onClick={() => navigate("docs")}
-                icon={<BookQuestionMarkRegular />}
-                style={{ marginLeft: 4 }} />
-      </NavBar>
       <Content>
         <div style={{ overflow: "auto" }}>
           <div style={{ textAlign: "center" }}>

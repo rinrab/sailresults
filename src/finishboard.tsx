@@ -2,8 +2,8 @@ import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuP
 import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, NavBarItem, racerMatches } from "./common";
-import {  Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
+import { Content, formatString, Layout, NavBar, NavBarCenter, racerMatches, SeriesNavigation } from "./common";
+import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
 import { IBoardEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
 
@@ -263,11 +263,7 @@ export function NewRaceState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title={series.current.name} to="../.." />
-        <NavBarItem title="Races" to=".." />
-        <NavBarItem title="New Race" to="" />
-      </NavBar>
+      <NavBar title={series.current.name} subtitle="New Race" />
       <Content>
         <RacerPicker series={series} draft={draft} />
         <div style={{ flex: "auto", overflow: "auto" }}>
@@ -312,11 +308,8 @@ export function EditRaceState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title={series.current.name} to="../../.." />
-        <NavBarItem title="Races" to="../.." />
-        <NavBarItem title={`R${parseInt(raceId) + 1}`} to="" />
-      </NavBar>
+      <NavBar back="../.." title={series.current.name} 
+              subtitle={`Race ${parseInt(raceId) + 1}`} />
       <Content>
         <RacerPicker series={series} draft={draft} />
         <div style={{ flex: "auto", overflow: "auto" }}>

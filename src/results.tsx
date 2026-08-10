@@ -1,7 +1,7 @@
 import { Button, Text, TableRow, TableCell, TableHeader, Table, TableBody } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
+import { Content, formatString, Layout, NavBar, NavBarCenter, SeriesNavigation } from "./common";
 import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
 import { StorageContext } from "./storage-context";
 
@@ -87,10 +87,8 @@ export default function ResultsState() {
 
   return (
     <Layout print={<ResultsPrint scoreboard={scoreboard} series={series.current} />}>
-      <NavBar>
-        <NavBarItem title={series.current.name} to=".." />
-        <NavBarItem title="Results" to="" />
-      </NavBar>
+      <NavBarCenter title={series.current.name}
+                    subtitle="Results" />
       <Content screenOnly>
         <div style={{ overflow: "auto", flex: "auto" }}>
           <Table style={{ tableLayout: "auto" }}>
@@ -117,6 +115,7 @@ export default function ResultsState() {
           <Button onClick={() => window.print()}>Print</Button>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }
