@@ -1,6 +1,5 @@
 name: Deploy static content to Pages
 
-
 on:
   push:
     branches: ["production"]
