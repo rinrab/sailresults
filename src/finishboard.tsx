@@ -282,8 +282,6 @@ export function NewRaceState() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <Button style={{ flex: "auto", width: "120px" }}
-                    onClick={() => navigate(`..`)}>Close</Button>
-            <Button style={{ flex: "auto", width: "120px" }}
                     onClick={() => draft.clear()}>Delete Draft</Button>
             <Button style={{ flex: "auto", width: "120px" }}
                     disabled={Object.entries(draft.board).length == 0}
@@ -299,7 +297,6 @@ export function NewRaceState() {
 }
 
 export function EditRaceState() {
-  const navigate = useNavigate();
   const { seriesId, raceId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
@@ -325,11 +322,6 @@ export function EditRaceState() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <div style={{ flex: "1 1 300px", margin: "auto" }}>
             {<FinishBoardStatus draft={draft} />}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={Object.entries(draft.board).length == 0}
-                    onClick={() => navigate("../..")}>Done</Button>
           </div>
         </div>
       </Content>

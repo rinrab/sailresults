@@ -100,9 +100,6 @@ export function SeriesConfigurationState() {
                    onChange={(e) => series.setName(e.target.value)} />
           </Field>
         </div>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => navigate("..")}>Back</Button>
-        </div>
       </Content>
       <SeriesNavigation />
     </Layout>

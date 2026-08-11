@@ -106,7 +106,6 @@ export default function ResultsState() {
                    keys={scoreboard}
                    map={key => key} />
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => navigate("../races/new")}>New Race</Button>
           <Button onClick={() => window.print()}>Print</Button>
         </div>
       </Content>
