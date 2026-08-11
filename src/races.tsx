@@ -51,7 +51,7 @@ export default function RacesOverviewState() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell style={{ width: 70, textAlign: "right", fontWeight: "bolder" }}>Race No.</TableCell>
+                <TableCell style={{ width: 40, textAlign: "right", fontWeight: "bolder" }}>#</TableCell>
                 <TableCell style={{ fontWeight: "bolder" }}>Racers finished</TableCell>
                 <TableCell style={{ width: 25 }}></TableCell>
               </TableRow>
