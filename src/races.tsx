@@ -4,6 +4,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
+import { Finishboard } from "./scoring";
 
 export default function RacesOverviewState() {
   const navigate = useNavigate();
@@ -30,6 +31,16 @@ export default function RacesOverviewState() {
     return <Button onClick={click} style={style}>New Race</Button>
   }
 
+  const getFinishedRacers = (board: Finishboard) => { 
+    let result = 0;
+    for (const [_, entry] of Object.entries(board)) {
+      if (typeof(entry) == "number") {
+        result++;
+      }
+    }
+    return result;
+  };
+
   return (
     <Layout>
       <NavBar title={series.current.name} subtitle="Races" />
@@ -41,7 +52,7 @@ export default function RacesOverviewState() {
             <TableHeader>
               <TableRow>
                 <TableCell style={{ width: 70, textAlign: "right", fontWeight: "bolder" }}>Race No.</TableCell>
-                <TableCell style={{ fontWeight: "bolder" }}>Racers in the finishboard</TableCell>
+                <TableCell style={{ fontWeight: "bolder" }}>Racers finished</TableCell>
                 <TableCell style={{ width: 25 }}></TableCell>
               </TableRow>
             </TableHeader>
@@ -50,7 +61,7 @@ export default function RacesOverviewState() {
                 <TableRow key={index} style={{ cursor: "pointer" }}
                           onClick={() => navigate(`${index}/edit`)}>
                   <TableCell style={{ width: 70, textAlign: "right" }}>R{index + 1}</TableCell>
-                  <TableCell>{Object.entries(finishboard).length} / {series.current.racers.length}</TableCell>
+                  <TableCell>{getFinishedRacers(finishboard)} / {series.current.racers.length}</TableCell>
                   <TableCell style={{ width: 25 }}>
                     <Menu>
                       <MenuTrigger>
