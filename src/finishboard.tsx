@@ -303,6 +303,12 @@ export function EditRaceState() {
   const draft = series.openBoard(parseInt(raceId));
   const [editingRank, setEditingRank] = React.useState(null);
 
+  React.useEffect(() => {
+    for (const racerId of draft.getRemaining()) {
+      draft.setPosition(racerId, "DNC");
+    }
+  }, []);
+
   return (
     <Layout>
       <NavBar back="../.." title={series.current.name} 
