@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 import { Finishboard } from "./scoring";
+import { Column, SailTable } from "./table";
 
 export default function RacesOverviewState() {
   const navigate = useNavigate();
@@ -41,46 +42,45 @@ export default function RacesOverviewState() {
     return result;
   };
 
+  const columns: Column<Finishboard>[] = [
+    {
+      header: "#",
+      cell: (_, index) => <Text>R{index + 1}</Text>,
+      align: "end",
+      size: 40,
+    },
+    {
+      header: "Racers finished",
+      cell: (row) => <Text>{getFinishedRacers(row)} / {series.current.racers.length}</Text>,
+      minsize: 70,
+    },
+    {
+      header: "",
+      cell: (_, index) => <Menu>
+        <MenuTrigger>
+          <Button icon={<MoreVerticalRegular />} appearance="transparent"
+                  onClick={(e) => e.stopPropagation()} />
+        </MenuTrigger>
+        <MenuPopover>
+          <MenuItem onClick={(e) => {
+            e.stopPropagation();
+            series.deleteBoard(index);
+          }}>Delete</MenuItem>
+        </MenuPopover>
+      </Menu>,
+      size: 32,
+      align: "end",
+    }
+  ];
+
   return (
     <Layout>
       <NavBar title={series.current.name} subtitle="Races" />
       <Content>
-        <div style={{ overflow: "auto", flex: 1 }}>
-          <Text size={700}>Races</Text>
-          <Divider style={{ margin: "8px 0" }} />
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell style={{ width: 40, textAlign: "right", fontWeight: "bolder" }}>#</TableCell>
-                <TableCell style={{ fontWeight: "bolder" }}>Racers finished</TableCell>
-                <TableCell style={{ width: 25 }}></TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {series.current.finishboards.map((finishboard, index) => (
-                <TableRow key={index} style={{ cursor: "pointer" }}
-                          onClick={() => navigate(`${index}/edit`)}>
-                  <TableCell style={{ width: 70, textAlign: "right" }}>R{index + 1}</TableCell>
-                  <TableCell>{getFinishedRacers(finishboard)} / {series.current.racers.length}</TableCell>
-                  <TableCell style={{ width: 25 }}>
-                    <Menu>
-                      <MenuTrigger>
-                        <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                                onClick={(e) => e.stopPropagation()} />
-                      </MenuTrigger>
-                      <MenuPopover>
-                        <MenuItem onClick={(e) => {
-                          e.stopPropagation();
-                          series.deleteBoard(index);
-                        }}>Delete</MenuItem>
-                      </MenuPopover>
-                    </Menu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <SailTable keys={series.current.finishboards}
+                   columns={columns}
+                   map={(key) => key}
+                   onSelect={(key, value, index) => navigate(`${index}/edit`)} />
         <div style={{ display: "flex", gap: 8 }}>
           <div style={{ flex: 1 }} />
           <EditDraftButton />
