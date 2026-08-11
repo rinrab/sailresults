@@ -2,7 +2,7 @@ name: Deploy static content to Pages
 
 on:
   push:
-    branches: ["production"]
+    branches: ["production", "trunk"]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,10 @@ concurrency:
 
 jobs:
   deploy:
+    if: |
+      (github.event.repository.name == 'sailresults' && github.ref_name == 'production') ||
+      (github.event.repository.name == 'sailresults-staging' && github.ref_name == 'trunk')
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
