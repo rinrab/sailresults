@@ -1,8 +1,8 @@
-import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Card, CardHeader, Field } from "@fluentui/react-components";
+import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Field } from "@fluentui/react-components";
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, NavBarItem } from "./common";
+import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
 import { IRacerEditor, ISeriesEditor } from "./storage";
 import { Column, SailTable } from "./table";
@@ -28,6 +28,12 @@ function RacersList(props: { series: ISeriesEditor }) {
   const navigate = useNavigate();
 
   const columns: Column<IRacerEditor>[] = [
+    {
+      header: "#",
+      size: 40,
+      align: "end",
+      cell: (_, index) => <Text>{index + 1}</Text>,
+    },
     {
       header: "Name",
       minsize: 120,
@@ -84,10 +90,8 @@ export function ListCompetitorsState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title={series.current.name} to=".." />
-        <NavBarItem title="Competitors" to="" />
-      </NavBar>
+      <NavBar title={series.current.name}
+              subtitle="Competitors" />
       <Content>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
         <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
@@ -103,10 +107,8 @@ export function ListCompetitorsState() {
         </form>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
         <RacersList series={series} />
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => navigate("..")}>Done</Button>
-        </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }
@@ -124,7 +126,6 @@ function getRacerDescription(racer: Racer) {
 }
 
 export function EditCompetitorState() {
-  const navigate = useNavigate();
   const { seriesId, racerId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
@@ -132,11 +133,8 @@ export function EditCompetitorState() {
 
   return (
     <Layout>
-      <NavBar>
-        <NavBarItem title={series.current.name} to="../.." />
-        <NavBarItem title="Competitors" to=".." />
-        <NavBarItem title={getRacerDescription(racer.current)} to="" />
-      </NavBar>
+      <NavBar title={series.current.name}
+              subtitle={getRacerDescription(racer.current)} />
       <Content>
         <h1>Editing Competitor</h1>
         <form style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
@@ -149,9 +147,6 @@ export function EditCompetitorState() {
                    onChange={e => racer.setNumber(e.target.value)} />
           </Field>
         </form>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => navigate("..")}>Back</Button>
-        </div>
       </Content>
     </Layout>
   );

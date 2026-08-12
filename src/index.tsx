@@ -2,7 +2,7 @@ import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Routes, Route, HashRouter } from "react-router-dom";
-import { DocsAbout, DocsIndex, DocsQuickStart, DocsScoring } from "./docs";
+import { DocsAbout, DocsHomeScreen, DocsIndex, DocsQuickStart, DocsScoring } from "./docs";
 import ResultsState from "./results";
 import { EditRaceState, NewRaceState } from "./finishboard";
 import ErrorBoundary from "./error";
@@ -46,6 +46,7 @@ function App() {
                 <Route path="about" element={<DocsAbout />} />
                 <Route path="quick-start" element={<DocsQuickStart />} />
                 <Route path="scoring" element={<DocsScoring />} />
+                <Route path="add-to-home-screen" element={<DocsHomeScreen />} />
               </Route>
             </Route>
           </Routes>
