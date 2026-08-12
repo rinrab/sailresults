@@ -34,6 +34,9 @@ export function DocsIndex() {
           <li>
             <Link to="scoring">Scoring</Link>
           </li>
+          <li>
+            <Link to="add-to-home-screen">How to add to home screen</Link>
+          </li>
         </ul>
       </div>
     </Content>
@@ -68,6 +71,37 @@ export function DocsAbout() {
           <li>Version: {version_major}.{version_minor} {revnum as any == "staging" && ("(in development)")}</li>
           <li>Subversion revision number: {revnum}</li>
         </ul>
+      </div>
+    </Content>
+  </Layout>
+}
+
+export function DocsHomeScreen() {
+  return <Layout>
+    <NavBar title="Documentation" subtitle="How to add to home screen" />
+    <Content>
+      <div style={{ overflow: "auto", height: "100%" }}>
+        <h1>Documentation</h1>
+        <h2>How to add to home screen</h2>
+        <p>Although, we don't ship a version of this app for neither iPhone nor
+        Android, you could still install it as a PWA (progressive web app) and
+        have a similar experience as it was an app.</p>
+        <h3>Steps for Safari</h3>
+        <ol>
+          <li>Click '...' to the right of the address bar.</li>
+          <li>In the pop-up navigate to 'Share'.</li>
+          <li>Scroll down and find 'Add to Home Screen'.</li>
+          <li>The icon should appear on the home screen.</li>
+        </ol>
+        <p>Please note that the version you have in your browser and installed
+        on your device have separate storage. Meaning you should remember where
+        the series was saved since you can't work on it from both instances at
+        the same time.</p>
+        <p>You could even have two installation side by side. In this case each
+        of them will have their separate storage. Although it is possible, we
+        do not recommend you do that.</p>
+        <p>Also please keep in mind that if you delete the app, all your data
+        will be lost forever.</p>
       </div>
     </Content>
   </Layout>
