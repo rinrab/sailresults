@@ -1,4 +1,4 @@
-import { Button, Text, TableRow, TableCell, TableHeader, Table, TableBody } from "@fluentui/react-components";
+import { Button, Text } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, SeriesNavigation } from "./common";
@@ -13,6 +13,10 @@ function ScoreCell(props: { score: EvaluatedScore }) {
       <Text><br />{props.score.realScore}</Text>
     }
   </div>
+}
+
+function formatRank(rank: number) {
+  return (rank == -1) ? "-" : rank.toString();
 }
 
 function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
@@ -43,7 +47,7 @@ function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
                   <ScoreCell score={score} />
                 </td>)}
               <td style={{ textAlign: "center", fontWeight: "bolder" }}>{row.total}</td>
-              <td style={{ textAlign: "center" }}>{row.rank}</td>
+              <td style={{ textAlign: "center" }}>{formatRank(row.rank)}</td>
             </tr>
           )}
         </tbody>
@@ -91,7 +95,7 @@ export default function ResultsState() {
     },
     {
       header: "Rank",
-      cell: (row) => <Text>{row.rank}</Text>,
+      cell: (row) => <Text>{formatRank(row.rank)}</Text>,
       size: 40,
       align: "center",
     },

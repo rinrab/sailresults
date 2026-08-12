@@ -127,8 +127,8 @@ export function DocsScoring() {
         abriviations.</p>
 
         <ul>
-          {Object.entries(dsqs).map(([name, desc]) =>
-            <li key={name}><Text weight="bold" font="monospace">{name}</Text>: {desc}</li>)}
+          {Object.entries(dsqs).map(([name, {description}]) =>
+            <li key={name}><Text weight="bold" font="monospace">{name}</Text>: {description}</li>)}
         </ul>
       </div>
     </Content>

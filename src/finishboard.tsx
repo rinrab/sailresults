@@ -163,9 +163,9 @@ function FinishboardRow(props: {
                   </MenuTrigger>
                   <MenuPopover>
                     <MenuList>
-                      {Object.entries(dsqs).map(([name, desc]) =>
+                      {Object.entries(dsqs).map(([name, {description}]) =>
                         <MenuItem key={name}
-                                  subText={desc}
+                                  subText={description}
                                   icon={ (name == props.rank) && <CheckmarkRegular /> }
                                   onClick={() => props.setPosition(name as FinishboardEntry)}
                           >{name}</MenuItem>
