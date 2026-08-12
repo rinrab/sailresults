@@ -107,7 +107,6 @@ export function DocsHomeScreen() {
   </Layout>
 }
 
-
 export function DocsQuickStart() {
   return <Layout>
     <NavBar title="Documentation" subtitle="Quick Start" />
