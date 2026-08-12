@@ -30,6 +30,10 @@ export const dsqs: Record<string, DisqualificationInfo> = {
     description: "Did not start",
     countsAsParticipation: false,
   },
+  "OCS": {
+    description: "On course side; rule 30.1",
+    countsAsParticipation: true,
+  },
   "DNF": {
     description: "Did not finish",
     countsAsParticipation: true,
