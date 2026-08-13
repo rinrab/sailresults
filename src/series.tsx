@@ -52,9 +52,9 @@ export function SeriesOverviewState() {
         <div style={{ overflow: "auto" }}>
           <h2>Series Overview</h2>
 
-          <Card onClick={() => navigate("results")} style={{ marginBottom: 12 }}>
-            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Results</h3>}
-                        description={<ResultsOverview series={series.current} />}
+          <Card onClick={() => navigate("competitors")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Competitors</h3>}
+                        description={<>{series.current.racers.length} people are racing in this ragatta.</>}
                         action={<ChevronRight24Regular /> } />
           </Card>
 
@@ -64,9 +64,9 @@ export function SeriesOverviewState() {
                         action={<ChevronRight24Regular /> } />
           </Card>
 
-          <Card onClick={() => navigate("competitors")} style={{ marginBottom: 12 }}>
-            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Competitors</h3>}
-                        description={<>{series.current.racers.length} people are racing in this ragatta.</>}
+          <Card onClick={() => navigate("results")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Results</h3>}
+                        description={<ResultsOverview series={series.current} />}
                         action={<ChevronRight24Regular /> } />
           </Card>
 

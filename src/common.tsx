@@ -75,17 +75,17 @@ export function SeriesNavigation() {
         <Home20Regular />
         <Text block size={100}>Overview</Text>
       </Tab>
-      <Tab value="results">
-        <Trophy20Regular />
-        <Text block size={100}>Results</Text>
+      <Tab value="competitors">
+        <People20Regular />
+        <Text block size={100}>Competitors</Text>
       </Tab>
       <Tab value="races">
         <Flag20Regular />
         <Text block size={100}>Races</Text>
       </Tab>
-      <Tab value="competitors">
-        <People20Regular />
-        <Text block size={100}>Competitors</Text>
+      <Tab value="results">
+        <Trophy20Regular />
+        <Text block size={100}>Results</Text>
       </Tab>
       <Tab value="config">
         <Settings20Regular />
