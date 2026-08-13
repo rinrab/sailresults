@@ -84,6 +84,14 @@ export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) 
 }
 
 function compareEvaluatedRacers(left: EvaluatedRacer, right: EvaluatedRacer): number {
+  if (left.rank == -1 && right.rank == -1) {
+    return 0;
+  } else if (left.rank == -1) {
+    return 67;
+  } else if (right.rank == -1) {
+    return -67;
+  }
+
   /* let's pretend they are the same for both left and right */
   const racesCount = left.scores.length;
 
@@ -173,22 +181,28 @@ export function evaluateScoreboard(
     });
   }
 
+  /* mark all not-participated entries */
+  for (const racer of result) {
+    if (! countsAsParticipation(racer.scores)) {
+      racer.rank = -1;
+    } else {
+      racer.rank = 1;
+    }
+  }
+
   result.sort((a, b) => compareEvaluatedRacers(a, b));
 
   let rank = 1;
   for (let i = 1; i < result.length; i++) {
-    const diff = compareEvaluatedRacers(result[i - 1], result[i]);
-    if (diff != 0) {
-      rank = i + 1;
+    if (result[i].rank != -1) {
+      const diff = compareEvaluatedRacers(result[i - 1], result[i]);
+      if (diff != 0) {
+        rank = i + 1;
+      }
+      result[i].rank = rank;
     }
-    result[i].rank = rank;
   }
 
-  for (const racer of result) {
-    if (! countsAsParticipation(racer.scores)) {
-      racer.rank = -1;
-    }
-  }
 
   return result;
 }
