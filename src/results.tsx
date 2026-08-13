@@ -22,7 +22,7 @@ function formatRank(rank: number) {
 function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
   return (
     <div>
-      <h1>{props.series.name}</h1>
+      <h1 style={{ textAlign: "center" }}>{props.series.name}</h1>
       <table style={{ width: "100%" }}>
         <thead>
           <tr>
