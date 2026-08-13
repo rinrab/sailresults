@@ -46,6 +46,11 @@ export function DocsIndex() {
   </Layout>
 }
 
+export function displayVersion() {
+  const note = ((revnum as any == "staging") ?  "(in development)" : revnum);
+  return `${version_major}.${version_minor} ${note}`;
+}
+
 export function DocsAbout() {
   return <Layout>
     <NavBar title="Documentation" subtitle="About" />
@@ -71,7 +76,7 @@ export function DocsAbout() {
         </ul>
         <h3>Version</h3>
         <ul>
-          <li>Version: {version_major}.{version_minor} {revnum as any == "staging" && ("(in development)")}</li>
+          <li>Version: ${displayVersion()}</li>
           <li>Subversion revision number: {revnum}</li>
           <li>Built at: {buildDate}</li>
         </ul>

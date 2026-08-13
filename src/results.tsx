@@ -1,10 +1,11 @@
-import { Button, Text } from "@fluentui/react-components";
+import { Button, Link, Text } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, SeriesNavigation } from "./common";
 import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
 import { StorageContext } from "./storage-context";
 import { Column, SailTable } from "./table";
+import { displayVersion } from "./docs";
 
 function ScoreCell(props: { score: EvaluatedScore }) {
   return <div>
@@ -23,7 +24,7 @@ function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
   return (
     <div>
       <h1 style={{ textAlign: "center" }}>{props.series.name}</h1>
-      <table style={{ width: "100%" }}>
+      <table style={{ width: "100%", marginBottom: 40 }}>
         <thead>
           <tr>
             <th style={{ textAlign: "right" }}>#</th>
@@ -51,6 +52,30 @@ function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
             </tr>
           )}
         </tbody>
+        <tfoot>
+          <tr style={{ border: "none" }}>
+            <td colSpan={99999} style={{ border: "none", padding: 0 }}>
+              <div style={{
+                display: "flex",
+                width: "100%",
+                marginTop: 8,
+                alignItems: "center",
+                gap: 4,
+              }}>
+                <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+                  <img src="/assets/wide.svg" style={{ height: 32 }} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
+                  <Text block size={200}>Version: {displayVersion()}</Text>
+                  <Text block size={200}>&copy; 2026 Timofei Zhakov, Rautu, and others</Text>
+                </div>
+                <div style={{ flex: 1, textAlign: "right" }}>
+                  <Link>https://www.sailresults.net</Link>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );
