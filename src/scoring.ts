@@ -65,6 +65,8 @@ export type Finishboard = {
   [racerId: number]: FinishboardEntry
 }
 
+export const DEFAULT_DISQUALIFICATION: FinishboardEntry = "DNF";
+
 export interface Series {
   id: number;
   name: string;
@@ -153,7 +155,7 @@ export function evaluateScoreboard(
     let total = 0;
 
     for (const board of finishBoards) {
-      const entry = board[racerId] ?? "DNC"; 
+      const entry = board[racerId] ?? DEFAULT_DISQUALIFICATION; 
       const realScore = evaluateRealScore(entry, series.racers.length);
 
       total += realScore;

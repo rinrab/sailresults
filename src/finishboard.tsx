@@ -3,7 +3,7 @@ import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warnin
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
-import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
+import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer, DEFAULT_DISQUALIFICATION } from "./scoring";
 import { IBoardEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
 
@@ -34,7 +34,7 @@ function FinishBoardStatus(props: { draft: IBoardEditor }) {
         color: tokens.colorPaletteDarkOrangeForeground1,
         margin: "-2px 4px" }} />
       <Text>
-        Note: {remainingRacers.length} remaining racers will be added as DNS.
+        Note: {remainingRacers.length} remaining racers will be added as {DEFAULT_DISQUALIFICATION}.
       </Text>
     </div>;
   }
@@ -305,7 +305,7 @@ export function EditRaceState() {
 
   React.useEffect(() => {
     for (const racerId of draft.getRemaining()) {
-      draft.setPosition(racerId, "DNC");
+      draft.setPosition(racerId, DEFAULT_DISQUALIFICATION);
     }
   }, []);
 
