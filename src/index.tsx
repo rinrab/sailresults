@@ -91,3 +91,7 @@ function doResize() {
 
 window.visualViewport.addEventListener("resize", doResize);
 doResize();
+
+document.body.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+});
