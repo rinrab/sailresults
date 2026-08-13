@@ -8,10 +8,10 @@ export default function ResultsOverview(props: { series: Series }) {
   const storage = React.useContext(StorageContext);
 
   if (props.series.finishboards.length == 0) {
-    return <>
+    return <div>
       <Text block>Results overview cannot be displayed.</Text>
       <Text block>There are no races yet.</Text>
-    </>
+    </div>
   } else {
     const scoreboard = evaluateScoreboard(
       storage.listRacers(),
