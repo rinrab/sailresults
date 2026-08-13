@@ -1,6 +1,7 @@
 /* i have no idea what the heck im doing here */
 
 import path from "node:path";
+import webpack from 'webpack';
 import { fileURLToPath } from "url";
 
 const outdir = path.dirname(fileURLToPath(import.meta.url));
@@ -37,5 +38,10 @@ export default {
   output: {
     filename: "sailresults.js",
     path: path.resolve(outdir, "out"),
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      __BUILD_DATE__: JSON.stringify(new Date().toUTCString()),
+    })
+  ],
 };

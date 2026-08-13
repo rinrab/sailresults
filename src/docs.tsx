@@ -5,6 +5,9 @@ import { Text } from "@fluentui/react-components";
 import { dsqs } from "./scoring";
 import { version_major, version_minor, revnum } from "./version";
 
+declare const __BUILD_DATE__: string;
+const buildDate = __BUILD_DATE__;
+
 export function FeaturesList() {
   return <ul>
     <li>Simple and convenient user experience.</li>
@@ -70,6 +73,7 @@ export function DocsAbout() {
         <ul>
           <li>Version: {version_major}.{version_minor} {revnum as any == "staging" && ("(in development)")}</li>
           <li>Subversion revision number: {revnum}</li>
+          <li>Built at: {buildDate}</li>
         </ul>
       </div>
     </Content>
