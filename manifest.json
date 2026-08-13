@@ -1,6 +1,6 @@
 {
-  "name": "SailResults",
-  "short_name": "SailResults",
+  "name": "StagingResults",
+  "short_name": "StagingResults",
   "description": "Sailing Results Scoring Calculator",
   "icons": [
     {

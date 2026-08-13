@@ -1,17 +1,18 @@
 import { Button, Text, TableRow, TableCell, TableHeader, Table, TableBody } from "@fluentui/react-components";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, NavBarItem } from "./common";
+import { Content, formatString, Layout, NavBar, SeriesNavigation } from "./common";
 import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
 import { StorageContext } from "./storage-context";
+import { Column, SailTable } from "./table";
 
 function ScoreCell(props: { score: EvaluatedScore }) {
-  return <>
+  return <div>
     <Text>{props.score.finishboardEntry}</Text>
     {props.score.finishboardEntry != props.score.realScore &&
       <Text><br />{props.score.realScore}</Text>
     }
-  </>
+  </div>
 }
 
 function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
@@ -49,34 +50,6 @@ function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
   );
 };
 
-function Cell({ width, align = "left", bold = false, children }) {
-  return (
-    <TableCell style={{
-      minWidth: width,
-      textAlign: align as any,
-      fontWeight: bold ? "bold" : "normal",
-    }}>
-      {children}
-    </TableCell>
-  );
-}
-
-function ResultRow(props: { row: EvaluatedRacer }) {
-  return (
-    <TableRow>
-      <Cell width={40} align="right">{props.row.rank}</Cell>
-      <Cell width={150}>{formatString(props.row.racer.name)}</Cell>
-      <Cell width={120}>{formatString(props.row.racer.number)}</Cell>
-      {props.row.scores.map((score, scoreIndex) =>
-        <Cell key={scoreIndex} width={40} align="center">
-          <ScoreCell score={score} />
-        </Cell>)}
-      <Cell width={70} bold align="center">{props.row.total}</Cell>
-    </TableRow>
-  );
-}
-
-
 export default function ResultsState() {
   const navigate = useNavigate();
   const { seriesId } = useParams();
@@ -85,38 +58,51 @@ export default function ResultsState() {
   const racers = storage.listRacers();
   const scoreboard = evaluateScoreboard(racers, series.current, series.current.finishboards);
 
+  const columns: Column<EvaluatedRacer>[] = [
+    {
+      header: "Rank",
+      cell: (row) => <Text>{row.rank}</Text>,
+      size: 40,
+      align: "end",
+    },
+    {
+      header: "Name",
+      minsize: 150,
+      cell: (row) => <Text>{row.racer.name}</Text>,
+    },
+    {
+      header: "Number",
+      minsize: 120,
+      cell: (row) => <Text>{row.racer.number}</Text>,
+    },
+    ...series.current.finishboards.map((_, index) => ({
+      header: (index + 1).toString(),
+      size: 40,
+      cell: (row) => <ScoreCell score={row.scores[index]} />,
+      align: "center",
+    } satisfies Column<EvaluatedRacer>)),
+    {
+      header: <Text weight="bold">Total</Text>,
+      size: 70,
+      cell: (row) => <Text weight="bold">{row.total}</Text>,
+      align: "center",
+    },
+  ];
+
   return (
     <Layout print={<ResultsPrint scoreboard={scoreboard} series={series.current} />}>
-      <NavBar>
-        <NavBarItem title={series.current.name} to=".." />
-        <NavBarItem title="Results" to="" />
-      </NavBar>
+      <NavBar title={series.current.name}
+              subtitle="Results" />
       <Content screenOnly>
-        <div style={{ overflow: "auto", flex: "auto" }}>
-          <Table style={{ tableLayout: "auto" }}>
-            <TableHeader>
-              <TableRow>
-                <Cell width={40} align="right">Rank</Cell>
-                <Cell width={150}>Name</Cell>
-                <Cell width={120}>Number</Cell>
-                {series.current.finishboards.map((_, index) =>
-                  <Cell key={index} width={40} align="center">R{index + 1}</Cell>
-                )}
-                <Cell width={70} align="center">Total</Cell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {scoreboard.map((row, index) =>
-                <ResultRow key={index} row={row} />
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <SailTable columns={columns} 
+                   keys={scoreboard}
+                   map={key => key} />
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => navigate("../races/new")}>New Race</Button>
           <Button onClick={() => window.print()}>Print</Button>
         </div>
       </Content>
+      <SeriesNavigation />
     </Layout>
   );
 }

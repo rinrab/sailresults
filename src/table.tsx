@@ -3,10 +3,11 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import React from "react";
 
 export interface Column<T> {
-  header: string;
-  cell: (row: T) => React.ReactElement;
+  header: string | React.ReactElement;
+  cell: (row: T, index: number) => React.ReactElement;
   size?: number;
   minsize?: number;
+  align?: "start" | "center" | "end";
 }
 
 export interface SailTableProps<KeyT, ValueT> {
@@ -27,18 +28,20 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
 
   const getCellStyles = (col: Column<ValueT>) => {
     const style: React.CSSProperties = {
-       display: "flex",
-       alignItems: "center",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: col.align,
+      textAlign: col.align,
     }
 
     if (col.size) {
+      style.flex = "0 0 auto";
       style.width = col.size;
+    } else if (col.minsize) {
+      style.flex = 1;
+      style.minWidth = col.minsize;
     } else {
       style.flex = 1;
-    }
-
-    if (col.minsize) {
-      style.minWidth = col.minsize;
     }
 
     return style;
@@ -83,16 +86,16 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
                           display: "flex",
                           height: item.size,
                           position: "absolute",
-                          width: "100%",
                           transform: `translateY(${item.start}px)`,
                           cursor: props.onSelect ? "pointer" : "default",
+                          minWidth: "100%",
                         }}
                         onClick={() => props?.onSelect(value, key)}>
                 {props.columns.map((col, index) => (
                   <TableCell
                     key={index}
                     style={getCellStyles(col)}>
-                    {col.cell(value)}
+                    {col.cell(value, item.index)}
                   </TableCell>
                 ))}
               </TableRow>
