@@ -95,3 +95,7 @@ doResize();
 document.body.addEventListener("touchmove", (e) => {
   e.preventDefault();
 });
+
+document.body.addEventListener("scroll", (e) => {
+  e.preventDefault();
+});
