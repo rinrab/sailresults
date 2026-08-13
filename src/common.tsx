@@ -1,7 +1,7 @@
-import { tokens, Breadcrumb, BreadcrumbItem, BreadcrumbButton, BreadcrumbDivider, TabList, Tab, Text, Button } from "@fluentui/react-components";
-import { ArrowLeftRegular, Flag20Regular, FlagRegular, Home20Regular, Home24Filled, Home24Regular, HomeRegular, People20Regular, PeopleRegular, Settings20Regular, SettingsRegular, Trophy20Regular, Trophy24Regular, TrophyRegular } from "@fluentui/react-icons";
+import { tokens, TabList, Tab, Text, Button } from "@fluentui/react-components";
+import { Flag20Regular, Home20Regular, People20Regular, Settings20Regular, Trophy20Regular, ChevronLeftRegular, ChevronLeft20Regular, ChevronLeft24Regular, ChevronLeft28Regular, ChevronLeft32Regular } from "@fluentui/react-icons";
 import React from "react";
-import { useLocation, useMatch, useMatches, useNavigate, useParams } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import { Racer } from "./scoring";
 
 export function formatString(str: string) {
@@ -21,7 +21,7 @@ export function Layout({ children, print = undefined }) {
 
 export function NavBarCenter({ title, subtitle }) {
   return <div style={{
-    padding: "8px 8px",
+    padding: 4,
     backgroundColor: tokens.colorNeutralBackground4,
   }} className="screen-only">
     <Text style={{ width: "100%", textAlign: "center" }} block weight="bold" size={200}>
@@ -37,13 +37,13 @@ export function NavBar({ title, subtitle = undefined, back = ".." }) {
   const navigate = useNavigate();
 
   return <div style={{
-    padding: "8px 8px",
+    padding: 4,
     backgroundColor: tokens.colorNeutralBackground4,
     display: "flex",
-    gap: 4,
   }} className="screen-only">
     {back && 
-      <Button icon={<ArrowLeftRegular /> }
+      <Button icon={<ChevronLeftRegular /> }
+              size="large"
               onClick={() => navigate(back)}
               appearance="transparent" />
     }
