@@ -49,7 +49,7 @@ export function SeriesOverviewState() {
     <Layout>
       <NavBar title={series.current.name} back="../.." />
       <Content>
-        <div style={{ overflow: "auto" }}>
+        <div style={{ overflow: "auto", padding: 8 }}>
           <h2>Series Overview</h2>
 
           <Card onClick={() => navigate("competitors")} style={{ marginBottom: 12 }}>
