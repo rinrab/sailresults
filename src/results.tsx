@@ -91,7 +91,7 @@ export default function ResultsState() {
   const columns: Column<EvaluatedRacer>[] = [
     {
       header: "#",
-      cell: (_, index) => <Text>R{index + 1}</Text>,
+      cell: (_, index) => <Text>{index + 1}</Text>,
       size: 40,
       align: "end",
     },
@@ -106,7 +106,7 @@ export default function ResultsState() {
       cell: (row) => <Text>{row.racer.number}</Text>,
     },
     ...series.current.finishboards.map((_, index) => ({
-      header: (index + 1).toString(),
+      header: `R${index + 1}`,
       size: 40,
       cell: (row) => <ScoreCell score={row.scores[index]} />,
       align: "center",
