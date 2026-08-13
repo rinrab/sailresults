@@ -57,7 +57,6 @@ function ResultsPrint(props: { scoreboard: EvaluatedRacer[], series: Series }) {
 };
 
 export default function ResultsState() {
-  const navigate = useNavigate();
   const { seriesId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
