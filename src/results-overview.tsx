@@ -21,7 +21,7 @@ export default function ResultsOverview(props: { series: Series }) {
 
     const emojis = ["🥇", "🥈", "🥉"];
 
-    return <>
+    return <div>
       <Table>
         <TableBody>
           {scoreboard.slice(0, 3).map((racer, index) =>
@@ -36,6 +36,6 @@ export default function ResultsOverview(props: { series: Series }) {
       {scoreboard.length > 3 && <div style={{ marginTop: 8 }}>
         <Text>{scoreboard.length - 3} racers are not shown.</Text>
       </div>}
-    </>
+    </div>
   }
 }
