@@ -8,10 +8,10 @@ export default function ResultsOverview(props: { series: Series }) {
   const storage = React.useContext(StorageContext);
 
   if (props.series.finishboards.length == 0) {
-    return <div>
+    return <>
       <Text block>Results overview cannot be displayed.</Text>
       <Text block>There are no races yet.</Text>
-    </div>
+    </>
   } else {
     const scoreboard = evaluateScoreboard(
       storage.listRacers(),
@@ -21,7 +21,7 @@ export default function ResultsOverview(props: { series: Series }) {
 
     const emojis = ["🥇", "🥈", "🥉"];
 
-    return <div>
+    return <>
       <Table>
         <TableBody>
           {scoreboard.slice(0, 3).map((racer, index) =>
@@ -36,6 +36,6 @@ export default function ResultsOverview(props: { series: Series }) {
       {scoreboard.length > 3 && <div style={{ marginTop: 8 }}>
         <Text>{scoreboard.length - 3} racers are not shown.</Text>
       </div>}
-    </div>
+    </>
   }
 }
