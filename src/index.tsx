@@ -85,17 +85,12 @@ async function registerServiceWorker() {
 
 registerServiceWorker();
 
-function doResize() {
+function fixViewport() {
   document.body.style.height = window.visualViewport.height + "px";
+  document.documentElement.style.height = window.visualViewport.height + "px";
+  window.scrollTo(0, 0);
 }
 
-window.visualViewport.addEventListener("resize", doResize);
-doResize();
-
-document.body.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-});
-
-document.body.addEventListener("scroll", (e) => {
-  e.preventDefault();
-});
+window.visualViewport.addEventListener("resize", fixViewport);
+window.visualViewport.addEventListener("scroll", fixViewport);
+fixViewport();
