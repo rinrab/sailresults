@@ -2,7 +2,7 @@ import { Button, Card, CardHeader, Divider, Field, Input, Text } from "@fluentui
 import { ChevronRight24Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, Layout, NavBar, SeriesNavigation } from "./common";
+import { Content, Layout, NavBar, NavBarItem } from "./common";
 import ResultsOverview from "./results-overview";
 import { StorageContext } from "./storage-context";
 
@@ -20,7 +20,9 @@ export function NewSeriesState() {
 
   return (
     <Layout>
-      <NavBar title="New Series" back="../.." />
+      <NavBar>
+        <NavBarItem title="New Series" to="" />
+      </NavBar>
       <Content>
         <form
           onSubmit={done}
@@ -47,7 +49,9 @@ export function SeriesOverviewState() {
   
   return (
     <Layout>
-      <NavBar title={series.current.name} back="../.." />
+      <NavBar>
+        <NavBarItem title={series.current.name} to="" />
+      </NavBar>
       <Content>
         <div style={{ overflow: "auto" }}>
           <h2>Series Overview</h2>
@@ -77,7 +81,6 @@ export function SeriesOverviewState() {
           </Card>
         </div>
       </Content>
-      <SeriesNavigation />
     </Layout>
   );
 }
@@ -90,7 +93,10 @@ export function SeriesConfigurationState() {
   
   return (
     <Layout>
-      <NavBar title={series.current.name} subtitle="Configuration" />
+      <NavBar>
+        <NavBarItem title={series.current.name} to=".." />
+        <NavBarItem title="Configuration" to="" />
+      </NavBar>
       <Content>
         <div style={{ overflow: "auto", flex: 1 }}>
           <h1>Series Configuration</h1>
@@ -100,8 +106,10 @@ export function SeriesConfigurationState() {
                    onChange={(e) => series.setName(e.target.value)} />
           </Field>
         </div>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() => navigate("..")}>Back</Button>
+        </div>
       </Content>
-      <SeriesNavigation />
     </Layout>
   );
 }

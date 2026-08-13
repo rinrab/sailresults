@@ -1,10 +1,11 @@
-import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader } from "@fluentui/react-components";
-import { Add48Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
+import { Button, Divider, Text, Card, Body1, CardFooter, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, SplitButton, MenuGroupHeader, MenuDivider, tokens, CardPreview } from "@fluentui/react-components";
+import { Add48Regular, AddRegular, BookQuestionMarkRegular, DocumentAddRegular, MoreHorizontalRegular, NewRegular, Open16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Content, Layout } from "./common";
+import { Content, Layout, NavBar, NavBarItem } from "./common";
 import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
+import { samples } from "./sample-data";
 import { importSeries, PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
 import { FeaturesList } from "./docs";
@@ -61,6 +62,33 @@ export default function StartState() {
 
   return (
     <Layout>
+      <NavBar>
+        <NavBarItem title="Main Menu" to="" />
+        <div style={{ flex: 1 }} />
+        <Menu positioning="below-end">
+          <MenuTrigger>
+            {(triggerProps) => (
+              <SplitButton
+                menuButton={triggerProps}
+                icon={<DocumentAddRegular /> }
+                primaryActionButton={{ onClick: () => navigate("series/new") }} />
+            )}
+          </MenuTrigger>
+
+          <MenuPopover>
+            <MenuItem onClick={() => navigate("series/new")}>Blank new Series</MenuItem>
+            <MenuDivider />
+            <MenuGroupHeader>Sample Regattas</MenuGroupHeader>
+            {samples.map((sample, index) =>
+              <MenuItem onClick={() => createSample(sample)}
+                        key={index}>{sample.name}</MenuItem>
+            )}
+          </MenuPopover>
+        </Menu>
+        <Button onClick={() => navigate("docs")}
+                icon={<BookQuestionMarkRegular />}
+                style={{ marginLeft: 4 }} />
+      </NavBar>
       <Content>
         <div style={{ overflow: "auto" }}>
           <div style={{ textAlign: "center" }}>
@@ -74,16 +102,9 @@ export default function StartState() {
             display: "flex",
             flexWrap: "wrap",
             flexDirection: "column",
-            padding: 8,
             columnGap: "16px",
             rowGap: "36px" }}>
-            <Card style={{ 
-                    display: "flex",
-                    alignItems: "center",
-                    height: 120,
-                    maxWidth: "400px",
-                  }}
-                  onClick={() => navigate("/series/new")}>
+            <Card style={{ display: "flex", alignItems: "center", height: 120 }} onClick={() => navigate("/series/new")}>
               <div style={{ flex: 1 }} />
               <Add48Regular />
               <div style={{ flex: 1 }} />

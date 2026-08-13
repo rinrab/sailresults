@@ -16,44 +16,15 @@ export interface EvaluatedRacer {
   rank: number,
 }
 
-export interface DisqualificationInfo {
-  description: string,
-  countsAsParticipation: boolean,
-};
-
-export const dsqs: Record<string, DisqualificationInfo> = {
-  "DNC": {
-    description: "Did not come",
-    countsAsParticipation: false,
-  },
-  "DNS": {
-    description: "Did not start",
-    countsAsParticipation: false,
-  },
-  "DNF": {
-    description: "Did not finish",
-    countsAsParticipation: true,
-  },
-  "NSC": {
-    description: "Did not sail the course",
-    countsAsParticipation: true,
-  },
-  "UFD": {
-    description: "Uniform flag disqualification; rule 30.3",
-    countsAsParticipation: true,
-  },
-  "BFD": {
-    description: "Black flag disqualification; rule 30.4",
-    countsAsParticipation: true,
-  },
-  "RET": {
-    description: "Retired",
-    countsAsParticipation: true,
-  },
-  "DSQ": {
-    description: "Disqualification",
-    countsAsParticipation: true,
-  },
+export const dsqs = {
+  "DNC": "Did not come",
+  "DNS": "Did not start",
+  "DNF": "Did not finish",
+  "NSC": "Did not sail the course",
+  "UFD": "Uniform flag disqualification; rule 30.3",
+  "BFD": "Black flag disqualification; rule 30.4",
+  "RET": "Retired",
+  "DSQ": "Disqualification",
 };
 
 export type FinishboardEntry = number | "DNC" | "DNS" | "DNF" | "NSC" | "UFD" | "BFD" | "RET" | "DSQ";
@@ -125,19 +96,6 @@ function compareEvaluatedRacers(left: EvaluatedRacer, right: EvaluatedRacer): nu
   return 0;
 }
 
-function countsAsParticipation(scores: EvaluatedScore[]): boolean {
-  for (const score of scores) {
-    if (typeof(score.finishboardEntry) == "number") {
-      return true;
-    } else {
-      if (dsqs[score.finishboardEntry].countsAsParticipation) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 export function evaluateScoreboard(
   racers: { [id: number]: Racer },
   series: Series,
@@ -176,12 +134,6 @@ export function evaluateScoreboard(
       rank = i + 1;
     }
     result[i].rank = rank;
-  }
-
-  for (const racer of result) {
-    if (! countsAsParticipation(racer.scores)) {
-      racer.rank = -1;
-    }
   }
 
   return result;

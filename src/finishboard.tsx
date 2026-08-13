@@ -2,8 +2,8 @@ import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuP
 import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
-import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
+import { Content, formatString, Layout, NavBar, NavBarItem, racerMatches } from "./common";
+import {  Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
 import { IBoardEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
 
@@ -163,9 +163,9 @@ function FinishboardRow(props: {
                   </MenuTrigger>
                   <MenuPopover>
                     <MenuList>
-                      {Object.entries(dsqs).map(([name, {description}]) =>
+                      {Object.entries(dsqs).map(([name, desc]) =>
                         <MenuItem key={name}
-                                  subText={description}
+                                  subText={desc}
                                   icon={ (name == props.rank) && <CheckmarkRegular /> }
                                   onClick={() => props.setPosition(name as FinishboardEntry)}
                           >{name}</MenuItem>
@@ -263,7 +263,11 @@ export function NewRaceState() {
 
   return (
     <Layout>
-      <NavBar title={series.current.name} subtitle="New Race" />
+      <NavBar>
+        <NavBarItem title={series.current.name} to="../.." />
+        <NavBarItem title="Races" to=".." />
+        <NavBarItem title="New Race" to="" />
+      </NavBar>
       <Content>
         <RacerPicker series={series} draft={draft} />
         <div style={{ flex: "auto", overflow: "auto" }}>
@@ -282,9 +286,11 @@ export function NewRaceState() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <Button style={{ flex: "auto", width: "120px" }}
+                    onClick={() => navigate(`..`)}>Close</Button>
+            <Button style={{ flex: "auto", width: "120px" }}
                     onClick={() => draft.clear()}>Delete Draft</Button>
             <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={Object.entries(draft.board).length == 0}
+                    disabled={Object.entries(draft).length == 0}
                     onClick={() => {
                       series.promoteDraft();
                       navigate("..");
@@ -297,22 +303,20 @@ export function NewRaceState() {
 }
 
 export function EditRaceState() {
+  const navigate = useNavigate();
   const { seriesId, raceId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
   const draft = series.openBoard(parseInt(raceId));
   const [editingRank, setEditingRank] = React.useState(null);
 
-  React.useEffect(() => {
-    for (const racerId of draft.getRemaining()) {
-      draft.setPosition(racerId, "DNC");
-    }
-  }, []);
-
   return (
     <Layout>
-      <NavBar back="../.." title={series.current.name} 
-              subtitle={`Race ${parseInt(raceId) + 1}`} />
+      <NavBar>
+        <NavBarItem title={series.current.name} to="../../.." />
+        <NavBarItem title="Races" to="../.." />
+        <NavBarItem title={`R${parseInt(raceId) + 1}`} to="" />
+      </NavBar>
       <Content>
         <RacerPicker series={series} draft={draft} />
         <div style={{ flex: "auto", overflow: "auto" }}>
@@ -328,6 +332,11 @@ export function EditRaceState() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <div style={{ flex: "1 1 300px", margin: "auto" }}>
             {<FinishBoardStatus draft={draft} />}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button style={{ flex: "auto", width: "120px" }}
+                    disabled={Object.entries(draft.board).length == 0}
+                    onClick={() => navigate("../..")}>Done</Button>
           </div>
         </div>
       </Content>
