@@ -4,7 +4,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
 import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer, DEFAULT_DISQUALIFICATION } from "./scoring";
-import { IBoardEditor, ISeriesEditor } from "./storage";
+import { IBoardEditor, IRacerEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
 
 function FinishBoardStatus(props: { draft: IBoardEditor }) {
@@ -85,7 +85,32 @@ function findLastPlace(finishboard: Finishboard) {
   return result;
 }
 
-function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEditor, query: string }) {
+function SuggestionItem(props: {
+  item: IRacerEditor,
+  setPosition: (value: FinishboardEntry | null) => void, 
+}) {
+  const text = `${props.item.current.name} ${props.item.current.number}`;
+
+  return <Option key={props.item.current.id} text={text}
+                 value={props.item.current.id.toString()}>
+    <div style={{ display: "flex", width: "100%", gap: 4 }}>
+      <div style={{ flex: 1 }}>{text}</div>
+      <Button onClick={(e) => { e.stopPropagation(); props.setPosition("DNC") }}
+              size="small" style={{ minWidth: 0 }}>DNC</Button>
+      <Button onClick={(e) => { e.stopPropagation(); props.setPosition("DNS") }}
+              size="small" style={{ minWidth: 0 }}>DNC</Button>
+      <Button onClick={(e) => { e.stopPropagation(); props.setPosition("DNF") }}
+              size="small" style={{ minWidth: 0 }}>DNF</Button>
+    </div>
+  </Option>;
+}
+
+function FinishboardSuggestions(props: {
+  series: ISeriesEditor,
+  draft: IBoardEditor,
+  query: string,
+  setIsOpen: (value: boolean) => void,
+}) {
   const storage = React.useContext(StorageContext);
   const remainingRacers = props.draft.getRemaining().map(id => storage.openRacer(id));
   const filteredItems = remainingRacers.filter(item => racerMatches(item.current, props.query));
@@ -105,10 +130,13 @@ function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEdi
       No racers matched by this query.</Text></>
   } else {
     return (<>
-      {filteredItems.map(item => {
-        const text = `${item.current.name} ${item.current.number}`;
-        return <Option key={item.current.id} text={text} value={item.current.id.toString()}>{text}</Option>;
-      })}
+      {filteredItems.map(item => 
+        <SuggestionItem setPosition={(value) => {
+                          props.draft.setPosition(item.current.id, value);
+                          props.setIsOpen(false);
+                        }}
+                        item={item} />
+      )}
     </>)
   }
 }
@@ -226,13 +254,15 @@ function RacerPicker(props: { series: ISeriesEditor, draft: IBoardEditor }) {
   const [query, setQuery] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const onOptionSelect = (_, data: OptionOnSelectData) => {
+  const onOptionSelect = (e, data: OptionOnSelectData) => {
     if (data.optionValue) {
       const id = parseInt(data.optionValue);
       props.draft.setPosition(id, findLastPlace(props.draft.board)),
       setQuery("");
     }
   };
+
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <div>
@@ -244,8 +274,13 @@ function RacerPicker(props: { series: ISeriesEditor, draft: IBoardEditor }) {
         onInput={(e) => setQuery(e.currentTarget.value)}
         selectedOptions={[]}
         onOptionSelect={onOptionSelect}
+        open={isOpen}
+        onOpenChange={(_, data) => setIsOpen(data.open)}
       >
-        <FinishboardSuggestions series={props.series} draft={props.draft} query={query} />
+        <FinishboardSuggestions series={props.series}
+                                draft={props.draft}
+                                query={query}
+                                setIsOpen={setIsOpen} />
       </Combobox>
     </div>
   );
