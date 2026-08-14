@@ -76,7 +76,7 @@ export function DocsAbout() {
         </ul>
         <h3>Version</h3>
         <ul>
-          <li>Version: ${displayVersion()}</li>
+          <li>Version: {displayVersion()}</li>
           <li>Subversion revision number: {revnum}</li>
           <li>Built at: {buildDate}</li>
         </ul>
