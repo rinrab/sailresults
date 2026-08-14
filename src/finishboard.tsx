@@ -50,7 +50,7 @@ function FinishboardRankEditor(props: {
     inputRef.current?.focus();
   });
   const [editingValue, setEditingValue] = React.useState<string>(props.draft.board[props.editingRank].toString());
-  const [revertValue] = React.useState(props.draft[props.editingRank]);
+  const [revertValue] = React.useState(props.draft.board[props.editingRank]);
 
   const storage = React.useContext(StorageContext);
   const racer = storage.openRacer(props.editingRank);
@@ -64,7 +64,7 @@ function FinishboardRankEditor(props: {
   }
 
   return <form onSubmit={props.done}>
-    <Text block>Adjust position of {racer.current.name} {racer.current.number} from {revertValue}</Text>
+    <Text block>Adjust position of '{racer.current.name} {racer.current.number}' from {revertValue} to:</Text>
     <div style={{ width: "100%", display: "flex", gap: 8 }}>
       <Input ref={inputRef} style={{ flex: 1 }} type="number"
              value={editingValue} onChange={e => setValue(e.target.value)}
