@@ -6,6 +6,7 @@ import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
 import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer, DEFAULT_DISQUALIFICATION } from "./scoring";
 import { IBoardEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
+import { Column, SailTable } from "./table";
 
 function FinishBoardStatus(props: { draft: IBoardEditor }) {
   const remainingRacers = props.draft.getRemaining();
@@ -113,73 +114,42 @@ function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEdi
   }
 }
 
-function FinishboardRow(props: {
+function FinishboardMenu(props: {
   rank: FinishboardEntry,
   racer: Racer,
   move: () => void,
   editing: boolean,
   setPosition: (value: FinishboardEntry | null) => void,
 }) {
-  const ref = React.useRef<HTMLTableRowElement>(null);
-  React.useEffect(() => {
-    if (props.editing) {
-      ref.current.scrollIntoView({
-        block: "nearest",
-        inline: "nearest",
-        behavior: "smooth",
-      });
-    }
-  });
-
-  const getRowStyle = () => {
-    if (props.editing) {
-      return {
-        backgroundColor: tokens.colorSubtleBackgroundPressed,
-        color: tokens.colorNeutralForeground1Pressed,
-      };
-    } else {
-      return {};
-    }
-  }
-
   return (
-    <TableRow ref={ref} style={getRowStyle()}>
-      <TableCell>{props.rank}</TableCell>
-      <TableCell>{formatString(props.racer.name)}</TableCell>
-      <TableCell>{formatString(props.racer.number)}</TableCell>
-      <TableCell>
-        <div style={{ justifyContent: "end", width: "100%", display: "flex" }}>
+    <Menu>
+      <MenuTrigger>
+        <Button icon={<MoreVerticalRegular />} appearance="transparent"
+          onClick={(e) => e.stopPropagation()} />
+      </MenuTrigger>
+      <MenuPopover>
+        <MenuList>
+          <MenuItem onClick={props.move}>Move</MenuItem>
           <Menu>
-            <MenuTrigger>
-              <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                      onClick={(e) => e.stopPropagation()} />
+            <MenuTrigger disableButtonEnhancement>
+              <MenuItem>Disqualify</MenuItem>
             </MenuTrigger>
             <MenuPopover>
               <MenuList>
-                <MenuItem onClick={props.move}>Move</MenuItem>
-                <Menu>
-                  <MenuTrigger disableButtonEnhancement>
-                    <MenuItem>Disqualify</MenuItem>
-                  </MenuTrigger>
-                  <MenuPopover>
-                    <MenuList>
-                      {Object.entries(dsqs).map(([name, {description}]) =>
-                        <MenuItem key={name}
-                                  subText={description}
-                                  icon={ (name == props.rank) && <CheckmarkRegular /> }
-                                  onClick={() => props.setPosition(name as FinishboardEntry)}
-                          >{name}</MenuItem>
-                      )}
-                    </MenuList>
-                  </MenuPopover>
-                </Menu>
-                <MenuItem onClick={() => props.setPosition(null)}>Delete</MenuItem>
+                {Object.entries(dsqs).map(([name, { description }]) =>
+                  <MenuItem key={name}
+                    subText={description}
+                    icon={(name == props.rank) && <CheckmarkRegular />}
+                    onClick={() => props.setPosition(name as FinishboardEntry)}
+                  >{name}</MenuItem>
+                )}
               </MenuList>
             </MenuPopover>
           </Menu>
-        </div>
-      </TableCell>
-    </TableRow>
+          <MenuItem onClick={() => props.setPosition(null)}>Delete</MenuItem>
+        </MenuList>
+      </MenuPopover>
+    </Menu>
   );
 }
 
@@ -190,34 +160,46 @@ function FinishboardTable(props: {
 }) {
   const storage = React.useContext(StorageContext);
 
+  const columns: Column<Racer>[] = [
+    {
+      header: "Rank",
+      cell: (row) => <Text>{props.draft.board[row.id]}</Text>,
+      size: 40,
+      align: "end",
+    },
+    {
+      header: "Name",
+      cell: (row) => <Text>{row.name}</Text>,
+      minsize: 150,
+    },
+    {
+      header: "Number",
+      cell: (row) => <Text>{row.number}</Text>,
+      minsize: 120,
+    },
+    {
+      header: "",
+      cell: (row) => (
+        <FinishboardMenu rank={props.draft.board[row.id]}
+                         racer={row}
+                         move={() => props.setEditingRank(row.id)}
+                         editing={props.editingRank == row.id}
+                         setPosition={(value) => props.draft.setPosition(row.id, value)} />
+      ),
+      size: 40,
+      align: "end",
+    },
+  ];
+
   if (Object.entries(props.draft.board).length == 0) {
     return <Text>The finishboard is empty.</Text>
   } else {
+    const keys = sortFinishboard(props.draft.board);
     return (
-      <div style={{ overflow: "auto", flex: "auto" }}>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell style={{ maxWidth: 40 }}>Rank</TableHeaderCell>
-              <TableHeaderCell>Name</TableHeaderCell>
-              <TableHeaderCell>Number</TableHeaderCell>
-              <TableHeaderCell style={{ maxWidth: 40 }}></TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortFinishboard(props.draft.board).map((racerId) => {
-              return <FinishboardRow 
-                key={racerId}
-                rank={props.draft.board[racerId]}
-                racer={storage.openRacer(racerId).current} 
-                setPosition={(value) => props.draft.setPosition(racerId, value)}
-                move={() => props.setEditingRank(racerId)}
-                editing={props.editingRank == racerId} />
-              }
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <SailTable columns={columns}
+                 keys={keys}
+                 map={(key) => storage.openRacer(key as any).current}
+                 selectedIndex={keys.indexOf(props.editingRank)} />
     );
   }
 }
