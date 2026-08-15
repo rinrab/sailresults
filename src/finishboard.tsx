@@ -162,20 +162,23 @@ function FinishboardTable(props: {
 
   const columns: Column<Racer>[] = [
     {
-      header: "Rank",
-      cell: (row) => <Text>{props.draft.board[row.id]}</Text>,
-      size: 40,
+      header: "#",
+      cell: (row, index) => <Text>{index + 1}</Text>,
+      size: 20,
       align: "end",
     },
     {
       header: "Name",
       cell: (row) => <Text>{row.name}</Text>,
-      minsize: 150,
     },
     {
       header: "Number",
       cell: (row) => <Text>{row.number}</Text>,
-      minsize: 120,
+    },
+    {
+      header: "Rank",
+      cell: (row) => <Text>{props.draft.board[row.id]}</Text>,
+      size: 20,
     },
     {
       header: "",
@@ -186,7 +189,7 @@ function FinishboardTable(props: {
                          editing={props.editingRank == row.id}
                          setPosition={(value) => props.draft.setPosition(row.id, value)} />
       ),
-      size: 40,
+      size: 32,
       align: "end",
     },
   ];
