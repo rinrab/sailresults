@@ -16,21 +16,56 @@ export interface EvaluatedRacer {
   rank: number,
 }
 
-export const dsqs = {
-  "DNC": "Did not come",
-  "DNS": "Did not start",
-  "DNF": "Did not finish",
-  "NSC": "Did not sail the course",
-  "UFD": "Uniform flag disqualification; rule 30.3",
-  "BFD": "Black flag disqualification; rule 30.4",
-  "RET": "Retired",
-  "DSQ": "Disqualification",
+export interface DisqualificationInfo {
+  description: string,
+  countsAsParticipation: boolean,
+};
+
+export const dsqs: Record<string, DisqualificationInfo> = {
+  "DNC": {
+    description: "Did not come",
+    countsAsParticipation: false,
+  },
+  "DNS": {
+    description: "Did not start",
+    countsAsParticipation: false,
+  },
+  "OCS": {
+    description: "On course side; rule 30.1",
+    countsAsParticipation: true,
+  },
+  "DNF": {
+    description: "Did not finish",
+    countsAsParticipation: true,
+  },
+  "NSC": {
+    description: "Did not sail the course",
+    countsAsParticipation: true,
+  },
+  "UFD": {
+    description: "Uniform flag disqualification; rule 30.3",
+    countsAsParticipation: true,
+  },
+  "BFD": {
+    description: "Black flag disqualification; rule 30.4",
+    countsAsParticipation: true,
+  },
+  "RET": {
+    description: "Retired",
+    countsAsParticipation: true,
+  },
+  "DSQ": {
+    description: "Disqualification",
+    countsAsParticipation: true,
+  },
 };
 
 export type FinishboardEntry = number | "DNC" | "DNS" | "DNF" | "NSC" | "UFD" | "BFD" | "RET" | "DSQ";
 export type Finishboard = { 
   [racerId: number]: FinishboardEntry
 }
+
+export const DEFAULT_DISQUALIFICATION: FinishboardEntry = "DNF";
 
 export interface Series {
   id: number;
@@ -49,6 +84,14 @@ export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) 
 }
 
 function compareEvaluatedRacers(left: EvaluatedRacer, right: EvaluatedRacer): number {
+  if (left.rank == -1 && right.rank == -1) {
+    return 0;
+  } else if (left.rank == -1) {
+    return 67;
+  } else if (right.rank == -1) {
+    return -67;
+  }
+
   /* let's pretend they are the same for both left and right */
   const racesCount = left.scores.length;
 
@@ -96,6 +139,19 @@ function compareEvaluatedRacers(left: EvaluatedRacer, right: EvaluatedRacer): nu
   return 0;
 }
 
+function countsAsParticipation(scores: EvaluatedScore[]): boolean {
+  for (const score of scores) {
+    if (typeof(score.finishboardEntry) == "number") {
+      return true;
+    } else {
+      if (dsqs[score.finishboardEntry].countsAsParticipation) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export function evaluateScoreboard(
   racers: { [id: number]: Racer },
   series: Series,
@@ -107,7 +163,7 @@ export function evaluateScoreboard(
     let total = 0;
 
     for (const board of finishBoards) {
-      const entry = board[racerId] ?? "DNC"; 
+      const entry = board[racerId] ?? DEFAULT_DISQUALIFICATION; 
       const realScore = evaluateRealScore(entry, series.racers.length);
 
       total += realScore;
@@ -125,16 +181,28 @@ export function evaluateScoreboard(
     });
   }
 
+  /* mark all not-participated entries */
+  for (const racer of result) {
+    if (! countsAsParticipation(racer.scores)) {
+      racer.rank = -1;
+    } else {
+      racer.rank = 1;
+    }
+  }
+
   result.sort((a, b) => compareEvaluatedRacers(a, b));
 
   let rank = 1;
   for (let i = 1; i < result.length; i++) {
-    const diff = compareEvaluatedRacers(result[i - 1], result[i]);
-    if (diff != 0) {
-      rank = i + 1;
+    if (result[i].rank != -1) {
+      const diff = compareEvaluatedRacers(result[i - 1], result[i]);
+      if (diff != 0) {
+        rank = i + 1;
+      }
+      result[i].rank = rank;
     }
-    result[i].rank = rank;
   }
+
 
   return result;
 }

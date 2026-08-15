@@ -3,8 +3,8 @@ import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warnin
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
-import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
-import { IBoardEditor, ISeriesEditor } from "./storage";
+import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer, DEFAULT_DISQUALIFICATION } from "./scoring";
+import { IBoardEditor, IRacerEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
 
 function FinishBoardStatus(props: { draft: IBoardEditor }) {
@@ -34,7 +34,7 @@ function FinishBoardStatus(props: { draft: IBoardEditor }) {
         color: tokens.colorPaletteDarkOrangeForeground1,
         margin: "-2px 4px" }} />
       <Text>
-        Note: {remainingRacers.length} remaining racers will be added as DNS.
+        Note: {remainingRacers.length} remaining racers will be added as {DEFAULT_DISQUALIFICATION}.
       </Text>
     </div>;
   }
@@ -50,7 +50,7 @@ function FinishboardRankEditor(props: {
     inputRef.current?.focus();
   });
   const [editingValue, setEditingValue] = React.useState<string>(props.draft.board[props.editingRank].toString());
-  const [revertValue] = React.useState(props.draft[props.editingRank]);
+  const [revertValue] = React.useState(props.draft.board[props.editingRank]);
 
   const storage = React.useContext(StorageContext);
   const racer = storage.openRacer(props.editingRank);
@@ -64,7 +64,7 @@ function FinishboardRankEditor(props: {
   }
 
   return <form onSubmit={props.done}>
-    <Text block>Adjust position of {racer.current.name} {racer.current.number} from {revertValue}</Text>
+    <Text block>Adjust position of '{racer.current.name} {racer.current.number}' from {revertValue} to:</Text>
     <div style={{ width: "100%", display: "flex", gap: 8 }}>
       <Input ref={inputRef} style={{ flex: 1 }} type="number"
              value={editingValue} onChange={e => setValue(e.target.value)}
@@ -85,7 +85,32 @@ function findLastPlace(finishboard: Finishboard) {
   return result;
 }
 
-function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEditor, query: string }) {
+function SuggestionItem(props: {
+  item: IRacerEditor,
+  setPosition: (value: FinishboardEntry | null) => void, 
+}) {
+  const text = `${props.item.current.name} ${props.item.current.number}`;
+
+  return <Option key={props.item.current.id} text={text}
+                 value={props.item.current.id.toString()}>
+    <div style={{ display: "flex", width: "100%", gap: 4 }}>
+      <div style={{ flex: 1 }}>{text}</div>
+      <Button onClick={(e) => { e.stopPropagation(); props.setPosition("DNC") }}
+              size="small" style={{ minWidth: 0 }}>DNC</Button>
+      <Button onClick={(e) => { e.stopPropagation(); props.setPosition("DNS") }}
+              size="small" style={{ minWidth: 0 }}>DNC</Button>
+      <Button onClick={(e) => { e.stopPropagation(); props.setPosition("DNF") }}
+              size="small" style={{ minWidth: 0 }}>DNF</Button>
+    </div>
+  </Option>;
+}
+
+function FinishboardSuggestions(props: {
+  series: ISeriesEditor,
+  draft: IBoardEditor,
+  query: string,
+  setIsOpen: (value: boolean) => void,
+}) {
   const storage = React.useContext(StorageContext);
   const remainingRacers = props.draft.getRemaining().map(id => storage.openRacer(id));
   const filteredItems = remainingRacers.filter(item => racerMatches(item.current, props.query));
@@ -105,10 +130,13 @@ function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEdi
       No racers matched by this query.</Text></>
   } else {
     return (<>
-      {filteredItems.map(item => {
-        const text = `${item.current.name} ${item.current.number}`;
-        return <Option key={item.current.id} text={text} value={item.current.id.toString()}>{text}</Option>;
-      })}
+      {filteredItems.map(item => 
+        <SuggestionItem setPosition={(value) => {
+                          props.draft.setPosition(item.current.id, value);
+                          props.setIsOpen(false);
+                        }}
+                        item={item} />
+      )}
     </>)
   }
 }
@@ -163,9 +191,9 @@ function FinishboardRow(props: {
                   </MenuTrigger>
                   <MenuPopover>
                     <MenuList>
-                      {Object.entries(dsqs).map(([name, desc]) =>
+                      {Object.entries(dsqs).map(([name, {description}]) =>
                         <MenuItem key={name}
-                                  subText={desc}
+                                  subText={description}
                                   icon={ (name == props.rank) && <CheckmarkRegular /> }
                                   onClick={() => props.setPosition(name as FinishboardEntry)}
                           >{name}</MenuItem>
@@ -226,13 +254,15 @@ function RacerPicker(props: { series: ISeriesEditor, draft: IBoardEditor }) {
   const [query, setQuery] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const onOptionSelect = (_, data: OptionOnSelectData) => {
+  const onOptionSelect = (e, data: OptionOnSelectData) => {
     if (data.optionValue) {
       const id = parseInt(data.optionValue);
       props.draft.setPosition(id, findLastPlace(props.draft.board)),
       setQuery("");
     }
   };
+
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <div>
@@ -244,8 +274,13 @@ function RacerPicker(props: { series: ISeriesEditor, draft: IBoardEditor }) {
         onInput={(e) => setQuery(e.currentTarget.value)}
         selectedOptions={[]}
         onOptionSelect={onOptionSelect}
+        open={isOpen}
+        onOpenChange={(_, data) => setIsOpen(data.open)}
       >
-        <FinishboardSuggestions series={props.series} draft={props.draft} query={query} />
+        <FinishboardSuggestions series={props.series}
+                                draft={props.draft}
+                                query={query}
+                                setIsOpen={setIsOpen} />
       </Combobox>
     </div>
   );
@@ -282,11 +317,9 @@ export function NewRaceState() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <Button style={{ flex: "auto", width: "120px" }}
-                    onClick={() => navigate(`..`)}>Close</Button>
-            <Button style={{ flex: "auto", width: "120px" }}
                     onClick={() => draft.clear()}>Delete Draft</Button>
             <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={Object.entries(draft).length == 0}
+                    disabled={Object.entries(draft.board).length == 0}
                     onClick={() => {
                       series.promoteDraft();
                       navigate("..");
@@ -299,12 +332,17 @@ export function NewRaceState() {
 }
 
 export function EditRaceState() {
-  const navigate = useNavigate();
   const { seriesId, raceId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
   const draft = series.openBoard(parseInt(raceId));
   const [editingRank, setEditingRank] = React.useState(null);
+
+  React.useEffect(() => {
+    for (const racerId of draft.getRemaining()) {
+      draft.setPosition(racerId, DEFAULT_DISQUALIFICATION);
+    }
+  }, []);
 
   return (
     <Layout>
@@ -325,11 +363,6 @@ export function EditRaceState() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <div style={{ flex: "1 1 300px", margin: "auto" }}>
             {<FinishBoardStatus draft={draft} />}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={Object.entries(draft.board).length == 0}
-                    onClick={() => navigate("../..")}>Done</Button>
           </div>
         </div>
       </Content>

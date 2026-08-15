@@ -14,7 +14,7 @@ export interface SailTableProps<KeyT, ValueT> {
   columns: Column<ValueT>[];
   keys: KeyT[];
   map: (key: KeyT) => ValueT;
-  onSelect?: (item: ValueT, key: KeyT) => void;
+  onSelect?: (item: ValueT, key: KeyT, index: number) => void;
 }
 
 export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
@@ -90,7 +90,7 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
                           cursor: props.onSelect ? "pointer" : "default",
                           minWidth: "100%",
                         }}
-                        onClick={() => props?.onSelect(value, key)}>
+                        onClick={() => props?.onSelect(value, key, item.index)}>
                 {props.columns.map((col, index) => (
                   <TableCell
                     key={index}

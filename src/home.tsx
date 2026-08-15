@@ -1,5 +1,5 @@
 import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader } from "@fluentui/react-components";
-import { Add48Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
+import { Add48Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Content, Layout } from "./common";
@@ -44,7 +44,12 @@ function SeriesCard(props: { series: Series }) {
         }
       />
 
-      <ResultsOverview series={props.series} />
+      <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
+        <div style={{ flex: 1 }}>
+          <ResultsOverview series={props.series} />
+        </div>
+        <ChevronRight24Regular />
+      </div>
     </Card>
   );
 }
