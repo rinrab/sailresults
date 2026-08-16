@@ -107,7 +107,7 @@ export function SeriesConfigurationState() {
                      onChange={(e) => series.setName(e.target.value)} />
             </Field>
 
-            <Field label="Edit raw CSV">
+            <Field label="Raw CSV">
               <Textarea readOnly resize="vertical"
                         value={csv}
                         textarea={{
