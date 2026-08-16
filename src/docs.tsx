@@ -5,6 +5,9 @@ import { Text } from "@fluentui/react-components";
 import { dsqs } from "./scoring";
 import { version_major, version_minor, revnum } from "./version";
 
+declare const __BUILD_DATE__: string;
+const buildDate = __BUILD_DATE__;
+
 export function FeaturesList() {
   return <ul>
     <li>Simple and convenient user experience.</li>
@@ -34,10 +37,18 @@ export function DocsIndex() {
           <li>
             <Link to="scoring">Scoring</Link>
           </li>
+          <li>
+            <Link to="add-to-home-screen">How to add to home screen</Link>
+          </li>
         </ul>
       </div>
     </Content>
   </Layout>
+}
+
+export function displayVersion() {
+  const note = ((revnum as any == "staging") ?  "(in development)" : revnum);
+  return `${version_major}.${version_minor} ${note}`;
 }
 
 export function DocsAbout() {
@@ -47,8 +58,11 @@ export function DocsAbout() {
       <div style={{ overflow: "auto", height: "100%" }}>
         <h1>Documentation</h1>
         <h2>About this app</h2>
-        <p>This is a sailing scoring program. It focues on simplicity and
-        minimalistic approach.</p>
+        <p><b>SailResults</b> is a scoring sailing program for organising and
+        accounting of sailing regattas, training series, and more. It focues
+        on simplicity and minimalistic user experience. This app is designed to
+        be used by the coach in the conditions of a session providing all the
+        tools you may need to keep track of your leaderboard.</p>
         <h3>Features</h3>
         <FeaturesList />
 
@@ -62,9 +76,41 @@ export function DocsAbout() {
         </ul>
         <h3>Version</h3>
         <ul>
-          <li>Version: {version_major}.{version_minor} {revnum as any == "staging" && ("(in development)")}</li>
+          <li>Version: {displayVersion()}</li>
           <li>Subversion revision number: {revnum}</li>
+          <li>Built at: {buildDate}</li>
         </ul>
+      </div>
+    </Content>
+  </Layout>
+}
+
+export function DocsHomeScreen() {
+  return <Layout>
+    <NavBar title="Documentation" subtitle="How to add to home screen" />
+    <Content>
+      <div style={{ overflow: "auto", height: "100%" }}>
+        <h1>Documentation</h1>
+        <h2>How to add to home screen</h2>
+        <p>Although, we don't ship a version of this app for neither iPhone nor
+        Android, you could still install it as a PWA (progressive web app) and
+        have a similar experience as it was an app.</p>
+        <h3>Steps for Safari</h3>
+        <ol>
+          <li>Click '...' to the right of the address bar.</li>
+          <li>In the pop-up navigate to 'Share'.</li>
+          <li>Scroll down and find 'Add to Home Screen'.</li>
+          <li>The icon should appear on the home screen.</li>
+        </ol>
+        <p>Please note that the version you have in your browser and installed
+        on your device have separate storage. Meaning you should remember where
+        the series was saved since you can't work on it from both instances at
+        the same time.</p>
+        <p>You could even have two installation side by side. In this case each
+        of them will have their separate storage. Although it is possible, we
+        do not recommend you do that.</p>
+        <p>Also please keep in mind that if you delete the app, all your data
+        will be lost forever.</p>
       </div>
     </Content>
   </Layout>
@@ -127,8 +173,8 @@ export function DocsScoring() {
         abriviations.</p>
 
         <ul>
-          {Object.entries(dsqs).map(([name, desc]) =>
-            <li key={name}><Text weight="bold" font="monospace">{name}</Text>: {desc}</li>)}
+          {Object.entries(dsqs).map(([name, {description}]) =>
+            <li key={name}><Text weight="bold" font="monospace">{name}</Text>: {description}</li>)}
         </ul>
       </div>
     </Content>

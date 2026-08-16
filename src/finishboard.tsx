@@ -3,9 +3,10 @@ import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warnin
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
-import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer } from "./scoring";
+import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer, DEFAULT_DISQUALIFICATION } from "./scoring";
 import { IBoardEditor, ISeriesEditor } from "./storage";
 import { StorageContext } from "./storage-context";
+import { Column, SailTable } from "./table";
 
 function FinishBoardStatus(props: { draft: IBoardEditor }) {
   const remainingRacers = props.draft.getRemaining();
@@ -34,7 +35,7 @@ function FinishBoardStatus(props: { draft: IBoardEditor }) {
         color: tokens.colorPaletteDarkOrangeForeground1,
         margin: "-2px 4px" }} />
       <Text>
-        Note: {remainingRacers.length} remaining racers will be added as DNS.
+        Note: {remainingRacers.length} remaining racers will be added as {DEFAULT_DISQUALIFICATION}.
       </Text>
     </div>;
   }
@@ -50,7 +51,7 @@ function FinishboardRankEditor(props: {
     inputRef.current?.focus();
   });
   const [editingValue, setEditingValue] = React.useState<string>(props.draft.board[props.editingRank].toString());
-  const [revertValue] = React.useState(props.draft[props.editingRank]);
+  const [revertValue] = React.useState(props.draft.board[props.editingRank]);
 
   const storage = React.useContext(StorageContext);
   const racer = storage.openRacer(props.editingRank);
@@ -64,7 +65,7 @@ function FinishboardRankEditor(props: {
   }
 
   return <form onSubmit={props.done}>
-    <Text block>Adjust position of {racer.current.name} {racer.current.number} from {revertValue}</Text>
+    <Text block>Adjust position of '{racer.current.name} {racer.current.number}' from {revertValue} to:</Text>
     <div style={{ width: "100%", display: "flex", gap: 8 }}>
       <Input ref={inputRef} style={{ flex: 1 }} type="number"
              value={editingValue} onChange={e => setValue(e.target.value)}
@@ -113,73 +114,42 @@ function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEdi
   }
 }
 
-function FinishboardRow(props: {
+function FinishboardMenu(props: {
   rank: FinishboardEntry,
   racer: Racer,
   move: () => void,
   editing: boolean,
   setPosition: (value: FinishboardEntry | null) => void,
 }) {
-  const ref = React.useRef<HTMLTableRowElement>(null);
-  React.useEffect(() => {
-    if (props.editing) {
-      ref.current.scrollIntoView({
-        block: "nearest",
-        inline: "nearest",
-        behavior: "smooth",
-      });
-    }
-  });
-
-  const getRowStyle = () => {
-    if (props.editing) {
-      return {
-        backgroundColor: tokens.colorSubtleBackgroundPressed,
-        color: tokens.colorNeutralForeground1Pressed,
-      };
-    } else {
-      return {};
-    }
-  }
-
   return (
-    <TableRow ref={ref} style={getRowStyle()}>
-      <TableCell>{props.rank}</TableCell>
-      <TableCell>{formatString(props.racer.name)}</TableCell>
-      <TableCell>{formatString(props.racer.number)}</TableCell>
-      <TableCell>
-        <div style={{ justifyContent: "end", width: "100%", display: "flex" }}>
+    <Menu>
+      <MenuTrigger>
+        <Button icon={<MoreVerticalRegular />} appearance="transparent"
+          onClick={(e) => e.stopPropagation()} />
+      </MenuTrigger>
+      <MenuPopover>
+        <MenuList>
+          <MenuItem onClick={props.move}>Move</MenuItem>
           <Menu>
-            <MenuTrigger>
-              <Button icon={<MoreVerticalRegular />} appearance="transparent"
-                      onClick={(e) => e.stopPropagation()} />
+            <MenuTrigger disableButtonEnhancement>
+              <MenuItem>Disqualify</MenuItem>
             </MenuTrigger>
             <MenuPopover>
               <MenuList>
-                <MenuItem onClick={props.move}>Move</MenuItem>
-                <Menu>
-                  <MenuTrigger disableButtonEnhancement>
-                    <MenuItem>Disqualify</MenuItem>
-                  </MenuTrigger>
-                  <MenuPopover>
-                    <MenuList>
-                      {Object.entries(dsqs).map(([name, desc]) =>
-                        <MenuItem key={name}
-                                  subText={desc}
-                                  icon={ (name == props.rank) && <CheckmarkRegular /> }
-                                  onClick={() => props.setPosition(name as FinishboardEntry)}
-                          >{name}</MenuItem>
-                      )}
-                    </MenuList>
-                  </MenuPopover>
-                </Menu>
-                <MenuItem onClick={() => props.setPosition(null)}>Delete</MenuItem>
+                {Object.entries(dsqs).map(([name, { description }]) =>
+                  <MenuItem key={name}
+                    subText={description}
+                    icon={(name == props.rank) && <CheckmarkRegular />}
+                    onClick={() => props.setPosition(name as FinishboardEntry)}
+                  >{name}</MenuItem>
+                )}
               </MenuList>
             </MenuPopover>
           </Menu>
-        </div>
-      </TableCell>
-    </TableRow>
+          <MenuItem onClick={() => props.setPosition(null)}>Delete</MenuItem>
+        </MenuList>
+      </MenuPopover>
+    </Menu>
   );
 }
 
@@ -190,34 +160,49 @@ function FinishboardTable(props: {
 }) {
   const storage = React.useContext(StorageContext);
 
+  const columns: Column<Racer>[] = [
+    {
+      header: "#",
+      cell: (row, index) => <Text>{index + 1}</Text>,
+      size: 20,
+      align: "end",
+    },
+    {
+      header: "Name",
+      cell: (row) => <Text>{row.name}</Text>,
+    },
+    {
+      header: "Number",
+      cell: (row) => <Text>{row.number}</Text>,
+    },
+    {
+      header: "Rank",
+      cell: (row) => <Text>{props.draft.board[row.id]}</Text>,
+      size: 20,
+    },
+    {
+      header: "",
+      cell: (row) => (
+        <FinishboardMenu rank={props.draft.board[row.id]}
+                         racer={row}
+                         move={() => props.setEditingRank(row.id)}
+                         editing={props.editingRank == row.id}
+                         setPosition={(value) => props.draft.setPosition(row.id, value)} />
+      ),
+      size: 32,
+      align: "end",
+    },
+  ];
+
   if (Object.entries(props.draft.board).length == 0) {
     return <Text>The finishboard is empty.</Text>
   } else {
+    const keys = sortFinishboard(props.draft.board);
     return (
-      <div style={{ overflow: "auto", flex: "auto" }}>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell style={{ maxWidth: 40 }}>Rank</TableHeaderCell>
-              <TableHeaderCell>Name</TableHeaderCell>
-              <TableHeaderCell>Number</TableHeaderCell>
-              <TableHeaderCell style={{ maxWidth: 40 }}></TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortFinishboard(props.draft.board).map((racerId) => {
-              return <FinishboardRow 
-                key={racerId}
-                rank={props.draft.board[racerId]}
-                racer={storage.openRacer(racerId).current} 
-                setPosition={(value) => props.draft.setPosition(racerId, value)}
-                move={() => props.setEditingRank(racerId)}
-                editing={props.editingRank == racerId} />
-              }
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <SailTable columns={columns}
+                 keys={keys}
+                 map={(key) => storage.openRacer(key as any).current}
+                 selectedIndex={keys.indexOf(props.editingRank)} />
     );
   }
 }
@@ -282,11 +267,9 @@ export function NewRaceState() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <Button style={{ flex: "auto", width: "120px" }}
-                    onClick={() => navigate(`..`)}>Close</Button>
-            <Button style={{ flex: "auto", width: "120px" }}
                     onClick={() => draft.clear()}>Delete Draft</Button>
             <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={Object.entries(draft).length == 0}
+                    disabled={Object.entries(draft.board).length == 0}
                     onClick={() => {
                       series.promoteDraft();
                       navigate("..");
@@ -299,12 +282,17 @@ export function NewRaceState() {
 }
 
 export function EditRaceState() {
-  const navigate = useNavigate();
   const { seriesId, raceId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
   const draft = series.openBoard(parseInt(raceId));
   const [editingRank, setEditingRank] = React.useState(null);
+
+  React.useEffect(() => {
+    for (const racerId of draft.getRemaining()) {
+      draft.setPosition(racerId, DEFAULT_DISQUALIFICATION);
+    }
+  }, []);
 
   return (
     <Layout>
@@ -325,11 +313,6 @@ export function EditRaceState() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <div style={{ flex: "1 1 300px", margin: "auto" }}>
             {<FinishBoardStatus draft={draft} />}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button style={{ flex: "auto", width: "120px" }}
-                    disabled={Object.entries(draft.board).length == 0}
-                    onClick={() => navigate("../..")}>Done</Button>
           </div>
         </div>
       </Content>

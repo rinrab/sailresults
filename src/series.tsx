@@ -49,12 +49,12 @@ export function SeriesOverviewState() {
     <Layout>
       <NavBar title={series.current.name} back="../.." />
       <Content>
-        <div style={{ overflow: "auto" }}>
+        <div style={{ overflow: "auto", padding: 8 }}>
           <h2>Series Overview</h2>
 
-          <Card onClick={() => navigate("results")} style={{ marginBottom: 12 }}>
-            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Results</h3>}
-                        description={<ResultsOverview series={series.current} />}
+          <Card onClick={() => navigate("competitors")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Competitors</h3>}
+                        description={<>{series.current.racers.length} people are racing in this ragatta.</>}
                         action={<ChevronRight24Regular /> } />
           </Card>
 
@@ -64,9 +64,9 @@ export function SeriesOverviewState() {
                         action={<ChevronRight24Regular /> } />
           </Card>
 
-          <Card onClick={() => navigate("competitors")} style={{ marginBottom: 12 }}>
-            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Competitors</h3>}
-                        description={<>{series.current.racers.length} people are racing in this ragatta.</>}
+          <Card onClick={() => navigate("results")} style={{ marginBottom: 12 }}>
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Results</h3>}
+                        description={<ResultsOverview series={series.current} />}
                         action={<ChevronRight24Regular /> } />
           </Card>
 
@@ -99,9 +99,6 @@ export function SeriesConfigurationState() {
             <Input value={series.current.name}
                    onChange={(e) => series.setName(e.target.value)} />
           </Field>
-        </div>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => navigate("..")}>Back</Button>
         </div>
       </Content>
       <SeriesNavigation />

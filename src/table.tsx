@@ -14,7 +14,8 @@ export interface SailTableProps<KeyT, ValueT> {
   columns: Column<ValueT>[];
   keys: KeyT[];
   map: (key: KeyT) => ValueT;
-  onSelect?: (item: ValueT, key: KeyT) => void;
+  onSelect?: (item: ValueT, key: KeyT, index: number) => void;
+  selectedIndex?: number;
 }
 
 export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
@@ -45,6 +46,17 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
     }
 
     return style;
+  };
+  
+  React.useEffect(() => {
+    if (props.selectedIndex != undefined && props.selectedIndex != -1) {
+      virtualizer.scrollToIndex(props.selectedIndex);
+    }
+  });
+
+  const selectedRowStyle = {
+    backgroundColor: tokens.colorSubtleBackgroundPressed,
+    color: tokens.colorNeutralForeground1Pressed,
   };
 
   return (
@@ -89,8 +101,9 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
                           transform: `translateY(${item.start}px)`,
                           cursor: props.onSelect ? "pointer" : "default",
                           minWidth: "100%",
+                          ...(item.index == props.selectedIndex) ? selectedRowStyle : {},
                         }}
-                        onClick={() => props?.onSelect(value, key)}>
+                        onClick={() => props?.onSelect(value, key, item.index)}>
                 {props.columns.map((col, index) => (
                   <TableCell
                     key={index}

@@ -107,9 +107,6 @@ export function ListCompetitorsState() {
         </form>
         <Divider style={{ flex: "0", padding: "8px 0" }} />
         <RacersList series={series} />
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => navigate("..")}>Done</Button>
-        </div>
       </Content>
       <SeriesNavigation />
     </Layout>
@@ -129,7 +126,6 @@ function getRacerDescription(racer: Racer) {
 }
 
 export function EditCompetitorState() {
-  const navigate = useNavigate();
   const { seriesId, racerId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
@@ -151,9 +147,6 @@ export function EditCompetitorState() {
                    onChange={e => racer.setNumber(e.target.value)} />
           </Field>
         </form>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => navigate("..")}>Back</Button>
-        </div>
       </Content>
     </Layout>
   );
