@@ -94,3 +94,6 @@ function fixViewport() {
 window.visualViewport.addEventListener("resize", fixViewport);
 window.visualViewport.addEventListener("scroll", fixViewport);
 fixViewport();
+
+navigator.storage.persist()
+  .then((result) => console.info(`navigator.storage.persist() returned ${result}`))
