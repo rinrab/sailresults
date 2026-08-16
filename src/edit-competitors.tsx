@@ -4,7 +4,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
-import { IRacerEditor, ISeriesEditor } from "./storage";
+import { ISeriesEditor } from "./storage";
 import { Column, SailTable } from "./table";
 import { Racer } from "./scoring";
 
@@ -24,10 +24,9 @@ function ActionsCell({ deleteFn }) {
 }
 
 function RacersList(props: { series: ISeriesEditor }) {
-  const storage = React.useContext(StorageContext);
   const navigate = useNavigate();
 
-  const columns: Column<IRacerEditor>[] = [
+  const columns: Column<Racer>[] = [
     {
       header: "#",
       size: 40,
@@ -37,18 +36,18 @@ function RacersList(props: { series: ISeriesEditor }) {
     {
       header: "Name",
       minsize: 120,
-      cell: (row) => <Text>{row.current.name}</Text>,
+      cell: (row) => <Text>{row.name}</Text>,
     },
     {
       header: "Number",
       minsize: 120,
-      cell: (row) => <Text>{row.current.number}</Text>,
+      cell: (row) => <Text>{row.number}</Text>,
     },
     {
       header: "",
       size: 32,
       cell: (row) => {
-        return <ActionsCell deleteFn={() => props.series.removeRacer(row.current.id)} />
+        return <ActionsCell deleteFn={() => props.series.deleteRacer(row.id)} />
       }
     }
   ];
@@ -56,15 +55,14 @@ function RacersList(props: { series: ISeriesEditor }) {
   if (props.series.current.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return <SailTable<number, IRacerEditor> 
+    return <SailTable<Racer, Racer> 
       columns={columns}
       keys={props.series.current.racers}
-      map={id => storage.openRacer(id)}
-      onSelect={(_, racerId) => navigate(racerId.toString())} />
+      map={racer => racer}
+      onSelect={(racer) => navigate(racer.id.toString())} />
   }
 }
 export function ListCompetitorsState() {
-  const navigate = useNavigate();
   const { seriesId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
@@ -72,16 +70,8 @@ export function ListCompetitorsState() {
   const [name, setName] = React.useState("");
   const [number, setNumber] = React.useState("");
 
-  const addRacer = (name: string, number: string) => {
-    const id = storage.newRacer();
-    const racer = storage.openRacer(id);
-    racer.setName(name);
-    racer.setNumber(number);
-    series.addRacer(id);
-  };
-
   const submit = () => {
-    addRacer(name.trim(), number.trim());
+    series.newRacer(name.trim(), number.trim());
 
     /* clear inputs */
     setName("");
@@ -129,7 +119,7 @@ export function EditCompetitorState() {
   const { seriesId, racerId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
-  const racer = storage.openRacer(parseInt(racerId));
+  const racer = series.openRacer(parseInt(racerId));
 
   return (
     <Layout>

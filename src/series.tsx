@@ -1,10 +1,12 @@
-import { Button, Card, CardHeader, Divider, Field, Input, Text } from "@fluentui/react-components";
+import { Button, Card, CardHeader, Divider, Field, Input, Text, Textarea, tokens } from "@fluentui/react-components";
 import { ChevronRight24Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import ResultsOverview from "./results-overview";
 import { StorageContext } from "./storage-context";
+import { toCSV } from "./export-import";
+import { exportSeries } from "./storage";
 
 export function NewSeriesState() {
   const navigate = useNavigate();
@@ -83,22 +85,39 @@ export function SeriesOverviewState() {
 }
 
 export function SeriesConfigurationState() {
-  const navigate = useNavigate();
   const { seriesId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
+
+  const csv = React.useMemo(() =>
+    toCSV(exportSeries(series)),
+    [series.current]
+  );
   
   return (
     <Layout>
       <NavBar title={series.current.name} subtitle="Configuration" />
       <Content>
         <div style={{ overflow: "auto", flex: 1 }}>
-          <h1>Series Configuration</h1>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}> 
+            <h1>Series Configuration</h1>
 
-          <Field label="Name">
-            <Input value={series.current.name}
-                   onChange={(e) => series.setName(e.target.value)} />
-          </Field>
+            <Field label="Name">
+              <Input value={series.current.name}
+                     onChange={(e) => series.setName(e.target.value)} />
+            </Field>
+
+            <Field label="Edit raw CSV">
+              <Textarea readOnly resize="vertical"
+                        value={csv}
+                        textarea={{
+                          style: {
+                            height: 200,
+                            fontFamily: tokens.fontFamilyMonospace 
+                          }
+                        }} />
+            </Field>
+          </div>
         </div>
       </Content>
       <SeriesNavigation />

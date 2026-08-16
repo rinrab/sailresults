@@ -14,7 +14,6 @@ export default function ResultsOverview(props: { series: Series }) {
     </div>
   } else {
     const scoreboard = evaluateScoreboard(
-      storage.listRacers(),
       props.series,
       props.series.finishboards
     );
