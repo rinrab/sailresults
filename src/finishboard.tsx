@@ -251,11 +251,9 @@ export function NewRaceState() {
       <NavBar title={series.current.name} subtitle="New Race" />
       <Content>
         <RacerPicker series={series} draft={draft} />
-        <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardTable draft={draft}
-                            editingRank={editingRank}
-                            setEditingRank={setEditingRank} />
-        </div>
+        <FinishboardTable draft={draft}
+                          editingRank={editingRank}
+                          setEditingRank={setEditingRank} />
         {editingRank &&
           <FinishboardRankEditor draft={draft}
                                  editingRank={editingRank}
@@ -300,11 +298,9 @@ export function EditRaceState() {
               subtitle={`Race ${parseInt(raceId) + 1}`} />
       <Content>
         <RacerPicker series={series} draft={draft} />
-        <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardTable draft={draft}
-                            editingRank={editingRank}
-                            setEditingRank={setEditingRank} />
-        </div>
+        <FinishboardTable draft={draft}
+                          editingRank={editingRank}
+                          setEditingRank={setEditingRank} />
         {editingRank &&
           <FinishboardRankEditor draft={draft}
                                  editingRank={editingRank}
