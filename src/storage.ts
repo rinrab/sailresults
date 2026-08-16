@@ -1,4 +1,4 @@
-import { Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
+import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
 
 export interface IStorage {
   listSeries: () => SeriesCollection,
@@ -388,4 +388,17 @@ export function importSeries(storage: IStorage, pack: PackedSeries) {
   }
 
   return seriesId;
+}
+
+export function exportSeries(series: ISeriesEditor): PackedSeries {
+  return {
+    name: series.current.name,
+    racers: series.current.racers.map(racer => ({
+      name: racer.name,
+      number: racer.number
+    })),
+    finishboards: series.current.finishboards.map(board =>
+      series.current.racers.map(racer => board[racer.id] ?? DEFAULT_DISQUALIFICATION)
+    )
+  };
 }
