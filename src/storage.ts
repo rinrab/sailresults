@@ -1,18 +1,13 @@
-import React from "react";
-import { Finishboard, FinishboardEntry, normaliseFinishboard, Racer, Series, setFinishboardPosition } from "./scoring";
+import { Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
 
 export interface IStorage {
   listSeries: () => SeriesCollection,
-  listRacers: () => RacersCollection,
 
   newSeries: (name: string) => number;
   openSeries: (id: number) => ISeriesEditor;
   deleteSeries: (id: number) => void;
 
   nextGlobalId: () => number;
-
-  openRacer: (id: number) => IRacerEditor;
-  newRacer: () => number;
 }
 
 export interface ISeriesEditor {
@@ -20,8 +15,9 @@ export interface ISeriesEditor {
 
   setName: (name: string) => void,
 
-  addRacer: (id: number) => void,
-  removeRacer: (id: number) => void,
+  newRacer: (name: string, number: string) => number,
+  openRacer: (id: number) => IRacerEditor;
+  deleteRacer: (id: number) => void,
 
   openBoard: (index: number) => IBoardEditor,
   deleteBoard: (index) => void,
@@ -33,7 +29,7 @@ export interface ISeriesEditor {
 export interface IBoardEditor {
   board: Finishboard,
   setPosition: (racerId: number, position: FinishboardEntry | null) => void,
-  getRemaining: () => number[],
+  getRemaining: () => Racer[],
   clear: () => void,
 }
 
@@ -41,7 +37,6 @@ export interface IRacerEditor {
   current: Racer,
   setName: (name: string) => void;
   setNumber: (number: string) => void;
-  kill: () => void;
 }
 
 export interface PackedSeries {
@@ -73,7 +68,7 @@ const RACERS_KEY = "racers";
 const SERIES_KEY = "series";
 const GLOBAL_ID_KEY = "globalRacerId";
 
-type RacersCollection = { [id: number]: Racer };
+type LegacyRacersCollection = { [id: number]: Racer };
 type SeriesCollection = { [id: number]: Series };
 
 function ensureNumber(value: any): number {
@@ -108,9 +103,9 @@ function ensureArray(value: any): any[] {
   }
 }
 
-export function openRacers(): RacersCollection {
+export function openLegacyRacers(): LegacyRacersCollection {
   const stored = ensureObject(openKey(RACERS_KEY) ?? {});
-  const result: RacersCollection = {};
+  const result: LegacyRacersCollection = {};
 
   for (const [key, value] of Object.entries(stored)) {
     result[key] = {
@@ -121,18 +116,6 @@ export function openRacers(): RacersCollection {
   }
 
   return result;
-}
-
-export function saveRacers(racers: RacersCollection) {
-  const obj = {};
-
-  for (const value of Object.values(racers)) {
-    obj[value.id] = {
-      name: value.name,
-      number: value.number,
-    };
-  }
-  saveKey(RACERS_KEY, obj);
 }
 
 function openFinishboard(value: any) {
@@ -148,7 +131,25 @@ function openFinishboard(value: any) {
   return board;
 }
 
-export function openSeries(): SeriesCollection {
+function openSeriesRacers(
+  value: any,
+  legacyRacers: LegacyRacersCollection
+): Racer[] {
+  return ensureArray(value).map((racer) => {
+    if (typeof(racer) == "number") {
+      return legacyRacers[racer];
+    } else {
+      const obj = ensureObject(racer);
+      return {
+        id: ensureNumber(obj["id"]),
+        name: ensureString(obj["name"]),
+        number: ensureString(obj["number"]),
+      };
+    }
+  });
+}
+
+export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollection {
   const stored = ensureObject(openKey(SERIES_KEY) ?? {});
   const result: SeriesCollection = {};
 
@@ -160,12 +161,10 @@ export function openSeries(): SeriesCollection {
       ? openFinishboard(value.draftFinishboard) 
       : null;
 
-    const racers = ensureArray(value.racers).map(racer  => ensureNumber(racer));
-
     result[key] = {
       id: ensureNumber(parseInt(key)),
       name: ensureString(value.name),
-      racers: racers,
+      racers: openSeriesRacers(value.racers, legacyRacers),
       finishboards: finishboards,
       draftFinishboard: draft,
     };
@@ -200,7 +199,7 @@ function getBoardEditor(
       return setFinishboardPosition(old, racerId, posistion);
     }),
 
-    getRemaining: () => series.racers.filter(racer => ! board[racer]),
+    getRemaining: () => series.racers.filter(racer => ! board[racer.id]),
 
     clear: () => update(() => ({})),
   };
@@ -210,6 +209,9 @@ function getSeriesEditor(
   series: Series,
   update: Mutator<Series>
 ): ISeriesEditor {
+  const findRacerIndex = (id: number) =>
+    series.racers.findIndex(item => item.id == id);
+
   return {
     current: series,
 
@@ -218,14 +220,41 @@ function getSeriesEditor(
       name: name
     })),
 
-    addRacer: (id) => update(old => ({
-      ...old,
-      racers: [...old.racers, id]
-    })),
+    newRacer: (name, number) => {
+      const id = nextGlobalId();
+      update(old => ({
+        ...old,
+        racers: [
+          ...old.racers,
+          {
+            id: id,
+            name: name,
+            number: number,
+          }
+        ],
+      }));
+      return id;
+    },
 
-    removeRacer: (id) => update(old => ({
+    openRacer: (id) => {
+      const index = findRacerIndex(id);
+
+      return getRacerEditor(
+        series.racers[index],
+        (mutate) => update(old => {
+          const copy = [...old.racers];
+          copy[index] = mutate(copy[index]);
+          return {
+            ...old,
+            racers: copy,
+          };
+        }),
+      );
+    },
+
+    deleteRacer: (id) => update(old => ({
       ...old,
-      racers: old.racers.filter((item) => item != id),
+      racers: old.racers.filter(racer => racer.id != id),
     })),
 
     openBoard: (index) => getBoardEditor(
@@ -280,7 +309,6 @@ function getRacerEditor(racer: Racer, update: Mutator<Racer>): IRacerEditor {
       ...old,
       number: number,
     })),
-    kill: () => "",
   };
 }
 
@@ -291,14 +319,11 @@ function nextGlobalId() {
 }
 
 export function getStorageEditor(
-  getRacers: () => RacersCollection,
-  updateRacers: Mutator<RacersCollection>,
   getSeries: () => SeriesCollection,
   updateSeries: Mutator<SeriesCollection>,
 ): IStorage {
   return {
     listSeries: () => getSeries(),
-    listRacers: () => getRacers(),
 
     newSeries: (name) => {
       const id = nextGlobalId();
@@ -338,50 +363,20 @@ export function getStorageEditor(
       return copy;
     }),
 
-    newRacer: () => {
-      const id = nextGlobalId();
-      updateRacers((old) => ({
-        ...old,
-        [id]: {
-          id: id,
-          name: "",
-          number: "",
-        }
-      }));
-      return id;
-    },
-
-    openRacer: (id) => {
-      return getRacerEditor(
-        getRacers()[id],
-        (mutate) => updateRacers((old) => {
-          const copy = { ...old };
-          copy[id] = mutate(copy[id]);
-          return copy;
-        }),
-      )
-    },
-
     nextGlobalId: nextGlobalId,
   };
 }
 
 export function importSeries(storage: IStorage, pack: PackedSeries) {
-  console.log("before")
   const seriesId = storage.newSeries(pack.name);
-  console.log("after")
   const series = storage.openSeries(seriesId);
 
   let firstId: number;
   for (const packedRacer of pack.racers) {
-    const id = storage.newRacer();
+    const id = series.newRacer(packedRacer.name, packedRacer.number);
     if (!firstId) {
       firstId = id;
     }
-    const racer = storage.openRacer(id);
-    racer.setName(packedRacer.name);
-    racer.setNumber(packedRacer.number);
-    series.addRacer(id);
   }
 
   for (const packedBoard of pack.finishboards) {
