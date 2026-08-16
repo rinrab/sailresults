@@ -48,7 +48,7 @@ export function DocsIndex() {
 
 export function displayVersion() {
   const note = ((revnum as any == "staging") ?  "in development" : revnum);
-  return `${version_major}.${version_minor} ${note}`;
+  return `${version_major}.${version_minor} (${note})`;
 }
 
 export function DocsAbout() {
