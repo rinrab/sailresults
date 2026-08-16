@@ -47,7 +47,7 @@ export function DocsIndex() {
 }
 
 export function displayVersion() {
-  const note = ((revnum as any == "staging") ?  "(in development)" : revnum);
+  const note = ((revnum as any == "staging") ?  "in development" : revnum);
   return `${version_major}.${version_minor} ${note}`;
 }
 
@@ -77,7 +77,6 @@ export function DocsAbout() {
         <h3>Version</h3>
         <ul>
           <li>Version: {displayVersion()}</li>
-          <li>Subversion revision number: {revnum}</li>
           <li>Built at: {buildDate}</li>
         </ul>
       </div>
