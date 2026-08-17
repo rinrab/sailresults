@@ -324,24 +324,37 @@ function nextGlobalId() {
   return id;
 }
 
+function getCurrentTime() {
+  const date = new Date(); 
+  return date.toISOString();
+}
+
 export function getStorageEditor(
   getSeries: () => SeriesCollection,
   updateSeries: Mutator<SeriesCollection>,
 ): IStorage {
+  const updateOneSeries = (id: number, mutate: (old: Series) => Series) => {
+    updateSeries((old) => ({
+      ...old,
+      [id]: {
+        ...mutate(old[id]),
+        lastEditedTime: getCurrentTime()
+      }
+    }))
+  };
+
   return {
     listSeries: () => getSeries(),
 
     newSeries: (name) => {
       const id = nextGlobalId();
-      updateSeries((old) => ({
-        ...old,
-        [id]: {
+      updateOneSeries(id, (old) => ({
           id: id,
           name: name,
           racers: [],
           finishboards: [],
           draftFinishboard: null,
-        }
+          lastEditedTime: getCurrentTime(),
       }));
       return id;
     },
@@ -352,12 +365,8 @@ export function getStorageEditor(
       if (openedSeries) {
         return getSeriesEditor(
           openedSeries,
-          (mutate) => updateSeries((old) => {
-            const copy = { ...old };
-            copy[id] = mutate(copy[id]);
-            return copy;
-          }
-        ));
+          (mutate) => updateOneSeries(id, mutate),
+        );
       } else {
         throw new Error("series does not exist");
       }
@@ -387,6 +396,7 @@ export function getStorageEditor(
           return result;
         }),
         draftFinishboard: null,
+        lastEditedTime: getCurrentTime(),
       };
 
       updateSeries(old => ({

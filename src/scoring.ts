@@ -73,6 +73,7 @@ export interface Series {
   racers: Racer[];
   finishboards: Finishboard[];
   draftFinishboard: Finishboard | null;
+  lastEditedTime: string;
 }
 
 export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) { 
