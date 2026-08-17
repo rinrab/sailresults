@@ -156,6 +156,10 @@ function FinishboardMenu(props: {
   );
 }
 
+function maybeDeleted(str: string | null) {
+  return str ?? "<racer was deleted>";
+}
+
 function FinishboardTable(props: {
   series: ISeriesEditor,
   draft: IBoardEditor,
@@ -173,11 +177,11 @@ function FinishboardTable(props: {
     },
     {
       header: "Name",
-      cell: (row) => <Text>{row.name}</Text>,
+      cell: (row) => <Text>{row?.name ?? "<racer was deleted>"}</Text>,
     },
     {
       header: "Number",
-      cell: (row) => <Text>{row.number}</Text>,
+      cell: (row) => <Text>{row?.number ?? "<racer was deleted>"}</Text>,
     },
     {
       header: "Rank",
@@ -205,7 +209,7 @@ function FinishboardTable(props: {
     return (
       <SailTable columns={columns}
                  keys={keys}
-                 map={(key) => props.series.openRacer(key as any).current}
+                 map={(key) => ({ ...props.series.openRacer(key as any)?.current, id: key })}
                  selectedIndex={keys.indexOf(props.editingRank)} />
     );
   }

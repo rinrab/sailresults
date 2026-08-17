@@ -17,7 +17,7 @@ export interface ISeriesEditor {
   setName: (name: string) => void,
 
   newRacer: (name: string, number: string) => number,
-  openRacer: (id: number) => IRacerEditor;
+  openRacer: (id: number) => IRacerEditor | null;
   deleteRacer: (id: number) => void,
 
   openBoard: (index: number) => IBoardEditor,
@@ -244,6 +244,10 @@ function getSeriesEditor(
 
     openRacer: (id) => {
       const index = findRacerIndex(id);
+
+      if (index == -1) {
+        return null;
+      }
 
       return getRacerEditor(
         series.racers[index],
