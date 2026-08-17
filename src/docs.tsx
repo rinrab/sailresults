@@ -31,26 +31,30 @@ export function Description() {
   </p>;
 }
 
+export function Resources() {
+  return <ul>
+    <li>
+      <Link to="about">About</Link>
+    </li>
+    <li>
+      <Link to="quick-start">Quick Start</Link>
+    </li>
+    <li>
+      <Link to="scoring">Scoring</Link>
+    </li>
+    <li>
+      <Link to="add-to-home-screen">How to add to home screen</Link>
+    </li>
+  </ul>;
+}
+
 export function DocsIndex() {
   return <Layout>
     <NavBar title="Documentation" />
     <Content>
       <div style={{ overflow: "auto", height: "100%" }}>
         <h1>Documentation</h1>
-        <ul>
-          <li>
-            <Link to="about">About</Link>
-          </li>
-          <li>
-            <Link to="quick-start">Quick Start</Link>
-          </li>
-          <li>
-            <Link to="scoring">Scoring</Link>
-          </li>
-          <li>
-            <Link to="add-to-home-screen">How to add to home screen</Link>
-          </li>
-        </ul>
+        <Resources />
       </div>
     </Content>
   </Layout>
