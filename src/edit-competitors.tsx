@@ -120,6 +120,7 @@ export function EditCompetitorState() {
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
   const racer = series.openRacer(parseInt(racerId));
+  const navigate = useNavigate();
 
   return (
     <Layout>
@@ -137,6 +138,12 @@ export function EditCompetitorState() {
                    onChange={e => racer.setNumber(e.target.value)} />
           </Field>
         </form>
+        <div style={{ display: "flex", justifyContent: "end" }}>
+          <Button onClick={() => {
+            series.deleteRacer(racer.current.id)
+            navigate("..");
+          }}>Delete</Button>
+        </div>
       </Content>
     </Layout>
   );
