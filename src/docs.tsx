@@ -21,6 +21,16 @@ export function FeaturesList() {
   </ul>
 }
 
+export function Description() { 
+  return <p>
+    <b>SailResults</b> is a scoring sailing program for organising and
+    accounting of sailing regattas, training series, and more. It focues on
+    simplicity and minimalistic user experience. This app is designed to be
+    used by the coach in the conditions of a session providing all the tools
+    you may need to keep track of your leaderboard.
+  </p>;
+}
+
 export function DocsIndex() {
   return <Layout>
     <NavBar title="Documentation" />
@@ -58,11 +68,7 @@ export function DocsAbout() {
       <div style={{ overflow: "auto", height: "100%" }}>
         <h1>Documentation</h1>
         <h2>About this app</h2>
-        <p><b>SailResults</b> is a scoring sailing program for organising and
-        accounting of sailing regattas, training series, and more. It focues
-        on simplicity and minimalistic user experience. This app is designed to
-        be used by the coach in the conditions of a session providing all the
-        tools you may need to keep track of your leaderboard.</p>
+        <Description />
         <h3>Features</h3>
         <FeaturesList />
 

@@ -7,7 +7,7 @@ import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
 import { makeSeriesPack, PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
-import { FeaturesList } from "./docs";
+import { Description, FeaturesList } from "./docs";
 import { doExport } from "./export-import";
 
 function SeriesCard(props: { series: Series }) {
@@ -76,6 +76,7 @@ export default function StartState() {
           <div style={{ textAlign: "center" }}>
             <img src="/assets/wide-staging.svg" style={{ height: 64 }} />
           </div>
+          <Description />
           <h2>Features</h2>
           <FeaturesList />
           <Divider style={{ margin: "8px 0" }} />
