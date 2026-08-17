@@ -34,16 +34,16 @@ export function Description() {
 export function Resources() {
   return <ul>
     <li>
-      <Link to="about">About</Link>
+      <Link to="/docs/about">About</Link>
     </li>
     <li>
-      <Link to="quick-start">Quick Start</Link>
+      <Link to="/docs/quick-start">Quick Start</Link>
     </li>
     <li>
-      <Link to="scoring">Scoring</Link>
+      <Link to="/docs/scoring">Scoring</Link>
     </li>
     <li>
-      <Link to="add-to-home-screen">How to add to home screen</Link>
+      <Link to="/docs/add-to-home-screen">How to add to home screen</Link>
     </li>
   </ul>;
 }
