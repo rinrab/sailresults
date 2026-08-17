@@ -199,7 +199,7 @@ function FinishboardTable(props: {
   ];
 
   if (Object.entries(props.draft.board).length == 0) {
-    return <Text>The finishboard is empty.</Text>
+    return <Text style={{ flex: 1 }}>The finishboard is empty.</Text>
   } else {
     const keys = sortFinishboard(props.draft.board);
     return (
