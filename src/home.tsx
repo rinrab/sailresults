@@ -1,11 +1,11 @@
 import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader } from "@fluentui/react-components";
-import { Add48Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
+import { Add32Regular, ArrowUpload32Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Content, Layout } from "./common";
 import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
-import { importSeries, PackedSeries } from "./storage";
+import { PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
 import { FeaturesList } from "./docs";
 
@@ -60,8 +60,8 @@ export default function StartState() {
   const series = storage.listSeries();
 
   const createSample = (sample: PackedSeries) => {
-    const id = importSeries(storage, sample);
-    navigate(`/series/${id}`);
+    //const id = importSeries(storage, sample);
+    //navigate(`/series/${id}`);
   };
 
   return (
@@ -90,9 +90,21 @@ export default function StartState() {
                   }}
                   onClick={() => navigate("/series/new")}>
               <div style={{ flex: 1 }} />
-              <Add48Regular />
+              <Add32Regular />
               <div style={{ flex: 1 }} />
               <b>Blank new Series</b>
+            </Card>
+            <Card style={{ 
+                    display: "flex",
+                    alignItems: "center",
+                    height: 120,
+                    maxWidth: "400px",
+                  }}
+                  onClick={() => navigate("/series/import")}>
+              <div style={{ flex: 1 }} />
+              <ArrowUpload32Regular />
+              <div style={{ flex: 1 }} />
+              <b>Import Series</b>
             </Card>
             {Object.values(series).map((item: Series) => (
               <SeriesCard key={item.id} series={item} />

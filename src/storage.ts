@@ -6,6 +6,7 @@ export interface IStorage {
   newSeries: (name: string) => number;
   openSeries: (id: number) => ISeriesEditor;
   deleteSeries: (id: number) => void;
+  importSeries: (pack: PackedSeries) => number;
 
   nextGlobalId: () => number;
 }
@@ -29,6 +30,7 @@ export interface ISeriesEditor {
 export interface IBoardEditor {
   board: Finishboard,
   setPosition: (racerId: number, position: FinishboardEntry | null) => void,
+  push: (racerId: number, position: FinishboardEntry | null) => void,
   getRemaining: () => Racer[],
   clear: () => void,
 }
@@ -199,6 +201,10 @@ function getBoardEditor(
       return setFinishboardPosition(old, racerId, posistion);
     }),
 
+    push: (racerId, posistion) => update(old => {
+      return { old, [racerId]: posistion };
+    }),
+
     getRemaining: () => series.racers.filter(racer => ! board[racer.id]),
 
     clear: () => update(() => ({})),
@@ -363,31 +369,36 @@ export function getStorageEditor(
       return copy;
     }),
 
+    importSeries: (pack: PackedSeries) => {
+      const startId = nextGlobalId();
+      const newSeries: Series = {
+        id: startId,
+        name: pack.name,
+        racers: pack.racers.map(racer => ({
+          id: nextGlobalId(),
+          name: racer.name,
+          number: racer.number
+        })),
+        finishboards: pack.finishboards.map(board => {
+          const result: Finishboard = {};
+          for (let i = 0; i < board.length; i++) {
+            result[startId + i + 1] = board[i];
+          }
+          return result;
+        }),
+        draftFinishboard: null,
+      };
+
+      updateSeries(old => ({
+        ...old,
+        [newSeries.id]: newSeries,
+      }));
+
+      return newSeries.id;
+    },
+
     nextGlobalId: nextGlobalId,
   };
-}
-
-export function importSeries(storage: IStorage, pack: PackedSeries) {
-  const seriesId = storage.newSeries(pack.name);
-  const series = storage.openSeries(seriesId);
-
-  let firstId: number;
-  for (const packedRacer of pack.racers) {
-    const id = series.newRacer(packedRacer.name, packedRacer.number);
-    if (!firstId) {
-      firstId = id;
-    }
-  }
-
-  for (const packedBoard of pack.finishboards) {
-    const draft = series.openDraft();
-    for (let i = 0; i < packedBoard.length; i++) {
-      draft.setPosition(firstId + i, packedBoard[i]);
-    }
-    series.promoteDraft();
-  }
-
-  return seriesId;
 }
 
 export function exportSeries(series: ISeriesEditor): PackedSeries {
