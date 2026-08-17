@@ -29,11 +29,13 @@ export function fromCSV(csv: string): PackedSeries {
   let max = 0;
 
   for (const line of csv.split("\n")) {
-    const fields = line.split(",");
+    const trimed = line.trim();
 
-    if (fields.length == 0) {
+    if (trimed == "") {
       continue;
     }
+
+    const fields = trimed.split(",");
 
     if (racesCount == -1) {
       racesCount = fields.length - 2;
