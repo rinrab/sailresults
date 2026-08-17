@@ -74,6 +74,7 @@ export interface Series {
   finishboards: Finishboard[];
   draftFinishboard: Finishboard | null;
   lastEditedTime: string;
+  firebaseId?: string;
 }
 
 export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) { 

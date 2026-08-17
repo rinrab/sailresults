@@ -25,6 +25,8 @@ export interface ISeriesEditor {
 
   openDraft: () => IBoardEditor,
   promoteDraft: () => void,
+
+  setFirebaseId: (id: string) => void;
 }
 
 export interface IBoardEditor {
@@ -307,6 +309,11 @@ function getSeriesEditor(
           draftFinishboard: mutate(old.draftFinishboard),
       })),
     ),
+
+    setFirebaseId: (firebaseId) => update((old) => ({
+      ...old,
+      firebaseId: firebaseId,
+    })),
   };
 }
 

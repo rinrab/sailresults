@@ -1,7 +1,7 @@
 import React from "react";
 import { getStorageEditor, IStorage, openLegacyRacers, openSeries, saveSeries } from "./storage";
 import { initializeApp } from "firebase/app";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { doc, addDoc, collection, getFirestore, runTransaction, setDoc } from "firebase/firestore";
 import { Series } from "./scoring";
 
 export const StorageContext = React.createContext<IStorage>(null);
@@ -20,13 +20,17 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const seriesStore = collection(db, "series");
 
-async function SyncSeries(series: Series) {
+async function SyncSeries(storage: IStorage, series: Series) {
   try {
-    const docRef = await addDoc(seriesStore, series);
-
-    console.log("Document written with ID: ", docRef.id);
+    if (series.firebaseId) {
+      setDoc(doc(seriesStore, series.firebaseId), series);
+    } else {
+      const docRef = await addDoc(seriesStore, series);
+      const editor = storage.openSeries(series.id);
+      editor.setFirebaseId(docRef.id);
+    }
   } catch (e) {
-    console.error("Error adding document: ", e);
+    console.error("Error syncing document: ", e);
   }
 }
 
@@ -40,7 +44,7 @@ export function StorageProvider({ children }) {
        series = mutate(old);
        saveSeries(series);
 
-       Object.values(editor.listSeries()).map(series => SyncSeries(series));
+       Object.values(editor.listSeries()).map(series => SyncSeries(editor, series));
 
        return series;
      }),
