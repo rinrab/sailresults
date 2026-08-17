@@ -156,10 +156,6 @@ function FinishboardMenu(props: {
   );
 }
 
-function maybeDeleted(str: string | null) {
-  return str ?? "<racer was deleted>";
-}
-
 function FinishboardTable(props: {
   series: ISeriesEditor,
   draft: IBoardEditor,
