@@ -28,6 +28,11 @@ function diffDates(target: Date, now: Date) {
   }
 }
 
+function compareSeries(a: Series, b: Series) {
+  return ((new Date(b.lastEditedTime)).getTime() -
+          (new Date(a.lastEditedTime)).getTime());
+}
+
 function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();
   const storage = React.useContext(StorageContext);
@@ -143,7 +148,7 @@ export default function StartState() {
               <div style={{ flex: 1 }} />
               <b>Import Series</b>
             </Card>
-            {Object.values(series).map((item: Series) => (
+            {Object.values(series).sort(compareSeries).map((item: Series) => (
               <SeriesCard key={item.id} series={item} />
             ))}
           </div>
