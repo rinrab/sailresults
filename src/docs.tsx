@@ -122,6 +122,65 @@ export function DocsQuickStart() {
       <div style={{ overflow: "auto", height: "100%" }}>
         <h1>Documentation</h1>
         <h2>Quick Start</h2>
+
+        <h3>1. Create a new series</h3>
+        <p>Enter series name. You could optionaly include date in it.</p>
+
+        <h3>2. Enter the competitors</h3>
+        <p>Click 'Edit Competitors' to open the list.</p>
+        <p>Use the form above to enter name and number (on the sail) of each
+        boat. Click 'Add' to confirm.</p> 
+        <p>'Number' could include text, which might be useful if you want to
+        use country code or distinguish between same sail numbers. Examples:
+        '123 red', '123 blue', or '123*'.</p>
+        <p>It's a good practise to enter competitors according to their
+        approximate rating as it will make it more convenient to enter
+        finishboard later on.</p>
+
+        <h3>3. Enter the finishboard</h3>
+        <p>In the 'Races' tab, use 'New Race' to open finishboard editor.</p>
+        <p>Boats are entered as they finished or copied from a hand-written
+        finishboard. Click the search bar at the top and use it to filter boats
+        by sail number or competitors name, or alternatively, just pick it from
+        the list without filtering.</p>
+        <p>Don't include disqualifications (OCS, UFD, DSQ, etc.) just yet -
+        we're going to adjust them later. Just put their finishing place for
+        now.</p>
+        <p>Review and verify the finishboard. As you click 'Done', a new race
+        is created with data you had entered. The missing boats are
+        automatically assigned 'DNF' (did not finish) instead.</p>
+
+        <h3>4. Correcting your results</h3>
+        <p>Either after entering the race, or at any point afterwards, you can
+        correct the results. You can 1) adjust positions or 2) mark them as
+        disqualified under any of the codes implemented. Use the '...' menu of
+        by the finishboard entry to access those options.</p>
+        <p>This is the perfect time that you review start violations (such as
+        OCS, UFD, etc.), handle retired boats, or any other reason to adjust
+        the data.</p>
+
+        <h3>5. Exporting the results</h3>
+        <p>Use the 'Print' button to print or get a PDF version of the
+        table. For a digital copy, pick 'PDF' in the printing dialog or click
+        'Share' on IOS.</p>
+        <p>To archive or backup the data in a SailResults compatible format,
+        use 'Export' button in 'Settings' or on the main menu. This will create
+        a CSV (comma separated values) which is a universal representation of
+        tables. You could as well open it with Excel or any other spreadsheet
+        editor of your choice for potential analysis.</p>
+
+        <h3>See also</h3>
+        <ul>
+          <li>
+            <Link to="../add-to-home-screen">How to add shortcut to the home
+            screen</Link> - make SailResults more convenient to access the app
+            on a mobile device.
+          </li>
+          <li>
+            Learn more about <Link to="../scoring">how scoring in sailing
+            regattas works.</Link>
+          </li>
+        </ul>
       </div>
     </Content>
   </Layout>
