@@ -1,4 +1,4 @@
-import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text } from "@fluentui/react-components";
+import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text, CardProps } from "@fluentui/react-components";
 import { Add32Regular, ArrowUpload32Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -41,16 +41,7 @@ function SeriesCard(props: { series: Series }) {
   const lastEdited = new Date(props.series.lastEditedTime);
 
   return (
-    <Card appearance="filled"
-          onClick={() => navigate(`/series/${props.series.id}/`)}
-          style={{
-            maxWidth: "400px",
-            width: "100%",
-            height: "fit-content",
-            marginBottom: 8
-          }}
-      >
-
+    <HomeScreenCard onClick={() => navigate(`/series/${props.series.id}/`)}>
       <CardHeader 
         header={<b>{props.series.name}</b>}
         description={<div>{props.series.finishboards.length} races / {props.series.racers.length} competitors</div>}
@@ -82,11 +73,36 @@ function SeriesCard(props: { series: Series }) {
         <ChevronRight24Regular />
       </div>
 
+      <div style={{ flex: 1 }} />
+
       <div style={{ display: "flex", justifyContent: "end" }}>
         <Text size={200}>Last edited {diffDates(lastEdited, now)}</Text>
       </div>
+    </HomeScreenCard>
+  );
+}
+
+function HomeScreenCard(props: { onClick: any, style?: any, children: any }) {
+  return (
+    <Card style={{ 
+            ...props.style,
+            display: "flex",
+          }}
+          onClick={props.onClick}>
+      {props.children}
     </Card>
   );
+}
+
+function Grid({ children }) {
+  return <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(320px, auto))",
+                padding: 8,
+                gap: 12,
+              }}>
+    {children}
+  </div>
 }
 
 export default function StartState() {
@@ -116,42 +132,29 @@ export default function StartState() {
           <h2>Resources</h2>
           <Resources />
           <Divider style={{ margin: "8px 0" }} />
-          <h2>Recent Series</h2>
-          <div style={{
-            display: "flex",
-            flexWrap: "wrap",
-            flexDirection: "column",
-            padding: 8,
-            columnGap: "16px",
-            rowGap: "36px" }}>
-            <Card style={{ 
-                    display: "flex",
-                    alignItems: "center",
-                    height: 120,
-                    maxWidth: "400px",
-                  }}
-                  onClick={() => navigate("/series/new")}>
+          <h2>Create Series</h2>
+          <Grid>
+            <HomeScreenCard style={{ alignItems: "center" }}
+                            onClick={() => navigate("/series/new")}>
               <div style={{ flex: 1 }} />
               <Add32Regular />
               <div style={{ flex: 1 }} />
               <b>Blank new Series</b>
-            </Card>
-            <Card style={{ 
-                    display: "flex",
-                    alignItems: "center",
-                    height: 120,
-                    maxWidth: "400px",
-                  }}
-                  onClick={() => navigate("/series/import")}>
+            </HomeScreenCard>
+            <HomeScreenCard style={{ alignItems: "center" }}
+                            onClick={() => navigate("/series/import")}>
               <div style={{ flex: 1 }} />
               <ArrowUpload32Regular />
               <div style={{ flex: 1 }} />
               <b>Import Series</b>
-            </Card>
+            </HomeScreenCard>
+          </Grid>
+          <h2>Recent Series</h2>
+          <Grid>
             {Object.values(series).sort(compareSeries).map((item: Series) => (
               <SeriesCard key={item.id} series={item} />
             ))}
-          </div>
+          </Grid>
         </div>
       </Content>
     </Layout>
