@@ -20,6 +20,10 @@ export function Layout({ children, print = undefined }) {
 }
 
 export function NavBarCenter({ title, subtitle }) {
+  React.useEffect(() => {
+    window.document.title = `${title} - SailResults`;
+  });
+
   return <div style={{
     padding: 4,
     backgroundColor: tokens.colorNeutralBackground4,
@@ -35,6 +39,10 @@ export function NavBarCenter({ title, subtitle }) {
 
 export function NavBar({ title, subtitle = undefined, back = ".." }) {
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    window.document.title = `${title} - SailResults`;
+  });
 
   return <div style={{
     padding: 4,

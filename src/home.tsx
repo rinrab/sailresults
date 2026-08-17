@@ -69,6 +69,10 @@ export default function StartState() {
     //navigate(`/series/${id}`);
   };
 
+  React.useEffect(() => {
+    window.document.title = "SailResults | Sailing Results Scoring Calculator";
+  });
+
   return (
     <Layout>
       <Content>
