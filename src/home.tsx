@@ -17,11 +17,11 @@ function diffDates(target: Date, now: Date) {
   let minutes = Math.floor(seconds / 60);
   let hours = Math.floor(minutes / 60);
 
-  if (hours > 24) {
+  if (hours >= 24) {
     return target.toLocaleDateString();
-  } else if (hours > 1) {
+  } else if (hours >= 1) {
     return `${hours} hours ago`;
-  } else if (minutes > 1) {
+  } else if (minutes >= 1) {
     return `${minutes} minutes ago`;
   } else {
     return "just now";
