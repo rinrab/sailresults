@@ -87,7 +87,9 @@ export function toCSV(series: PackedSeries): string {
 export function doExport(series: PackedSeries) {
   const csv = toCSV(series);
 
-  const blob = new Blob([csv], { type: 'text/plain' });
+  const blob = new Blob([csv], {
+    type: "text/plain;charset=UTF-8"
+  });
 
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
