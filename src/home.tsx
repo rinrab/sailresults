@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { Content, Layout } from "./common";
 import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
-import { PackedSeries } from "./storage";
+import { makeSeriesPack, PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
 import { FeaturesList } from "./docs";
+import { doExport } from "./export-import";
 
 function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();
@@ -35,6 +36,10 @@ function SeriesCard(props: { series: Series }) {
                       icon={<MoreHorizontalRegular />} />
             </MenuTrigger>
             <MenuPopover>
+              <MenuItem onClick={(e) => {
+                e.stopPropagation();
+                doExport(makeSeriesPack(props.series));
+              }}>Export</MenuItem>
               <MenuItem onClick={(e) => {
                 e.stopPropagation();
                 storage.deleteSeries(props.series.id);

@@ -401,15 +401,15 @@ export function getStorageEditor(
   };
 }
 
-export function exportSeries(series: ISeriesEditor): PackedSeries {
+export function makeSeriesPack(series: Series): PackedSeries {
   return {
-    name: series.current.name,
-    racers: series.current.racers.map(racer => ({
+    name: series.name,
+    racers: series.racers.map(racer => ({
       name: racer.name,
       number: racer.number
     })),
-    finishboards: series.current.finishboards.map(board =>
-      series.current.racers.map(racer => board[racer.id] ?? DEFAULT_DISQUALIFICATION)
+    finishboards: series.finishboards.map(board =>
+      series.racers.map(racer => board[racer.id] ?? DEFAULT_DISQUALIFICATION)
     )
   };
 }

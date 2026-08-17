@@ -5,8 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import ResultsOverview from "./results-overview";
 import { StorageContext } from "./storage-context";
-import { fromCSV, toCSV } from "./export-import";
-import { exportSeries } from "./storage";
+import { doExport, fromCSV, toCSV } from "./export-import";
+import { makeSeriesPack } from "./storage";
 
 export function NewSeriesState() {
   const navigate = useNavigate();
@@ -169,11 +169,6 @@ export function SeriesConfigurationState() {
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
 
-  const csv = React.useMemo(() =>
-    toCSV(exportSeries(series)),
-    [series.current]
-  );
-  
   return (
     <Layout>
       <NavBar title={series.current.name} subtitle="Configuration" />
@@ -187,17 +182,10 @@ export function SeriesConfigurationState() {
                      onChange={(e) => series.setName(e.target.value)} />
             </Field>
 
-            <Field label="Raw CSV">
-              <Textarea readOnly resize="vertical"
-                        value={csv}
-                        textarea={{
-                          style: {
-                            height: 200,
-                            fontFamily: tokens.fontFamilyMonospace 
-                          }
-                        }} />
-            </Field>
           </div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "end" }}>
+          <Button onClick={() => doExport(makeSeriesPack(series.current))}>Export</Button>
         </div>
       </Content>
       <SeriesNavigation />

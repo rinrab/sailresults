@@ -83,3 +83,18 @@ export function toCSV(series: PackedSeries): string {
       ].join(",")
     ).join("\n");
 }
+
+export function doExport(series: PackedSeries) {
+  const csv = toCSV(series);
+
+  const blob = new Blob([csv], { type: 'text/plain' });
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${series.name}.csv`;
+
+  link.click();
+
+  URL.revokeObjectURL(link.href);
+}
+
