@@ -1,4 +1,4 @@
-import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader } from "@fluentui/react-components";
+import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text } from "@fluentui/react-components";
 import { Add32Regular, ArrowUpload32Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,9 +10,30 @@ import { StorageContext } from "./storage-context";
 import { Description, FeaturesList, Resources } from "./docs";
 import { doExport } from "./export-import";
 
+function diffDates(target: Date, now: Date) {
+  const diff = now.getTime() - target.getTime();
+
+  let seconds = Math.floor(diff / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  if (hours > 24) {
+    return target.toLocaleDateString();
+  } else if (hours > 1) {
+    return `${hours} hours ago`;
+  } else if (minutes > 1) {
+    return `${minutes} minutes ago`;
+  } else {
+    return "just now";
+  }
+}
+
 function SeriesCard(props: { series: Series }) {
   const navigate = useNavigate();
   const storage = React.useContext(StorageContext);
+
+  const now = new Date();
+  const lastEdited = new Date(props.series.lastEditedTime);
 
   return (
     <Card appearance="filled"
@@ -54,6 +75,10 @@ function SeriesCard(props: { series: Series }) {
           <ResultsOverview series={props.series} />
         </div>
         <ChevronRight24Regular />
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "end" }}>
+        <Text size={200}>Last edited {diffDates(lastEdited, now)}</Text>
       </div>
     </Card>
   );

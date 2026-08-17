@@ -120,7 +120,7 @@ export function openLegacyRacers(): LegacyRacersCollection {
   return result;
 }
 
-function openFinishboard(value: any) {
+function openFinishboard(value: any): Finishboard {
   const board = ensureObject(value);
   const result: { [racer: number]: FinishboardEntry } = [];
   for (const [racer, entry] of Object.entries(board)) {
@@ -130,7 +130,7 @@ function openFinishboard(value: any) {
       throw new Error("bad entry found");
     }
   }
-  return board;
+  return board as Finishboard;
 }
 
 function openSeriesRacers(
@@ -169,7 +169,8 @@ export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollecti
       racers: openSeriesRacers(value.racers, legacyRacers),
       finishboards: finishboards,
       draftFinishboard: draft,
-    };
+      lastEditedTime: ensureString(value.lastEditedTime ?? getCurrentTime()),
+    } satisfies Series;
   }
 
   return result;
@@ -183,6 +184,7 @@ export function saveSeries(series: SeriesCollection) {
       racers: value.racers,
       finishboards: value.finishboards,
       draftFinishboard: value.draftFinishboard,
+      lastEditedTime: value.lastEditedTime,
     };
   }
   saveKey(SERIES_KEY, result);
