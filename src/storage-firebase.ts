@@ -46,11 +46,12 @@ async function push() {
 
         if (series.firebaseId) {
           await setDoc(doc(seriesStore, series.firebaseId), resource);
-          storage.openSeries(series.id).setNeedsSync(false);
         } else {
           const docRef = await addDoc(seriesStore, resource);
           storage.openSeries(series.id).setFirebaseId(docRef.id);
         }
+
+        storage.openSeries(series.id).setNeedsSync(false);
       });
 
     await Promise.all(promises);
