@@ -9,6 +9,8 @@ export interface IStorage {
   importSeries: (pack: PackedSeries) => number;
 
   nextGlobalId: () => number;
+
+  onSeriesChanged: (handler: (series: Series) => void) => void;
 }
 
 export interface ISeriesEditor {
@@ -346,14 +348,22 @@ export function getStorageEditor(
   getSeries: () => SeriesCollection,
   updateSeries: Mutator<SeriesCollection>,
 ): IStorage {
+  let seriesChangedHandler = null;
+
   const updateOneSeries = (id: number, mutate: (old: Series) => Series) => {
-    updateSeries((old) => ({
-      ...old,
-      [id]: {
+    updateSeries((old) => {
+      const newValue = {
         ...mutate(old[id]),
         lastEditedTime: getCurrentTime()
+      };
+      if (seriesChangedHandler) {
+        seriesChangedHandler(newValue);
       }
-    }))
+      return {
+        ...old,
+        [id]: newValue,
+      };
+    })
   };
 
   return {
@@ -421,6 +431,8 @@ export function getStorageEditor(
     },
 
     nextGlobalId: nextGlobalId,
+
+    onSeriesChanged: (handler) => seriesChangedHandler = handler,
   };
 }
 
