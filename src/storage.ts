@@ -1,4 +1,4 @@
-import { schedulePush } from "./firebase";
+import { schedulePush } from "./storage-firebase";
 import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
 
 export interface IStorage {

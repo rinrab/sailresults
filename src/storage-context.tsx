@@ -1,6 +1,6 @@
 import React from "react";
 import { getStorageEditor, IStorage, openLegacyRacers, openSeries, saveSeries } from "./storage";
-import { initializeFirebase } from "./firebase";
+import { initializeFirebase } from "./storage-firebase";
 
 export const StorageContext = React.createContext(null);
 

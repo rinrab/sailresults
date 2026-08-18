@@ -4,15 +4,7 @@ import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query } 
 import { Series } from "./scoring";
 import { getAuth } from "firebase/auth";
 import { storage } from "./storage-context";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAy8l4WJmdHngHhoY-z7-L1VL1WG8vB_Yc",
-  authDomain: "sailresults-staging.firebaseapp.com",
-  projectId: "sailresults-staging",
-  storageBucket: "sailresults-staging.firebasestorage.app",
-  messagingSenderId: "502927475203",
-  appId: "1:502927475203:web:d43f5059493cb2ab3e4436"
-};
+import { firebaseConfig } from "./storage-firebase-config";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
