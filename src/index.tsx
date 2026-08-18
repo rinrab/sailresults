@@ -11,6 +11,7 @@ import { ImportSeriesState, NewSeriesState, SeriesConfigurationState, SeriesOver
 import StartState from "./home";
 import RacesOverviewState from "./races";
 import { StorageProvider } from "./storage-context";
+import { AccountMe, AccountSignIn, AccountSignUp } from "./account";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -48,6 +49,11 @@ function App() {
                 <Route path="quick-start" element={<DocsQuickStart />} />
                 <Route path="scoring" element={<DocsScoring />} />
                 <Route path="add-to-home-screen" element={<DocsHomeScreen />} />
+              </Route>
+              <Route path="account">
+                <Route path="signin" element={<AccountSignIn />} />
+                <Route path="signup" element={<AccountSignUp />} />
+                <Route path="me" element={<AccountMe />} />
               </Route>
             </Route>
           </Routes>

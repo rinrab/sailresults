@@ -1,3 +1,4 @@
+import { getRemoteSeries, schedulePush } from "./storage-firebase";
 import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
 
 export interface IStorage {
@@ -7,6 +8,7 @@ export interface IStorage {
   openSeries: (id: number) => ISeriesEditor;
   deleteSeries: (id: number) => void;
   importSeries: (pack: PackedSeries) => number;
+  pullSeries: (firebaseId: string, data: any) => void;
 
   nextGlobalId: () => number;
 }
@@ -25,6 +27,9 @@ export interface ISeriesEditor {
 
   openDraft: () => IBoardEditor,
   promoteDraft: () => void,
+
+  setFirebaseId: (id: string) => void;
+  setNeedsSync: (value: boolean) => void;
 }
 
 export interface IBoardEditor {
@@ -170,6 +175,8 @@ export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollecti
       finishboards: finishboards,
       draftFinishboard: draft,
       lastEditedTime: ensureString(value.lastEditedTime ?? getCurrentTime()),
+      firebaseId: value.firebaseId,
+      needsSync: !! value.needsSync,
     } satisfies Series;
   }
 
@@ -185,6 +192,8 @@ export function saveSeries(series: SeriesCollection) {
       finishboards: value.finishboards,
       draftFinishboard: value.draftFinishboard,
       lastEditedTime: value.lastEditedTime,
+      firebaseId: value.firebaseId,
+      needsSync: value.needsSync,
     };
   }
   saveKey(SERIES_KEY, result);
@@ -307,6 +316,15 @@ function getSeriesEditor(
           draftFinishboard: mutate(old.draftFinishboard),
       })),
     ),
+
+    setFirebaseId: (firebaseId) => update((old) => ({
+      ...old,
+      firebaseId: firebaseId,
+    })),
+    setNeedsSync: (value) => update((old) => ({
+      ...old,
+      needsSync: value,
+    })),
   };
 }
 
@@ -340,13 +358,22 @@ export function getStorageEditor(
   updateSeries: Mutator<SeriesCollection>,
 ): IStorage {
   const updateOneSeries = (id: number, mutate: (old: Series) => Series) => {
-    updateSeries((old) => ({
-      ...old,
-      [id]: {
-        ...mutate(old[id]),
-        lastEditedTime: getCurrentTime()
+    updateSeries((old) => {
+      const oldValue = old[id];
+      const newValue = mutate(oldValue);
+
+      if (JSON.stringify(getRemoteSeries(oldValue)) !=
+          JSON.stringify(getRemoteSeries(newValue))) {
+        schedulePush();
+        newValue.needsSync = true;
+        newValue.lastEditedTime = getCurrentTime();
       }
-    }))
+
+      return {
+        ...old,
+        [id]: newValue,
+      };
+    })
   };
 
   return {
@@ -361,6 +388,7 @@ export function getStorageEditor(
           finishboards: [],
           draftFinishboard: null,
           lastEditedTime: getCurrentTime(),
+          needsSync: true,
       }));
       return id;
     },
@@ -403,6 +431,7 @@ export function getStorageEditor(
         }),
         draftFinishboard: null,
         lastEditedTime: getCurrentTime(),
+        needsSync: true,
       };
 
       updateSeries(old => ({
@@ -412,6 +441,27 @@ export function getStorageEditor(
 
       return newSeries.id;
     },
+
+    pullSeries: (firebaseId, data: any) => updateSeries((old) => {
+      const series = Object.values(old).find(series => series.firebaseId == firebaseId);
+
+      if (series?.needsSync) {
+        /* don't overwrite with local modification */
+        return old;
+      }
+
+      const newValue = {
+        ...data,
+        id: series?.id ?? nextGlobalId(),
+        firebaseId: firebaseId,
+        needsSync: false,
+      };
+
+      return {
+        ...old,
+        [newValue.id]: newValue,
+      };
+    }),
 
     nextGlobalId: nextGlobalId,
   };

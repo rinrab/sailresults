@@ -3,6 +3,7 @@ import { Flag20Regular, Home20Regular, People20Regular, Settings20Regular, Troph
 import React from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 import { Racer } from "./scoring";
+import { AccountMenu } from "./account";
 
 export function formatString(str: string) {
   return (str == "") ? "-" : str;
@@ -16,24 +17,6 @@ export function Layout({ children, print = undefined }) {
   return <div className="layout">
     {children}
     {print && <div className="print-only">{print}</div>}
-  </div>;
-}
-
-export function NavBarCenter({ title, subtitle }) {
-  React.useEffect(() => {
-    window.document.title = `${title} - SailResults`;
-  });
-
-  return <div style={{
-    padding: 4,
-    backgroundColor: tokens.colorNeutralBackground4,
-  }} className="screen-only">
-    <Text style={{ width: "100%", textAlign: "center" }} block weight="bold" size={200}>
-      {title}
-    </Text>
-    <Text style={{ width: "100%", textAlign: "center" }} block size={200}>
-      {subtitle}
-    </Text>
   </div>;
 }
 
@@ -62,6 +45,9 @@ export function NavBar({ title, subtitle = undefined, back = ".." }) {
       {subtitle && <Text size={200}>
         {subtitle}
       </Text>}
+    </div>
+    <div style={{ marginRight: 8 }}>
+      <AccountMenu />
     </div>
   </div>;
 }
