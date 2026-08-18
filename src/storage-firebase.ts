@@ -24,7 +24,9 @@ async function pull() {
       query(seriesStore, where("owner", "==", auth.currentUser.uid))
     )
 
-    console.log(snapshot.docs);
+    snapshot.forEach((doc) => {
+      storage.pullSeries(doc.id, doc.data());
+    });
   } else {
     console.log("can't pull: unauthorized");
   }
@@ -32,6 +34,7 @@ async function pull() {
 
 async function push() {
   if (auth.currentUser) {
+    console.log(storage);
     const promises = Object.values(storage.listSeries())
       .filter(series => series.needsSync)
       .map(series => SyncSeries(storage, series));

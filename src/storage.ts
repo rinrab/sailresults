@@ -8,6 +8,7 @@ export interface IStorage {
   openSeries: (id: number) => ISeriesEditor;
   deleteSeries: (id: number) => void;
   importSeries: (pack: PackedSeries) => number;
+  pullSeries: (firebaseId: string, data: any) => void;
 
   nextGlobalId: () => number;
 }
@@ -440,6 +441,27 @@ export function getStorageEditor(
 
       return newSeries.id;
     },
+
+    pullSeries: (firebaseId, data: any) => updateSeries((old) => {
+      const series = Object.values(old).find(series => series.firebaseId == firebaseId);
+
+      if (series?.needsSync) {
+        /* don't overwrite with local modification */
+        return old;
+      }
+
+      const newValue = {
+        ...data,
+        id: series?.id ?? nextGlobalId(),
+        firebaseId: firebaseId,
+        needsSync: false,
+      };
+
+      return {
+        ...old,
+        [newValue.id]: newValue,
+      };
+    }),
 
     nextGlobalId: nextGlobalId,
   };
