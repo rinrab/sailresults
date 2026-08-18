@@ -19,24 +19,6 @@ export function Layout({ children, print = undefined }) {
   </div>;
 }
 
-export function NavBarCenter({ title, subtitle }) {
-  React.useEffect(() => {
-    window.document.title = `${title} - SailResults`;
-  });
-
-  return <div style={{
-    padding: 4,
-    backgroundColor: tokens.colorNeutralBackground4,
-  }} className="screen-only">
-    <Text style={{ width: "100%", textAlign: "center" }} block weight="bold" size={200}>
-      {title}
-    </Text>
-    <Text style={{ width: "100%", textAlign: "center" }} block size={200}>
-      {subtitle}
-    </Text>
-  </div>;
-}
-
 export function NavBar({ title, subtitle = undefined, back = ".." }) {
   const navigate = useNavigate();
 
