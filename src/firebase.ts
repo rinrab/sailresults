@@ -22,7 +22,7 @@ const seriesStore = collection(db, "series");
 
 let lastPulledId = null;
 
-async function pull(editor: IStorage) {
+async function pull() {
   if (auth.currentUser) {
     if (lastPulledId == auth.currentUser.uid) {
       return;
@@ -38,10 +38,10 @@ async function pull(editor: IStorage) {
   }
 }
 
-async function push(editor: IStorage) {
+async function push() {
   if (auth.currentUser) {
-    const promises = Object.values(editor.listSeries())
-      .map(series => SyncSeries(editor, series));
+    const promises = Object.values(storage.listSeries())
+      .map(series => SyncSeries(storage, series));
 
     await Promise.all(promises);
   } else {
@@ -74,7 +74,7 @@ let pushTimeout: NodeJS.Timeout | null = null;
 
 export function initializeFirebase() {
   auth.onAuthStateChanged(() => schedulePush());
-  pull(storage);
+  pull();
 }
 
 export function schedulePush() {
@@ -83,6 +83,6 @@ export function schedulePush() {
   }
 
   pushTimeout = setTimeout(() => {
-    push(storage);
+    push();
   }, 1000);
 }
