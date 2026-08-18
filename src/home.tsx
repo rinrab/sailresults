@@ -1,8 +1,8 @@
-import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text, CardProps, tokens } from "@fluentui/react-components";
+import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text, tokens } from "@fluentui/react-components";
 import { Add32Regular, ArrowUpload32Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Content, Layout } from "./common";
+import { Content, Layout, SeriesStatus } from "./common";
 import ResultsOverview from "./results-overview";
 import { Series } from "./scoring";
 import { makeSeriesPack, PackedSeries } from "./storage";
@@ -76,7 +76,9 @@ function SeriesCard(props: { series: Series }) {
 
       <div style={{ flex: 1 }} />
 
-      <div style={{ display: "flex", justifyContent: "end" }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <SeriesStatus series={props.series} />
+        <div style={{ flex: 1 }} />
         <Text size={200}>Last edited {diffDates(lastEdited, now)}</Text>
       </div>
     </HomeScreenCard>

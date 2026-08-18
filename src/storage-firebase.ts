@@ -89,3 +89,7 @@ export function schedulePush() {
     push();
   }, 1000);
 }
+
+export function isAuthorized() {
+  return !! auth.currentUser;
+}
