@@ -4,22 +4,26 @@ import React from "react";
 import { Button, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Text } from "@fluentui/react-components";
 import { Person32Regular, PersonFilled, PersonRegular } from "@fluentui/react-icons";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User, signOut } from "firebase/auth";
-import { auth } from "./storage-firebase";
+import { auth, signIn, signUp } from "./storage-firebase";
 
 export function AccountSignIn() {
   const navigate = useNavigate();
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [inProgress, setInProgress] = React.useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
 
     try {
-      await signInWithEmailAndPassword(auth, username, password);
-      navigate("../me");
+      setInProgress(true);
+      await signIn(username, password, setStatus);
+      setTimeout(() => navigate("/"), 300);
     } catch (error) {
-      setError(error.toString());
+      setStatus(error.toString());
+    } finally {
+      setInProgress(false);
     }
   };
 
@@ -36,9 +40,9 @@ export function AccountSignIn() {
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </Field>
 
-          <Text>{error}</Text>
+          <Text>{status}</Text>
 
-          <Button type="submit">Sign In</Button>
+          <Button type="submit" disabled={inProgress}>Sign In</Button>
         </form>
       </Content>
     </Layout>
@@ -49,16 +53,20 @@ export function AccountSignUp() {
   const navigate = useNavigate();
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [inProgress, setInProgress] = React.useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
 
     try {
-      await createUserWithEmailAndPassword(auth, username, password);
-      navigate("../me");
+      setInProgress(true);
+      await signUp(username, password, setStatus);
+      setTimeout(() => navigate("/"), 300);
     } catch (error) {
-      setError(error.toString());
+      setStatus(error.toString());
+    } finally {
+      setInProgress(false);
     }
   };
 
@@ -75,9 +83,9 @@ export function AccountSignUp() {
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </Field>
 
-          <Text>{error}</Text>
+          <Text>{status}</Text>
 
-          <Button type="submit">Sign Up</Button>
+          <Button type="submit" disabled={inProgress}>Sign Up</Button>
         </form>
       </Content>
     </Layout>

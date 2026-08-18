@@ -2,7 +2,7 @@ import { IStorage } from "./storage";
 import { initializeApp } from "firebase/app";
 import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query } from "firebase/firestore";
 import { Series } from "./scoring";
-import { getAuth } from "firebase/auth";
+import { Auth, getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { storage } from "./storage-context";
 import { firebaseConfig } from "./storage-firebase-config";
 
@@ -74,10 +74,13 @@ export function getRemoteSeries(series: Series) {
 }
 
 let pushTimeout: NodeJS.Timeout | null = null;
+let onAuthBlocked = false;
 
 auth.onAuthStateChanged(async () => {
-  await pull();
-  schedulePush();
+  if (! onAuthBlocked) {
+    await pull();
+    schedulePush();
+  }
 });
 
 export function schedulePush() {
@@ -92,4 +95,40 @@ export function schedulePush() {
 
 export function isAuthorized() {
   return !! auth.currentUser;
+}
+
+export async function signIn(
+  email: string,
+  password: string,
+  progress: (message: string) => void
+) {
+  onAuthBlocked = true;
+  try {
+    progress("Logging in...");
+    await signInWithEmailAndPassword(auth, email, password);
+    progress("Fetching data from the server...");
+    await pull();
+    progress("Uploading local data to the server...");
+    await push();
+    progress("Done!");
+  } finally {
+    onAuthBlocked = false;
+  }
+}
+
+export async function signUp(
+  email: string,
+  password: string,
+  progress: (message: string) => void
+) {
+  onAuthBlocked = true;
+  try {
+    progress("Creating an account...");
+    await createUserWithEmailAndPassword(auth, email, password);
+    progress("Uploading local data to the server...");
+    await push();
+    progress("Done!");
+  } finally {
+    onAuthBlocked = false;
+  }
 }
