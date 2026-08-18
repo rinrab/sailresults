@@ -3,6 +3,7 @@ import { Flag20Regular, Home20Regular, People20Regular, Settings20Regular, Troph
 import React from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 import { Racer } from "./scoring";
+import { AccountMenu } from "./account";
 
 export function formatString(str: string) {
   return (str == "") ? "-" : str;
@@ -44,6 +45,9 @@ export function NavBar({ title, subtitle = undefined, back = ".." }) {
       {subtitle && <Text size={200}>
         {subtitle}
       </Text>}
+    </div>
+    <div style={{ marginRight: 8 }}>
+      <AccountMenu />
     </div>
   </div>;
 }

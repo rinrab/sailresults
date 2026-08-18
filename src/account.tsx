@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { Content, Layout, NavBar } from "./common";
 import React from "react";
-import { Button, Field, Input, Text } from "@fluentui/react-components";
+import { Button, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Text } from "@fluentui/react-components";
+import { Person32Regular, PersonFilled, PersonRegular } from "@fluentui/react-icons";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User, signOut } from "firebase/auth";
-
-const auth = getAuth();
+import { auth } from "./storage-firebase";
 
 export function AccountSignIn() {
   const navigate = useNavigate();
@@ -130,4 +130,36 @@ export function AccountMe() {
       </Content>
     </Layout>
   );
+}
+
+export function AccountMenu() {
+  const navigate = useNavigate();
+  const [isReady, setIsReady] = React.useState(false);
+  const [isAuthorized, setIsAuthorized] = React.useState(false);
+  const [username, setUsername] = React.useState("");
+
+  React.useEffect(() => auth.onAuthStateChanged((user) => {
+    setIsReady(true);
+    setIsAuthorized(!!user);
+    setUsername(user?.email);
+  }));
+
+  return <Menu>
+    <MenuTrigger>
+      <Button icon={<PersonFilled />} style={{ borderRadius: 99 }} size="large" />
+    </MenuTrigger>
+    <MenuPopover>
+      {isReady ? (isAuthorized ? <>
+          <MenuGroupHeader>{username}</MenuGroupHeader>
+          <MenuDivider />
+          <MenuItem onClick={() => navigate("/account/me")}>View Profile</MenuItem>
+          <MenuItem onClick={() => signOut(auth)}>Sign Out</MenuItem>
+        </> :
+        <>
+          <MenuItem onClick={() => navigate("/account/signin")}>Sign In</MenuItem>
+          <MenuItem onClick={() => navigate("/account/signup")}>Sign Up</MenuItem>
+        </>) : "Loading..."
+      }
+    </MenuPopover>
+  </Menu>
 }

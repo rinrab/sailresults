@@ -7,7 +7,7 @@ import { storage } from "./storage-context";
 import { firebaseConfig } from "./storage-firebase-config";
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
+export const auth = getAuth();
 
 const db = getFirestore(app);
 const seriesStore = collection(db, "series");

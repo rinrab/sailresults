@@ -1,4 +1,4 @@
-import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text, CardProps } from "@fluentui/react-components";
+import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text, CardProps, tokens } from "@fluentui/react-components";
 import { Add32Regular, ArrowUpload32Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import { makeSeriesPack, PackedSeries } from "./storage";
 import { StorageContext } from "./storage-context";
 import { Description, FeaturesList, Resources } from "./docs";
 import { doExport } from "./export-import";
+import { AccountMenu } from "./account";
 
 function diffDates(target: Date, now: Date) {
   const diff = now.getTime() - target.getTime();
@@ -123,8 +124,12 @@ export default function StartState() {
     <Layout>
       <Content>
         <div style={{ overflow: "auto" }}>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ display: "flex", padding: 12, backgroundColor: tokens.colorNeutralBackground4 }}>
+            <div style={{ flex: 1 }} />
             <img src="/assets/wide-staging.svg" style={{ height: 64 }} />
+            <div style={{ flex: 1, display: "flex", justifyContent: "end", alignItems: "center" }}>
+              <AccountMenu />
+            </div>
           </div>
           <Description />
           <h2>Features</h2>
