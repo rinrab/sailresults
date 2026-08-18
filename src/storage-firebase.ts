@@ -28,7 +28,11 @@ async function pull() {
       storage.pullSeries(doc.id, doc.data());
     });
   } else {
-    console.log("can't pull: unauthorized");
+    /* if no user is authenticated, remove all local copies that had been
+     * synced before (have firebaseId) but have no local modifications */
+    Object.values(storage.listSeries())
+      .filter(series => series.firebaseId && ! series.needsSync)
+      .map(series => storage.deleteSeries(series.id));
   }
 }
 
