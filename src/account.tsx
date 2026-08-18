@@ -3,8 +3,8 @@ import { Content, Layout, NavBar } from "./common";
 import React from "react";
 import { Button, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Text } from "@fluentui/react-components";
 import { Person32Regular, PersonFilled, PersonRegular } from "@fluentui/react-icons";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User, signOut } from "firebase/auth";
-import { auth, signIn, signUp } from "./storage-firebase";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from "firebase/auth";
+import { auth, signIn, signUp, signOut } from "./storage-firebase";
 
 export function AccountSignIn() {
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ function UserDetails(props: { user: User, update: () => void }) {
 
     <div style={{ display: "flex", gap: 8 }}>
       <Button onClick={() => alert("not implemented")}>Change Password</Button>
-      <Button onClick={() => signOut(auth).then(() => props.update())}>Sign Out</Button>
+      <Button onClick={() => signOut().then(() => props.update())}>Sign Out</Button>
       <Button onClick={() => props.user.delete().then(() => props.update())}>Delete User</Button>
     </div>
   </>;
@@ -161,7 +161,7 @@ export function AccountMenu() {
           <MenuGroupHeader>{username}</MenuGroupHeader>
           <MenuDivider />
           <MenuItem onClick={() => navigate("/account/me")}>View Profile</MenuItem>
-          <MenuItem onClick={() => signOut(auth)}>Sign Out</MenuItem>
+          <MenuItem onClick={() => signOut().then(() => navigate("/"))}>Sign Out</MenuItem>
         </> :
         <>
           <MenuItem onClick={() => navigate("/account/signin")}>Sign In</MenuItem>

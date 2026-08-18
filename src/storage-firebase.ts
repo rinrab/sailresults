@@ -132,3 +132,13 @@ export async function signUp(
     onAuthBlocked = false;
   }
 }
+
+export async function signOut() {
+  onAuthBlocked = true;
+  try {
+    await auth.signOut();
+    await pull();
+  } finally {
+    onAuthBlocked = false;
+  }
+}
