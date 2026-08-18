@@ -1,10 +1,8 @@
 import React from "react";
 import { getStorageEditor, IStorage, openLegacyRacers, openSeries, saveSeries } from "./storage";
-import { initializeFirebase } from "./storage-firebase";
 
 export const StorageContext = React.createContext(null);
 
-let initialized = false;
 export let storage: IStorage;
 
 export function StorageProvider({ children }) {
@@ -19,11 +17,6 @@ export function StorageProvider({ children }) {
        return series;
      }),
   );
-
-  if (! initialized) {
-    initialized = true;
-    initializeFirebase();
-  }
 
   return (
     <StorageContext.Provider value={storage}>

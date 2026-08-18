@@ -1,4 +1,4 @@
-import { schedulePush } from "./storage-firebase";
+import { getRemoteSeries, schedulePush } from "./storage-firebase";
 import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
 
 export interface IStorage {
@@ -28,6 +28,7 @@ export interface ISeriesEditor {
   promoteDraft: () => void,
 
   setFirebaseId: (id: string) => void;
+  setNeedsSync: (value: boolean) => void;
 }
 
 export interface IBoardEditor {
@@ -174,6 +175,7 @@ export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollecti
       draftFinishboard: draft,
       lastEditedTime: ensureString(value.lastEditedTime ?? getCurrentTime()),
       firebaseId: value.firebaseId,
+      needsSync: !! value.needsSync,
     } satisfies Series;
   }
 
@@ -190,6 +192,7 @@ export function saveSeries(series: SeriesCollection) {
       draftFinishboard: value.draftFinishboard,
       lastEditedTime: value.lastEditedTime,
       firebaseId: value.firebaseId,
+      needsSync: value.needsSync,
     };
   }
   saveKey(SERIES_KEY, result);
@@ -317,6 +320,10 @@ function getSeriesEditor(
       ...old,
       firebaseId: firebaseId,
     })),
+    setNeedsSync: (value) => update((old) => ({
+      ...old,
+      needsSync: value,
+    })),
   };
 }
 
@@ -351,14 +358,19 @@ export function getStorageEditor(
 ): IStorage {
   const updateOneSeries = (id: number, mutate: (old: Series) => Series) => {
     updateSeries((old) => {
-      schedulePush();
+      const oldValue = old[id];
+      const newValue = mutate(oldValue);
+
+      if (JSON.stringify(getRemoteSeries(oldValue)) !=
+          JSON.stringify(getRemoteSeries(newValue))) {
+        schedulePush();
+        newValue.needsSync = true;
+        newValue.lastEditedTime = getCurrentTime();
+      }
 
       return {
         ...old,
-        [id]: {
-          ...mutate(old[id]),
-          lastEditedTime: getCurrentTime()
-        },
+        [id]: newValue,
       };
     })
   };
@@ -375,6 +387,7 @@ export function getStorageEditor(
           finishboards: [],
           draftFinishboard: null,
           lastEditedTime: getCurrentTime(),
+          needsSync: true,
       }));
       return id;
     },
@@ -417,6 +430,7 @@ export function getStorageEditor(
         }),
         draftFinishboard: null,
         lastEditedTime: getCurrentTime(),
+        needsSync: true,
       };
 
       updateSeries(old => ({

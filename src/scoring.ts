@@ -75,6 +75,7 @@ export interface Series {
   draftFinishboard: Finishboard | null;
   lastEditedTime: string;
   firebaseId?: string;
+  needsSync: boolean;
 }
 
 export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) { 

@@ -33,6 +33,7 @@ async function pull() {
 async function push() {
   if (auth.currentUser) {
     const promises = Object.values(storage.listSeries())
+      .filter(series => series.needsSync)
       .map(series => SyncSeries(storage, series));
 
     await Promise.all(promises);
@@ -41,22 +42,32 @@ async function push() {
   }
 }
 
-async function SyncSeries(storage: IStorage, series: Series) {
+export function getRemoteSeries(series: Series) {
   const resource = {
     ...series,
     owner: auth.currentUser.uid,
   };
 
+  delete resource.needsSync;
+  delete resource.firebaseId;
+  delete resource.id;
+
+  return resource;
+}
+
+async function SyncSeries(storage: IStorage, series: Series) {
+  const resource = getRemoteSeries(series);
+
   try {
     if (series.firebaseId) {
       await setDoc(doc(seriesStore, series.firebaseId), resource);
+      storage.openSeries(series.id).setNeedsSync(false);
     } else {
       const docRef = await addDoc(seriesStore, resource);
-      const editor = storage.openSeries(series.id);
-      editor.setFirebaseId(docRef.id);
+      storage.openSeries(series.id).setFirebaseId(docRef.id);
     }
 
-    console.log("synced", resource);
+    console.log("pushed", resource);
   } catch (e) {
     console.error("Error syncing document: ", e, resource);
   }
@@ -64,10 +75,10 @@ async function SyncSeries(storage: IStorage, series: Series) {
 
 let pushTimeout: NodeJS.Timeout | null = null;
 
-export function initializeFirebase() {
-  auth.onAuthStateChanged(() => schedulePush());
-  pull();
-}
+auth.onAuthStateChanged(async () => {
+  await pull();
+  schedulePush();
+});
 
 export function schedulePush() {
   if (pushTimeout) {
