@@ -52,7 +52,7 @@ async function push() {
 export function getRemoteSeries(series: Series) {
   const resource = {
     ...series,
-    owner: auth.currentUser.uid,
+    owner: auth.currentUser?.uid,
   };
 
   delete resource.needsSync;
