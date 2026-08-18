@@ -1,3 +1,4 @@
+import { schedulePush } from "./firebase";
 import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
 
 export interface IStorage {
@@ -9,8 +10,6 @@ export interface IStorage {
   importSeries: (pack: PackedSeries) => number;
 
   nextGlobalId: () => number;
-
-  onSeriesChanged: (handler: (series: Series) => void) => void;
 }
 
 export interface ISeriesEditor {
@@ -350,20 +349,16 @@ export function getStorageEditor(
   getSeries: () => SeriesCollection,
   updateSeries: Mutator<SeriesCollection>,
 ): IStorage {
-  let seriesChangedHandler = null;
-
   const updateOneSeries = (id: number, mutate: (old: Series) => Series) => {
     updateSeries((old) => {
-      const newValue = {
-        ...mutate(old[id]),
-        lastEditedTime: getCurrentTime()
-      };
-      if (seriesChangedHandler) {
-        seriesChangedHandler(newValue);
-      }
+      schedulePush();
+
       return {
         ...old,
-        [id]: newValue,
+        [id]: {
+          ...mutate(old[id]),
+          lastEditedTime: getCurrentTime()
+        },
       };
     })
   };
@@ -433,8 +428,6 @@ export function getStorageEditor(
     },
 
     nextGlobalId: nextGlobalId,
-
-    onSeriesChanged: (handler) => seriesChangedHandler = handler,
   };
 }
 
