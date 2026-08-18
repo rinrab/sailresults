@@ -41,7 +41,17 @@ async function push() {
     console.log(storage);
     const promises = Object.values(storage.listSeries())
       .filter(series => series.needsSync)
-      .map(series => SyncSeries(storage, series));
+      .map(async (series) => {
+        const resource = getRemoteSeries(series);
+
+        if (series.firebaseId) {
+          await setDoc(doc(seriesStore, series.firebaseId), resource);
+          storage.openSeries(series.id).setNeedsSync(false);
+        } else {
+          const docRef = await addDoc(seriesStore, resource);
+          storage.openSeries(series.id).setFirebaseId(docRef.id);
+        }
+      });
 
     await Promise.all(promises);
   } else {
@@ -60,24 +70,6 @@ export function getRemoteSeries(series: Series) {
   delete resource.id;
 
   return resource;
-}
-
-async function SyncSeries(storage: IStorage, series: Series) {
-  const resource = getRemoteSeries(series);
-
-  try {
-    if (series.firebaseId) {
-      await setDoc(doc(seriesStore, series.firebaseId), resource);
-      storage.openSeries(series.id).setNeedsSync(false);
-    } else {
-      const docRef = await addDoc(seriesStore, resource);
-      storage.openSeries(series.id).setFirebaseId(docRef.id);
-    }
-
-    console.log("pushed", resource);
-  } catch (e) {
-    console.error("Error syncing document: ", e, resource);
-  }
 }
 
 let pushTimeout: NodeJS.Timeout | null = null;
