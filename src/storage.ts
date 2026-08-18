@@ -174,6 +174,7 @@ export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollecti
       finishboards: finishboards,
       draftFinishboard: draft,
       lastEditedTime: ensureString(value.lastEditedTime ?? getCurrentTime()),
+      firebaseId: value.firebaseId,
     } satisfies Series;
   }
 
@@ -189,6 +190,7 @@ export function saveSeries(series: SeriesCollection) {
       finishboards: value.finishboards,
       draftFinishboard: value.draftFinishboard,
       lastEditedTime: value.lastEditedTime,
+      firebaseId: value.firebaseId,
     };
   }
   saveKey(SERIES_KEY, result);
