@@ -362,6 +362,19 @@ function getCurrentTime() {
   return date.toISOString();
 }
 
+function seriesAreEqual(left: Series, right: Series) {
+  if (left == right) {
+    return true;
+  }
+
+  if (! left || ! right) {
+    return false;
+  }
+
+  return JSON.stringify(getRemoteSeries(left)) ==
+         JSON.stringify(getRemoteSeries(right))
+}
+
 export function getStorageEditor(
   getSeries: () => SeriesCollection,
   updateSeries: Mutator<SeriesCollection>,
@@ -371,8 +384,7 @@ export function getStorageEditor(
       const oldValue = old[id];
       const newValue = mutate(oldValue);
 
-      if (JSON.stringify(getRemoteSeries(oldValue)) !=
-          JSON.stringify(getRemoteSeries(newValue))) {
+      if (! seriesAreEqual(oldValue, newValue)) {
         schedulePush();
         newValue.needsSync = true;
         newValue.lastEditedTime = getCurrentTime();
@@ -470,8 +482,7 @@ export function getStorageEditor(
         remoteModified: true,
       } satisfies Series;
 
-      if (JSON.stringify(getRemoteSeries(newValue)) ==
-          JSON.stringify(getRemoteSeries(series))) {
+      if (seriesAreEqual(series, newValue)) {
         /* don't update if pulled series is no different from the one we have
          * locally */
         return old;
