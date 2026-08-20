@@ -7,7 +7,7 @@ import ResultsState from "./results";
 import { EditRaceState, NewRaceState } from "./finishboard";
 import ErrorBoundary from "./error";
 import { EditCompetitorState, ListCompetitorsState } from "./edit-competitors";
-import { NewSeriesState, SeriesConfigurationState, SeriesOverviewState } from "./series";
+import { ImportSeriesState, NewSeriesState, SeriesConfigurationState, SeriesOverviewState } from "./series";
 import StartState from "./home";
 import RacesOverviewState from "./races";
 import { StorageProvider } from "./storage-context";
@@ -24,6 +24,7 @@ function App() {
               <Route index element={<StartState />} />
               <Route path="series">
                 <Route path="new" element={<NewSeriesState />} />
+                <Route path="import" element={<ImportSeriesState />} />
                 <Route path=":seriesId">
                   <Route index element={<SeriesOverviewState />} />
                   <Route path="config" element={<SeriesConfigurationState />} />
@@ -94,3 +95,6 @@ function fixViewport() {
 window.visualViewport.addEventListener("resize", fixViewport);
 window.visualViewport.addEventListener("scroll", fixViewport);
 fixViewport();
+
+navigator.storage.persist()
+  .then((result) => console.info(`navigator.storage.persist() returned ${result}`))
