@@ -1,6 +1,6 @@
 import { IStorage } from "./storage";
 import { initializeApp } from "firebase/app";
-import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData } from "firebase/firestore";
+import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch } from "firebase/firestore";
 import { Series } from "./scoring";
 import { Auth, getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { storage } from "./storage-context";
@@ -34,23 +34,25 @@ function disconnect() {
 
 async function push() {
   if (auth.currentUser) {
-    console.log(storage);
-    const promises = Object.values(storage.listSeries())
+    const batch = writeBatch(db);
+
+    Object.values(storage.listSeries())
       .filter(series => series.needsSync)
       .map(async (series) => {
         const resource = getRemoteSeries(series);
 
         if (series.firebaseId) {
-          await setDoc(doc(seriesStore, series.firebaseId), resource);
+          batch.set(doc(seriesStore, series.firebaseId), resource);
         } else {
-          const docRef = await addDoc(seriesStore, resource);
+          const docRef = doc(seriesStore);
+          batch.set(docRef, resource);
           storage.openSeries(series.id).setFirebaseId(docRef.id);
         }
 
         storage.openSeries(series.id).setNeedsSync(false);
       });
 
-    await Promise.all(promises);
+    return batch.commit();
   } else {
     console.log("can't push: unauthorized");
   }
