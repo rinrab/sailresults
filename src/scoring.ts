@@ -70,9 +70,10 @@ export const DEFAULT_DISQUALIFICATION: FinishboardEntry = "DNF";
 export interface Series {
   id: number;
   name: string;
-  racers: number[];
+  racers: Racer[];
   finishboards: Finishboard[];
   draftFinishboard: Finishboard | null;
+  lastEditedTime: string;
 }
 
 export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) { 
@@ -153,17 +154,16 @@ function countsAsParticipation(scores: EvaluatedScore[]): boolean {
 }
 
 export function evaluateScoreboard(
-  racers: { [id: number]: Racer },
   series: Series,
   finishBoards: Finishboard[]
 ) {
   const result: EvaluatedRacer[] = [];
-  for (const racerId of series.racers) {
+  for (const racer of series.racers) {
     const scores: EvaluatedScore[] = [];
     let total = 0;
 
     for (const board of finishBoards) {
-      const entry = board[racerId] ?? DEFAULT_DISQUALIFICATION; 
+      const entry = board[racer.id] ?? DEFAULT_DISQUALIFICATION; 
       const realScore = evaluateRealScore(entry, series.racers.length);
 
       total += realScore;
@@ -174,7 +174,7 @@ export function evaluateScoreboard(
     }
 
     result.push({
-      racer: racers[racerId],
+      racer: racer,
       scores: scores,
       total: total,
       rank: 1,

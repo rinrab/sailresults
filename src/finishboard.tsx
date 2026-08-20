@@ -43,6 +43,7 @@ function FinishBoardStatus(props: { draft: IBoardEditor }) {
 
 function FinishboardRankEditor(props: {
   draft: IBoardEditor,
+  series: ISeriesEditor,
   editingRank: number,
   done: () => void 
 }) {
@@ -53,8 +54,7 @@ function FinishboardRankEditor(props: {
   const [editingValue, setEditingValue] = React.useState<string>(props.draft.board[props.editingRank].toString());
   const [revertValue] = React.useState(props.draft.board[props.editingRank]);
 
-  const storage = React.useContext(StorageContext);
-  const racer = storage.openRacer(props.editingRank);
+  const racer = props.series.openRacer(props.editingRank);
 
   const setValue = (value: string) => {
     setEditingValue(value);
@@ -86,10 +86,13 @@ function findLastPlace(finishboard: Finishboard) {
   return result;
 }
 
-function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEditor, query: string }) {
-  const storage = React.useContext(StorageContext);
-  const remainingRacers = props.draft.getRemaining().map(id => storage.openRacer(id));
-  const filteredItems = remainingRacers.filter(item => racerMatches(item.current, props.query));
+function FinishboardSuggestions(props: {
+  series: ISeriesEditor,
+  draft: IBoardEditor,
+  query: string
+}) {
+  const remainingRacers = props.draft.getRemaining();
+  const filteredItems = remainingRacers.filter(item => racerMatches(item, props.query));
 
   const itemStyle = {
     display: "flex",
@@ -107,8 +110,8 @@ function FinishboardSuggestions(props: { series: ISeriesEditor, draft: IBoardEdi
   } else {
     return (<>
       {filteredItems.map(item => {
-        const text = `${item.current.name} ${item.current.number}`;
-        return <Option key={item.current.id} text={text} value={item.current.id.toString()}>{text}</Option>;
+        const text = `${item.name} ${item.number}`;
+        return <Option key={item.id} text={text} value={item.id.toString()}>{text}</Option>;
       })}
     </>)
   }
@@ -154,6 +157,7 @@ function FinishboardMenu(props: {
 }
 
 function FinishboardTable(props: {
+  series: ISeriesEditor,
   draft: IBoardEditor,
   editingRank: number,
   setEditingRank: (value: number) => void
@@ -169,11 +173,11 @@ function FinishboardTable(props: {
     },
     {
       header: "Name",
-      cell: (row) => <Text>{row.name}</Text>,
+      cell: (row) => <Text>{row?.name ?? "<racer was deleted>"}</Text>,
     },
     {
       header: "Number",
-      cell: (row) => <Text>{row.number}</Text>,
+      cell: (row) => <Text>{row?.number ?? "<racer was deleted>"}</Text>,
     },
     {
       header: "Rank",
@@ -195,13 +199,13 @@ function FinishboardTable(props: {
   ];
 
   if (Object.entries(props.draft.board).length == 0) {
-    return <Text>The finishboard is empty.</Text>
+    return <Text style={{ flex: 1 }}>The finishboard is empty.</Text>
   } else {
     const keys = sortFinishboard(props.draft.board);
     return (
       <SailTable columns={columns}
                  keys={keys}
-                 map={(key) => storage.openRacer(key as any).current}
+                 map={(key) => ({ ...props.series.openRacer(key as any)?.current, id: key })}
                  selectedIndex={keys.indexOf(props.editingRank)} />
     );
   }
@@ -251,13 +255,13 @@ export function NewRaceState() {
       <NavBar title={series.current.name} subtitle="New Race" />
       <Content>
         <RacerPicker series={series} draft={draft} />
-        <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardTable draft={draft}
-                            editingRank={editingRank}
-                            setEditingRank={setEditingRank} />
-        </div>
+        <FinishboardTable series={series}
+                          draft={draft}
+                          editingRank={editingRank}
+                          setEditingRank={setEditingRank} />
         {editingRank &&
-          <FinishboardRankEditor draft={draft}
+          <FinishboardRankEditor series={series}
+                                 draft={draft}
                                  editingRank={editingRank}
                                  done={() => setEditingRank(null)} />
         }
@@ -289,8 +293,8 @@ export function EditRaceState() {
   const [editingRank, setEditingRank] = React.useState(null);
 
   React.useEffect(() => {
-    for (const racerId of draft.getRemaining()) {
-      draft.setPosition(racerId, DEFAULT_DISQUALIFICATION);
+    for (const racer of draft.getRemaining()) {
+      draft.setPosition(racer.id, DEFAULT_DISQUALIFICATION);
     }
   }, []);
 
@@ -300,13 +304,13 @@ export function EditRaceState() {
               subtitle={`Race ${parseInt(raceId) + 1}`} />
       <Content>
         <RacerPicker series={series} draft={draft} />
-        <div style={{ flex: "auto", overflow: "auto" }}>
-          <FinishboardTable draft={draft}
-                            editingRank={editingRank}
-                            setEditingRank={setEditingRank} />
-        </div>
+        <FinishboardTable series={series}
+                          draft={draft}
+                          editingRank={editingRank}
+                          setEditingRank={setEditingRank} />
         {editingRank &&
-          <FinishboardRankEditor draft={draft}
+          <FinishboardRankEditor series={series}
+                                 draft={draft}
                                  editingRank={editingRank}
                                  done={() => setEditingRank(null)} />
         }

@@ -1,6 +1,6 @@
 import { Button, Link, Text } from "@fluentui/react-components";
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, SeriesNavigation } from "./common";
 import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
 import { StorageContext } from "./storage-context";
@@ -85,8 +85,7 @@ export default function ResultsState() {
   const { seriesId } = useParams();
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
-  const racers = storage.listRacers();
-  const scoreboard = evaluateScoreboard(racers, series.current, series.current.finishboards);
+  const scoreboard = evaluateScoreboard(series.current, series.current.finishboards);
 
   const columns: Column<EvaluatedRacer>[] = [
     {
