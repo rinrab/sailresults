@@ -37,7 +37,7 @@ async function push() {
     const batch = writeBatch(db);
 
     Object.values(storage.listSeries())
-      .filter(series => series.needsSync)
+      .filter(series => series.needsSync || ! series.firebaseId)
       .map(async (series) => {
         const resource = getRemoteSeries(series);
 
