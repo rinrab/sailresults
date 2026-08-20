@@ -1,6 +1,6 @@
 import { IStorage } from "./storage";
 import { initializeApp } from "firebase/app";
-import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query } from "firebase/firestore";
+import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData } from "firebase/firestore";
 import { Series } from "./scoring";
 import { Auth, getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { storage } from "./storage-context";
@@ -12,28 +12,24 @@ export const auth = getAuth();
 const db = getFirestore(app);
 const seriesStore = collection(db, "series");
 
-let lastPulledId = null;
+function buildSeriesQuery() {
+  return query(seriesStore, where("owner", "==", auth.currentUser.uid));
+}
 
-async function pull() {
-  if (auth.currentUser) {
-    if (lastPulledId == auth.currentUser.uid) {
-      return;
-    }
+function pull(snapshot: QuerySnapshot<DocumentData, DocumentData>) {
+  console.log("pull")
+  // TODO: verify data
+  snapshot.forEach((doc) => {
+    storage.pullSeries(doc.id, doc.data());
+  });
+}
 
-    const snapshot = await getDocs(
-      query(seriesStore, where("owner", "==", auth.currentUser.uid))
-    )
-
-    snapshot.forEach((doc) => {
-      storage.pullSeries(doc.id, doc.data());
-    });
-  } else {
-    /* if no user is authenticated, remove all local copies that had been
-     * synced before (have firebaseId) but have no local modifications */
-    Object.values(storage.listSeries())
-      .filter(series => series.firebaseId && ! series.needsSync)
-      .map(series => storage.deleteSeries(series.id));
-  }
+function disconnect() {
+  /* if no user is authenticated, remove all local copies that had been
+   * synced before (have firebaseId) but have no local modifications */
+  Object.values(storage.listSeries())
+    .filter(series => series.firebaseId && ! series.needsSync)
+    .map(series => storage.deleteSeries(series.id));
 }
 
 async function push() {
@@ -74,12 +70,26 @@ export function getRemoteSeries(series: Series) {
 }
 
 let pushTimeout: NodeJS.Timeout | null = null;
-let onAuthBlocked = false;
+let blockSync = false;
+let snapshotListenerUnsubscribe: Unsubscribe | null = null;
 
 auth.onAuthStateChanged(async () => {
-  if (! onAuthBlocked) {
-    await pull();
-    schedulePush();
+  if (snapshotListenerUnsubscribe) {
+    snapshotListenerUnsubscribe();
+  }
+
+  if (auth.currentUser) {
+    snapshotListenerUnsubscribe = onSnapshot(buildSeriesQuery(), (snapshot) => {
+      if (! snapshot.metadata.hasPendingWrites && ! blockSync) {
+        console.log("snapshot");
+        pull(snapshot);
+        schedulePush();
+      }
+    });
+  } else {
+    if (! blockSync) {
+      disconnect();
+    }
   }
 });
 
@@ -102,17 +112,17 @@ export async function signIn(
   password: string,
   progress: (message: string) => void
 ) {
-  onAuthBlocked = true;
+  blockSync = true;
   try {
     progress("Logging in...");
     await signInWithEmailAndPassword(auth, email, password);
     progress("Fetching data from the server...");
-    await pull();
+    pull(await getDocs(buildSeriesQuery()));
     progress("Uploading local data to the server...");
     await push();
     progress("Done!");
   } finally {
-    onAuthBlocked = false;
+    blockSync = false;
   }
 }
 
@@ -121,7 +131,7 @@ export async function signUp(
   password: string,
   progress: (message: string) => void
 ) {
-  onAuthBlocked = true;
+  blockSync = true;
   try {
     progress("Creating an account...");
     await createUserWithEmailAndPassword(auth, email, password);
@@ -129,16 +139,16 @@ export async function signUp(
     await push();
     progress("Done!");
   } finally {
-    onAuthBlocked = false;
+    blockSync = false;
   }
 }
 
 export async function signOut() {
-  onAuthBlocked = true;
+  blockSync = true;
   try {
     await auth.signOut();
-    await pull();
+    disconnect();
   } finally {
-    onAuthBlocked = false;
+    blockSync = false;
   }
 }
