@@ -59,13 +59,13 @@ async function push() {
 
 export function getRemoteSeries(series: Series) {
   const resource = {
-    ...series,
+    name: series.name,
+    racers: series.racers,
+    finishboards: series.finishboards,
+    draftFinishboard: series.draftFinishboard,
+    lastEditedTime: series.lastEditedTime,
     owner: auth.currentUser?.uid,
   };
-
-  delete resource.needsSync;
-  delete resource.firebaseId;
-  delete resource.id;
 
   return resource;
 }

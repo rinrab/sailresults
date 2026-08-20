@@ -185,6 +185,7 @@ export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollecti
       lastEditedTime: ensureString(value.lastEditedTime ?? getCurrentTime()),
       firebaseId: value.firebaseId,
       needsSync: !! value.needsSync,
+      remoteModified: false,
     } satisfies Series;
   }
 
@@ -375,6 +376,7 @@ export function getStorageEditor(
         schedulePush();
         newValue.needsSync = true;
         newValue.lastEditedTime = getCurrentTime();
+        newValue.remoteModified = false;
       }
 
       return {
@@ -397,6 +399,7 @@ export function getStorageEditor(
           draftFinishboard: null,
           lastEditedTime: getCurrentTime(),
           needsSync: true,
+          remoteModified: false,
       }));
       return id;
     },
@@ -440,6 +443,7 @@ export function getStorageEditor(
         draftFinishboard: null,
         lastEditedTime: getCurrentTime(),
         needsSync: true,
+        remoteModified: false,
       };
 
       updateSeries(old => ({
@@ -463,7 +467,15 @@ export function getStorageEditor(
         id: series?.id ?? nextGlobalId(),
         firebaseId: firebaseId,
         needsSync: false,
-      };
+        remoteModified: true,
+      } satisfies Series;
+
+      if (JSON.stringify(getRemoteSeries(newValue)) ==
+          JSON.stringify(getRemoteSeries(series))) {
+        /* don't update if pulled series is no different from the one we have
+         * locally */
+        return old;
+      }
 
       return {
         ...old,

@@ -76,6 +76,7 @@ export interface Series {
   lastEditedTime: string;
   firebaseId?: string;
   needsSync: boolean;
+  remoteModified: boolean;
 }
 
 export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) { 
