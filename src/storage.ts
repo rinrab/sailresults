@@ -1,6 +1,12 @@
 import { getRemoteSeries, schedulePush } from "./storage-firebase";
 import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
 
+export interface IPushEditor {
+  add: (series: Series) => string;
+  update: (series: Series) => string;
+  commit: () => Promise<void>;
+}
+
 export interface IStorage {
   listSeries: () => SeriesCollection,
 
@@ -9,6 +15,8 @@ export interface IStorage {
   deleteSeries: (id: number) => void;
   importSeries: (pack: PackedSeries) => number;
   pullSeries: (firebaseId: string, data: any) => void;
+
+  drivePush: (editor: IPushEditor) => Promise<void>;
 
   nextGlobalId: () => number;
 }
@@ -462,6 +470,36 @@ export function getStorageEditor(
         [newValue.id]: newValue,
       };
     }),
+
+    drivePush: async (pushEditor) => {
+      const postCommit = [];
+
+      Object.values(getSeries())
+        .filter(series => series.needsSync || ! series.firebaseId)
+        .map((series) => {
+          let firebaseId: string;
+          if (series.firebaseId) {
+            firebaseId = pushEditor.update(series);
+          } else {
+            firebaseId = pushEditor.add(series);
+          }
+
+          postCommit.push(() => updateSeries(old => ({
+            ...old,
+            [series.id]: {
+              ...old[series.id],
+              needsSync: false,
+              firebaseId: firebaseId,
+            }
+          })));
+        });
+
+      await pushEditor.commit();
+
+      /* aborted if commit() throw an error */
+
+      postCommit.map(action => action());
+    },
 
     nextGlobalId: nextGlobalId,
   };

@@ -1,6 +1,6 @@
-import { IStorage } from "./storage";
+import { IPushEditor, IStorage } from "./storage";
 import { initializeApp } from "firebase/app";
-import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch } from "firebase/firestore";
+import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch, WriteBatch } from "firebase/firestore";
 import { Series } from "./scoring";
 import { Auth, getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { storage } from "./storage-context";
@@ -32,27 +32,26 @@ function disconnect() {
     .map(series => storage.deleteSeries(series.id));
 }
 
+function getBatchEditor(batch: WriteBatch): IPushEditor {
+  return {
+    add: (series) => {
+      const resource = getRemoteSeries(series);
+      const docRef = doc(seriesStore);
+      batch.set(docRef, resource);
+      return docRef.id;
+    },
+    update: (series) => {
+      const resource = getRemoteSeries(series);
+      batch.set(doc(seriesStore, series.firebaseId), resource);
+      return series.firebaseId;
+    },
+    commit: async () => await batch.commit(),
+  };
+}
+
 async function push() {
   if (auth.currentUser) {
-    const batch = writeBatch(db);
-
-    Object.values(storage.listSeries())
-      .filter(series => series.needsSync || ! series.firebaseId)
-      .map(async (series) => {
-        const resource = getRemoteSeries(series);
-
-        if (series.firebaseId) {
-          batch.set(doc(seriesStore, series.firebaseId), resource);
-        } else {
-          const docRef = doc(seriesStore);
-          batch.set(docRef, resource);
-          storage.openSeries(series.id).setFirebaseId(docRef.id);
-        }
-
-        storage.openSeries(series.id).setNeedsSync(false);
-      });
-
-    return batch.commit();
+    return storage.drivePush(getBatchEditor(writeBatch(db)));
   } else {
     console.log("can't push: unauthorized");
   }
