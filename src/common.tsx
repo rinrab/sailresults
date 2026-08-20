@@ -4,8 +4,8 @@ import React from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 import { Racer, Series } from "./scoring";
 import { AccountMenu } from "./account";
-import { isAuthorized } from "./storage-firebase";
 import { StorageContext } from "./storage-context";
+import { FirebaseAuthContext } from "./storage-firebase-auth-context";
 
 export function formatString(str: string) {
   return (str == "") ? "-" : str;
@@ -112,9 +112,16 @@ export function Content({ children, screenOnly = false }) {
 }
 
 export function SeriesStatus(props: { series: Series }) {
-  if (isAuthorized()) {
+  const user = React.useContext(FirebaseAuthContext);
+
+  if (user) {
     if (props.series.needsSync) {
       return <Spinner size="extra-tiny" label="Syncing..." />
+    } else if (props.series.remoteModified) {
+      return <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <CheckmarkCircle16Regular color={tokens.colorPaletteGreenBackground3} />
+        <Text>Remote modified</Text>
+      </div>
     } else if (props.series.firebaseId) {
       return <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         <CheckmarkCircle16Regular color={tokens.colorPaletteGreenBackground3} />
