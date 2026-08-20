@@ -2,9 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { Content, Layout, NavBar } from "./common";
 import React from "react";
 import { Button, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Text } from "@fluentui/react-components";
-import { Person32Regular, PersonFilled, PersonRegular } from "@fluentui/react-icons";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from "firebase/auth";
+import { PersonFilled } from "@fluentui/react-icons";
+import { User } from "firebase/auth";
 import { auth, signIn, signUp, signOut } from "./storage-firebase";
+import { FirebaseAuthContext } from "./storage-firebase-auth-context";
 
 export function AccountSignIn() {
   const navigate = useNavigate();
@@ -92,7 +93,7 @@ export function AccountSignUp() {
   );
 }
 
-function UserDetails(props: { user: User, update: () => void }) {
+function UserDetails(props: { user: User }) {
   return <>
     <Field label="Username">
       <Input disabled value={props.user.email} />
@@ -100,8 +101,8 @@ function UserDetails(props: { user: User, update: () => void }) {
 
     <div style={{ display: "flex", gap: 8 }}>
       <Button onClick={() => alert("not implemented")}>Change Password</Button>
-      <Button onClick={() => signOut().then(() => props.update())}>Sign Out</Button>
-      <Button onClick={() => props.user.delete().then(() => props.update())}>Delete User</Button>
+      <Button onClick={() => signOut()}>Sign Out</Button>
+      <Button onClick={() => props.user.delete()}>Delete User</Button>
     </div>
   </>;
 }
@@ -118,21 +119,14 @@ function AnonymousOptions() {
 }
 
 export function AccountMe() {
-  const [isReady, setIsReady] = React.useState(false);
-  const [dummy, setDummy] = React.useState(1);
-
-  auth.authStateReady().then(() => setIsReady(true));
-
-  const update = () => {
-    setDummy(dummy + 1);
-  };
+  const { isReady, user } = React.useContext(FirebaseAuthContext);
 
   return (
     <Layout>
       <NavBar title="Account" subtitle="Information" back="../.." />
       <Content>
-        {isReady ? (auth.currentUser ? 
-                      <UserDetails user={auth.currentUser} update={update} /> :
+        {isReady ? (user ? 
+                      <UserDetails user={user} /> :
                       <AnonymousOptions /> ) 
                  : "Loading..."}
       </Content>
@@ -142,23 +136,15 @@ export function AccountMe() {
 
 export function AccountMenu() {
   const navigate = useNavigate();
-  const [isReady, setIsReady] = React.useState(false);
-  const [isAuthorized, setIsAuthorized] = React.useState(false);
-  const [username, setUsername] = React.useState("");
-
-  React.useEffect(() => auth.onAuthStateChanged((user) => {
-    setIsReady(true);
-    setIsAuthorized(!!user);
-    setUsername(user?.email);
-  }));
+  const { isReady, user } = React.useContext(FirebaseAuthContext);
 
   return <Menu>
     <MenuTrigger>
       <Button icon={<PersonFilled />} style={{ borderRadius: 99 }} size="large" />
     </MenuTrigger>
     <MenuPopover>
-      {isReady ? (isAuthorized ? <>
-          <MenuGroupHeader>{username}</MenuGroupHeader>
+      {isReady ? (user ? <>
+          <MenuGroupHeader>{user.email}</MenuGroupHeader>
           <MenuDivider />
           <MenuItem onClick={() => navigate("/account/me")}>View Profile</MenuItem>
           <MenuItem onClick={() => signOut().then(() => navigate("/"))}>Sign Out</MenuItem>
