@@ -17,6 +17,7 @@ export interface IStorage {
   pullSeries: (firebaseId: string, data: any) => void;
 
   drivePush: (editor: IPushEditor) => Promise<void>;
+  disconnect: () => void;
 
   nextGlobalId: () => number;
 }
@@ -523,6 +524,24 @@ export function getStorageEditor(
 
       postCommit.map(action => action());
     },
+
+    disconnect: () => updateSeries((old) => {
+      const result = {};
+
+      for (const series of Object.values(old)) {
+        /* if no user is authenticated, remove all local copies that had been
+         * synced before (have firebaseId) but have no local modifications
+         *
+         * keeping it only if either it wasn't synced or firebaseId is missing
+         * and it also wasn't synced 
+         * */
+        if (! series.firebaseId || series.needsSync) {
+          result[series.id] = series;
+        }
+      }
+
+      return result;
+    }),
 
     nextGlobalId: nextGlobalId,
   };

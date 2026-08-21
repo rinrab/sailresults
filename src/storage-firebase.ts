@@ -24,14 +24,6 @@ function pull(snapshot: QuerySnapshot<DocumentData, DocumentData>) {
   });
 }
 
-function disconnect() {
-  /* if no user is authenticated, remove all local copies that had been
-   * synced before (have firebaseId) but have no local modifications */
-  Object.values(storage.listSeries())
-    .filter(series => series.firebaseId && ! series.needsSync)
-    .map(series => storage.deleteSeries(series.id));
-}
-
 function getBatchEditor(batch: WriteBatch): IPushEditor {
   return {
     add: (series) => {
@@ -89,7 +81,7 @@ auth.onAuthStateChanged(async () => {
     });
   } else {
     if (! blockSync) {
-      disconnect();
+      storage.disconnect();
     }
   }
 });
@@ -148,7 +140,7 @@ export async function signOut() {
   blockSync = true;
   try {
     await auth.signOut();
-    disconnect();
+    storage.disconnect();
   } finally {
     blockSync = false;
   }
