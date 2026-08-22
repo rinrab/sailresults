@@ -122,7 +122,7 @@ export function SeriesStatus(props: { series: Series }) {
     } else if (props.series.remoteModified) {
       return <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         <CheckmarkCircle16Regular color={tokens.colorPaletteGreenBackground3} />
-        <Text>Remote modified</Text>
+        <Text>Fetched</Text>
       </div>
     } else if (props.series.firebaseId) {
       return <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
