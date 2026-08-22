@@ -1,10 +1,10 @@
-import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, TableRow, TableCell, Table, TableHeaderCell, TableHeader, TableBody, OptionOnSelectData } from "@fluentui/react-components";
+import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, OptionOnSelectData } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
-import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer, DEFAULT_DISQUALIFICATION } from "./scoring";
-import { IBoardEditor, ISeriesEditor } from "./storage";
+import { Content, Layout, NavBar, racerMatches } from "./common";
+import { dsqs, sortFinishboard, DEFAULT_DISQUALIFICATION } from "./scoring";
+import { Finishboard, FinishboardEntry, IBoardEditor, ISeriesEditor, Racer } from "./storage";
 import { StorageContext } from "./storage-context";
 import { Column, SailTable } from "./table";
 

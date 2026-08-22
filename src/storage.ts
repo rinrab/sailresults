@@ -1,5 +1,28 @@
 import { getRemoteSeries, schedulePush } from "./storage-firebase";
-import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
+import { DEFAULT_DISQUALIFICATION, setFinishboardPosition } from "./scoring";
+
+export interface Series {
+  id: number;
+  name: string;
+  racers: Racer[];
+  finishboards: Finishboard[];
+  draftFinishboard: Finishboard | null;
+  lastEditedTime: string;
+  firebaseId?: string;
+  needsSync: boolean;
+  remoteModified: boolean;
+}
+
+export interface Racer {
+  id: number;
+  name: string;
+  number: string;
+}
+
+export type FinishboardEntry = number | "DNC" | "DNS" | "DNF" | "NSC" | "UFD" | "BFD" | "RET" | "DSQ";
+export type Finishboard = { 
+  [racerId: number]: FinishboardEntry
+}
 
 export interface IPushEditor {
   add: (series: Series) => string;

@@ -1,11 +1,11 @@
-import { Button, Divider, Text, Menu, MenuTrigger, MenuPopover, MenuItem, TableBody, TableRow, TableCell, Table, TableHeader, Badge, CounterBadge } from "@fluentui/react-components";
+import { Button, Text, Menu, MenuTrigger, MenuPopover, MenuItem, CounterBadge } from "@fluentui/react-components";
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
-import { Finishboard } from "./scoring";
 import { Column, SailTable } from "./table";
+import { Finishboard } from "./storage";
 
 export default function RacesOverviewState() {
   const navigate = useNavigate();

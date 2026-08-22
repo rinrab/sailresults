@@ -1,8 +1,7 @@
-import { IPushEditor, IStorage } from "./storage";
+import { IPushEditor, Series } from "./storage";
 import { initializeApp } from "firebase/app";
-import { doc, addDoc, collection, getFirestore, setDoc, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch, WriteBatch } from "firebase/firestore";
-import { Series } from "./scoring";
-import { Auth, getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, collection, getFirestore, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch, WriteBatch } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { storage } from "./storage-context";
 import { firebaseConfig } from "./storage-firebase-config";
 

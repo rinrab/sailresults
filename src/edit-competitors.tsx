@@ -4,9 +4,8 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
-import { ISeriesEditor } from "./storage";
+import { ISeriesEditor, Racer } from "./storage";
 import { Column, SailTable } from "./table";
-import { Racer } from "./scoring";
 
 function ActionsCell({ deleteFn }) {
   return <Menu>

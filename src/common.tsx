@@ -2,10 +2,10 @@ import { tokens, TabList, Tab, Text, Button, Spinner } from "@fluentui/react-com
 import { Flag20Regular, Home20Regular, People20Regular, Settings20Regular, Trophy20Regular, ChevronLeftRegular, ChevronLeft20Regular, ChevronLeft24Regular, ChevronLeft28Regular, ChevronLeft32Regular, CheckmarkCircle16Regular, CloudOff16Regular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useMatch, useNavigate } from "react-router-dom";
-import { Racer, Series } from "./scoring";
 import { AccountMenu } from "./account";
 import { StorageContext } from "./storage-context";
 import { FirebaseAuthContext } from "./storage-firebase-auth-context";
+import { Racer, Series } from "./storage";
 
 export function formatString(str: string) {
   return (str == "") ? "-" : str;
