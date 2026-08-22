@@ -52,7 +52,11 @@ async function push() {
 export function getRemoteSeries(series: Series) {
   const resource = {
     name: series.name,
-    racers: series.racers,
+    racers: series.racers.map(racer => ({
+      id: racer.id,
+      name: racer.name,
+      number: racer.number,
+    })),
     finishboards: series.finishboards,
     draftFinishboard: series.draftFinishboard,
     lastEditedTime: series.lastEditedTime,
