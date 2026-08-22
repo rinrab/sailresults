@@ -1,5 +1,6 @@
 import React from "react";
-import { getStorageEditor, IStorage, openLegacyRacers, openSeries, saveSeries } from "./storage";
+import { getStorageEditor, IStorage } from "./storage";
+import { openLegacyRacers, openSeries, saveSeries } from "./storage-json";
 
 export const StorageContext = React.createContext(null);
 
