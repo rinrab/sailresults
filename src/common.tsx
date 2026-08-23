@@ -27,8 +27,8 @@ export function NavBarBase({ children }) {
     padding: 8,
     backgroundColor: tokens.colorNeutralBackground4,
     display: "flex",
-    alignItems: "center",
-    height: 46,
+    alignItems: "stretch",
+    height: 38,
   }} className="screen-only">
     {children}
   </div>
