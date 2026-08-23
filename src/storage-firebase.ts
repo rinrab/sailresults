@@ -1,7 +1,7 @@
 import { IPushEditor, Series } from "./storage";
 import { initializeApp } from "firebase/app";
 import { doc, collection, getFirestore, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch, WriteBatch } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithEmailLink, sendSignInLinkToEmail, ActionCodeSettings } from "firebase/auth";
 import { storage } from "./storage-context";
 import { firebaseConfig } from "./storage-firebase-config";
 
@@ -144,6 +144,25 @@ export async function signOut() {
   try {
     await auth.signOut();
     storage.disconnect();
+  } finally {
+    blockSync = false;
+  }
+}
+
+export async function sendLink(
+  email: string,
+  progress: (message: string) => void
+) {
+  blockSync = true;
+  try {
+    progress("Sending a link...");
+    const actionCode = {
+      url: `${window.location.origin}/#/account/link/`,
+      handleCodeInApp: true,
+    } satisfies ActionCodeSettings;
+
+    await sendSignInLinkToEmail(auth, email, actionCode);
+    progress("Please click the link sent to your email address to proceed.");
   } finally {
     blockSync = false;
   }

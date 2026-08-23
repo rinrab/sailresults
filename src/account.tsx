@@ -1,15 +1,54 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Content, Layout, NavBar } from "./common";
 import React from "react";
-import { Button, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Text } from "@fluentui/react-components";
+import { Button, Divider, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Switch, Text } from "@fluentui/react-components";
 import { PersonFilled } from "@fluentui/react-icons";
 import { User } from "firebase/auth";
-import { auth, signIn, signUp, signOut } from "./storage-firebase";
+import { signIn, signUp, signOut, sendLink } from "./storage-firebase";
 import { FirebaseAuthContext } from "./storage-firebase-auth-context";
 
-export function AccountSignIn() {
+function useLocalStorage(key: string, defaultValue: any = null): any {
+  const [value, setValue] = React.useState(
+    () => JSON.parse(localStorage.getItem(key) ?? defaultValue)
+  );
+  React.useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  });
+  return [value, setValue];
+}
+
+const KEY_EMAIL = "email";
+const KEY_PASSWORDLESS = "passwordless";
+
+function PasswordlessLogin({ email, setEmail }) {
+  const [status, setStatus] = React.useState("");
+  const [inProgress, setInProgress] = React.useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    try {
+      setInProgress(true);
+      await sendLink(email, setStatus);
+    } catch (error) {
+      setStatus(error.toString());
+    } finally {
+      setInProgress(false);
+    }
+  }
+
+  return <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
+    <Field label="Email Address">
+      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+    </Field>
+
+    <Button type="submit" disabled={inProgress}>Send a link</Button>
+
+    <Text>{status}</Text>
+  </form>
+}
+
+export function EmailPasswordSignIn({ email, setEmail }) {
   const navigate = useNavigate();
-  const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [status, setStatus] = React.useState("");
   const [inProgress, setInProgress] = React.useState(false);
@@ -19,7 +58,7 @@ export function AccountSignIn() {
 
     try {
       setInProgress(true);
-      await signIn(username, password, setStatus);
+      await signIn(email, password, setStatus);
       setTimeout(() => navigate("/"), 300);
     } catch (error) {
       setStatus(error.toString());
@@ -27,32 +66,53 @@ export function AccountSignIn() {
       setInProgress(false);
     }
   };
+
+  return <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
+    <Field label="Email Address">
+      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+    </Field>
+
+    <Field label="Password">
+      <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+    </Field>
+
+    <Button type="submit" disabled={inProgress}>Sign In</Button>
+
+    <Text>{status}</Text>
+  </form>
+}
+
+export function AccountSignIn() {
+  const [passwordless, setPasswordless] = useLocalStorage(KEY_PASSWORDLESS, true);
+  const [email, setEmail] = useLocalStorage(KEY_EMAIL);
 
   return (
     <Layout>
       <NavBar title="Account" subtitle="Sign In" back="../.." />
       <Content>
-        <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
-          <Field label="Email Address">
-            <Input type="email" value={username} onChange={(e) => setUsername(e.target.value)} />
-          </Field>
+        <h1>Sign In</h1>
 
-          <Field label="Password">
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          </Field>
+        <Field hint="Choose whether you want to login by email & password or use an email link.">
+          <Switch label="Passwordless login"
+                  checked={passwordless}
+                  onChange={(e) => setPasswordless(e.target.checked)} />
+        </Field>
 
-          <Text>{status}</Text>
+        <Divider style={{ maxHeight: 0 }} />
 
-          <Button type="submit" disabled={inProgress}>Sign In</Button>
-        </form>
+        {passwordless 
+          ? <PasswordlessLogin email={email} setEmail={setEmail} />
+          : <EmailPasswordSignIn email={email} setEmail={setEmail} />
+        }
+
+        <div>Don't have an account? Try <Link to="/account/signup">Sign Up</Link> instead.</div>
       </Content>
     </Layout>
   );
 }
 
-export function AccountSignUp() {
+export function EmailPasswordSignUp({ email, setEmail }) {
   const navigate = useNavigate();
-  const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [status, setStatus] = React.useState("");
   const [inProgress, setInProgress] = React.useState(false);
@@ -62,7 +122,7 @@ export function AccountSignUp() {
 
     try {
       setInProgress(true);
-      await signUp(username, password, setStatus);
+      await signUp(email, password, setStatus);
       setTimeout(() => navigate("/"), 300);
     } catch (error) {
       setStatus(error.toString());
@@ -71,23 +131,45 @@ export function AccountSignUp() {
     }
   };
 
+    return <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
+      <Field label="Email Address">
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </Field>
+
+      <Field label="Password">
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </Field>
+
+      <Text>{status}</Text>
+
+      <Button type="submit" disabled={inProgress}>Sign Up</Button>
+    </form>
+}
+
+export function AccountSignUp() {
+  const [passwordless, setPasswordless] = useLocalStorage(KEY_PASSWORDLESS, true);
+  const [email, setEmail] = useLocalStorage(KEY_EMAIL);
+
   return (
     <Layout>
       <NavBar title="Account" subtitle="Sign Up" back="../.." />
       <Content>
-        <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
-          <Field label="Email Address">
-            <Input type="email" value={username} onChange={(e) => setUsername(e.target.value)} />
-          </Field>
+        <h1>Sign Up</h1>
 
-          <Field label="Password">
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          </Field>
+        <Field hint="Choose whether you want to sign up by email & password or use an email link.">
+          <Switch label="Passwordless login"
+                  checked={passwordless}
+                  onChange={(e) => setPasswordless(e.target.checked)} />
+        </Field>
 
-          <Text>{status}</Text>
+        <Divider style={{ maxHeight: 0 }} />
 
-          <Button type="submit" disabled={inProgress}>Sign Up</Button>
-        </form>
+        {passwordless 
+          ? <PasswordlessLogin email={email} setEmail={setEmail} />
+          : <EmailPasswordSignUp email={email} setEmail={setEmail} />
+        }
+
+        <div>Already have an account? Try <Link to="/account/signin">Sign In</Link> instead.</div>
       </Content>
     </Layout>
   );
