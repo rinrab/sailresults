@@ -1,7 +1,7 @@
 import { IPushEditor, Series } from "./storage";
 import { initializeApp } from "firebase/app";
 import { doc, collection, getFirestore, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch, WriteBatch } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithEmailLink, sendSignInLinkToEmail, ActionCodeSettings } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithEmailLink, sendSignInLinkToEmail, ActionCodeSettings, sendPasswordResetEmail, confirmPasswordReset } from "firebase/auth";
 import { storage } from "./storage-context";
 import { firebaseConfig } from "./storage-firebase-config";
 
@@ -147,4 +147,18 @@ export async function signOut() {
   } finally {
     blockSync = false;
   }
+}
+
+export async function sendResetPassword(
+  email: string,
+  progress: (message: string) => void
+) {
+  progress("Sending a reset password link...");
+  const actionCode = {
+    url: `${window.location.origin}/#/account/signin/`,
+    handleCodeInApp: true,
+  } satisfies ActionCodeSettings;
+
+  await sendPasswordResetEmail(auth, email, actionCode);
+  progress("Done.");
 }

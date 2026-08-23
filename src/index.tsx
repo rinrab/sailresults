@@ -11,7 +11,7 @@ import { ImportSeriesState, NewSeriesState, SeriesConfigurationState, SeriesOver
 import StartState from "./home";
 import RacesOverviewState from "./races";
 import { StorageProvider } from "./storage-context";
-import { AccountMe, AccountSignIn, AccountSignUp } from "./account";
+import { AccountMe, AccountResetPassword, AccountResetPasswordDone, AccountSignIn, AccountSignUp } from "./account";
 import { FirebaseAuthProvider } from "./storage-firebase-auth-context";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -55,6 +55,8 @@ function App() {
                 <Route path="account">
                   <Route path="signin" element={<AccountSignIn />} />
                   <Route path="signup" element={<AccountSignUp />} />
+                  <Route path="reset-password" element={<AccountResetPassword />} />
+                  <Route path="reset-complete" element={<AccountResetPasswordDone />} />
                   <Route path="me" element={<AccountMe />} />
                 </Route>
               </Route>

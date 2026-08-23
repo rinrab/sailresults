@@ -4,7 +4,7 @@ import React from "react";
 import { Button, Divider, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Switch, Text } from "@fluentui/react-components";
 import { PersonFilled } from "@fluentui/react-icons";
 import { User } from "firebase/auth";
-import { signIn, signUp, signOut } from "./storage-firebase";
+import { signIn, signUp, signOut, sendResetPassword } from "./storage-firebase";
 import { FirebaseAuthContext } from "./storage-firebase-auth-context";
 
 function useLocalStorage(key: string, defaultValue: any = null): any {
@@ -52,6 +52,16 @@ function validatePassword(password: string): FiledValidation {
   }
 }
 
+function EmailField({ email, setEmail }) {
+  const emailValidation = validateEmail(email);
+
+  return <Field label="Email Address"
+         validationState={emailValidation.validationState}
+         validationMessage={emailValidation.validationMessage}>
+    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+  </Field>;
+}
+
 export function EmailPasswordSignIn({ email, setEmail }) {
   const navigate = useNavigate();
   const [password, setPassword] = React.useState("");
@@ -72,17 +82,12 @@ export function EmailPasswordSignIn({ email, setEmail }) {
     }
   };
 
-  const emailValidation = validateEmail(email);
-
   return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-      <Field label="Email Address"
-             validationState={emailValidation.validationState}
-             validationMessage={emailValidation.validationMessage}>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      </Field>
+      <EmailField email={email} setEmail={setEmail} />
 
-      <Field label="Password">
+      <Field label="Password" 
+             hint={<Link to="/account/reset-password">Forgot password?</Link>}>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </Field>
     </div>
@@ -117,11 +122,7 @@ function EmailPasswordSignUp({ email, setEmail }) {
 
   return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-      <Field label="Email Address"
-             validationState={emailValidation.validationState}
-             validationMessage={emailValidation.validationMessage}>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      </Field>
+      <EmailField email={email} setEmail={setEmail} />
 
       <Field label="Password"
              validationState={passwordValidation.validationState}
@@ -237,4 +238,61 @@ export function AccountMenu() {
       }
     </MenuPopover>
   </Menu>
+}
+
+export function AccountResetPassword() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useLocalStorage(KEY_EMAIL);
+  const [status, setStatus] = React.useState("");
+  const [inProgress, setInProgress] = React.useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setInProgress(true);
+      await sendResetPassword(email, setStatus);
+      setTimeout(() => navigate("/account/reset-complete"), 300);
+    } catch (error) {
+      setStatus(error.toString());
+    } finally {
+      setInProgress(false);
+    }
+  };
+
+  return (
+    <Layout>
+      <NavBar title="Account" subtitle="Reset password" back="../.." />
+      <Content>
+        <h1>Reset password</h1>
+
+        <form onSubmit={submit} style={{ flex: 1, display: "flex", gap: 8, flexDirection: "column" }}>
+          <div style={{ flex: 1, display: "flex", gap: 8, flexDirection: "column" }}>
+            <EmailField email={email} setEmail={setEmail} />
+            <Link to="/account/signin">Go back to Sign In</Link>
+          </div>
+          <Text>{status}</Text>
+          <Button type="submit" disabled={inProgress}>Reset password</Button>
+        </form>
+
+        <div>A password reset link will be sent to your email.</div>
+      </Content>
+    </Layout>
+  );
+}
+
+export function AccountResetPasswordDone() {
+  return (
+    <Layout>
+      <NavBar title="Account" subtitle="Reset password" back="../.." />
+      <Content>
+        <h1>Reset password</h1>
+
+        <div>A password reset link was sent to your email</div>
+        <div>Please check your mail box and follow the link to continue.</div>
+        
+        <Link to="/account/signin">Go back to Sign In</Link>
+      </Content>
+    </Layout>
+  );
 }
