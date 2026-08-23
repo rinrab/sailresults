@@ -148,22 +148,3 @@ export async function signOut() {
     blockSync = false;
   }
 }
-
-export async function sendLink(
-  email: string,
-  progress: (message: string) => void
-) {
-  blockSync = true;
-  try {
-    progress("Sending a link...");
-    const actionCode = {
-      url: `${window.location.origin}/#/account/link/`,
-      handleCodeInApp: true,
-    } satisfies ActionCodeSettings;
-
-    await sendSignInLinkToEmail(auth, email, actionCode);
-    progress("Please click the link sent to your email address to proceed.");
-  } finally {
-    blockSync = false;
-  }
-}

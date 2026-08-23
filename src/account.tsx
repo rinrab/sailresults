@@ -4,7 +4,7 @@ import React from "react";
 import { Button, Divider, Field, Input, Menu, MenuDivider, MenuGroupHeader, MenuItem, MenuPopover, MenuTrigger, Switch, Text } from "@fluentui/react-components";
 import { PersonFilled } from "@fluentui/react-icons";
 import { User } from "firebase/auth";
-import { signIn, signUp, signOut, sendLink } from "./storage-firebase";
+import { signIn, signUp, signOut } from "./storage-firebase";
 import { FirebaseAuthContext } from "./storage-firebase-auth-context";
 
 function useLocalStorage(key: string, defaultValue: any = null): any {
@@ -18,35 +18,6 @@ function useLocalStorage(key: string, defaultValue: any = null): any {
 }
 
 const KEY_EMAIL = "email";
-const KEY_PASSWORDLESS = "passwordless";
-
-function PasswordlessLogin({ email, setEmail }) {
-  const [status, setStatus] = React.useState("");
-  const [inProgress, setInProgress] = React.useState(false);
-
-  const submit = async (e) => {
-    e.preventDefault();
-    try {
-      setInProgress(true);
-      await sendLink(email, setStatus);
-    } catch (error) {
-      setStatus(error.toString());
-    } finally {
-      setInProgress(false);
-    }
-  }
-
-  return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-      <Field label="Email Address">
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      </Field>
-    </div>
-
-    <Text>{status}</Text>
-    <Button type="submit" disabled={inProgress}>Send a link</Button>
-  </form>
-}
 
 export function EmailPasswordSignIn({ email, setEmail }) {
   const navigate = useNavigate();
@@ -122,7 +93,6 @@ function EmailPasswordSignUp({ email, setEmail }) {
 
 
 export function AccountSignIn() {
-  const [passwordless, setPasswordless] = useLocalStorage(KEY_PASSWORDLESS, true);
   const [email, setEmail] = useLocalStorage(KEY_EMAIL);
 
   return (
@@ -131,18 +101,9 @@ export function AccountSignIn() {
       <Content>
         <h1>Sign In</h1>
 
-        <Field hint="Choose whether you want to login by email & password or use an email link.">
-          <Switch label="Passwordless login"
-                  checked={passwordless}
-                  onChange={(e) => setPasswordless(e.target.checked)} />
-        </Field>
-
         <Divider style={{ maxHeight: 0 }} />
 
-        {passwordless 
-          ? <PasswordlessLogin email={email} setEmail={setEmail} />
-          : <EmailPasswordSignIn email={email} setEmail={setEmail} />
-        }
+        <EmailPasswordSignIn email={email} setEmail={setEmail} />
 
         <div>Don't have an account? Try <Link to="/account/signup">Sign Up</Link> instead.</div>
       </Content>
@@ -151,7 +112,6 @@ export function AccountSignIn() {
 }
 
 export function AccountSignUp() {
-  const [passwordless, setPasswordless] = useLocalStorage(KEY_PASSWORDLESS, true);
   const [email, setEmail] = useLocalStorage(KEY_EMAIL);
 
   return (
@@ -160,18 +120,9 @@ export function AccountSignUp() {
       <Content>
         <h1>Sign Up</h1>
 
-        <Field hint="Choose whether you want to sign up by email & password or use an email link.">
-          <Switch label="Passwordless login"
-                  checked={passwordless}
-                  onChange={(e) => setPasswordless(e.target.checked)} />
-        </Field>
-
         <Divider style={{ maxHeight: 0 }} />
 
-        {passwordless 
-          ? <PasswordlessLogin email={email} setEmail={setEmail} />
-          : <EmailPasswordSignUp email={email} setEmail={setEmail} />
-        }
+        <EmailPasswordSignUp email={email} setEmail={setEmail} />
 
         <div>Already have an account? Try <Link to="/account/signin">Sign In</Link> instead.</div>
       </Content>
