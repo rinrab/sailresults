@@ -19,6 +19,39 @@ function useLocalStorage(key: string, defaultValue: any = null): any {
 
 const KEY_EMAIL = "email";
 
+interface FiledValidation {
+  validationState: "success" | "error" | "none" | "warning";
+  validationMessage: string;
+};
+
+function validateEmail(email: string): FiledValidation {
+  if (email.match(/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/)) {
+    return {
+      validationState: "success",
+      validationMessage: "Email address is valid!"
+    };
+  } else {
+    return {
+      validationState: "error",
+      validationMessage: "Please enter a correct email address."
+    };
+  }
+}
+
+function validatePassword(password: string): FiledValidation {
+  if (password.length < 8) {
+    return {
+      validationState: "error",
+      validationMessage: "Password must contain at least 8 characters!"
+    };
+  } else {
+    return {
+      validationState: "success",
+      validationMessage: "Password is strong enough!"
+    };
+  }
+}
+
 export function EmailPasswordSignIn({ email, setEmail }) {
   const navigate = useNavigate();
   const [password, setPassword] = React.useState("");
@@ -39,9 +72,13 @@ export function EmailPasswordSignIn({ email, setEmail }) {
     }
   };
 
+  const emailValidation = validateEmail(email);
+
   return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-      <Field label="Email Address">
+      <Field label="Email Address"
+             validationState={emailValidation.validationState}
+             validationMessage={emailValidation.validationMessage}>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </Field>
 
@@ -75,13 +112,20 @@ function EmailPasswordSignUp({ email, setEmail }) {
     }
   };
 
+  const emailValidation = validateEmail(email);
+  const passwordValidation = validatePassword(password);
+
   return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-      <Field label="Email Address">
+      <Field label="Email Address"
+             validationState={emailValidation.validationState}
+             validationMessage={emailValidation.validationMessage}>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </Field>
 
-      <Field label="Password">
+      <Field label="Password"
+             validationState={passwordValidation.validationState}
+             validationMessage={passwordValidation.validationMessage}>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </Field>
     </div>
