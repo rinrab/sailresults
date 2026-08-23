@@ -2,13 +2,14 @@ import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHe
 import { Add32Regular, ArrowUpload32Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Content, Layout, SeriesStatus } from "./common";
+import { Content, Layout, NavBar, NavBarBase, SeriesStatus } from "./common";
 import ResultsOverview from "./results-overview";
 import { makeSeriesPack, PackedSeries, Series } from "./storage";
 import { StorageContext } from "./storage-context";
 import { Description, FeaturesList, Resources } from "./docs";
 import { doExport } from "./export-import";
 import { AccountMenu } from "./account";
+import { FirebaseAuthContext } from "./storage-firebase-auth-context";
 
 function diffDates(target: Date, now: Date) {
   const diff = now.getTime() - target.getTime();
@@ -110,6 +111,7 @@ function Grid({ children }) {
 export default function StartState() {
   const navigate = useNavigate();
   const storage = React.useContext(StorageContext);
+  const { isReady, user } = React.useContext(FirebaseAuthContext);
   const series = storage.listSeries();
 
   const createSample = (sample: PackedSeries) => {
@@ -123,14 +125,24 @@ export default function StartState() {
 
   return (
     <Layout>
+      <NavBarBase>
+        <div style={{ flex: 1, display: "flex", gap: 8 }}>
+          <Button onClick={() => navigate("/series/new")} appearance="primary">New Series</Button>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button onClick={() => navigate("/docs")}>Docs</Button>
+          {isReady 
+            ? (user 
+              ? <AccountMenu />
+              : <Button onClick={() => navigate("/account/signin")}>Login</Button>)
+            : <>Loading...</> 
+          }
+        </div>
+      </NavBarBase>
       <Content>
         <div style={{ overflow: "auto" }}>
-          <div style={{ display: "flex", padding: 12, backgroundColor: tokens.colorNeutralBackground4 }}>
-            <div style={{ flex: 1 }} />
+          <div style={{ display: "flex", padding: 12, justifyContent: "center" }}>
             <img src="/assets/wide-staging.svg" style={{ height: 64 }} />
-            <div style={{ flex: 1, display: "flex", justifyContent: "end", alignItems: "center" }}>
-              <AccountMenu />
-            </div>
           </div>
           <Description />
           <h2>Features</h2>

@@ -22,6 +22,18 @@ export function Layout({ children, print = undefined }) {
   </div>;
 }
 
+export function NavBarBase({ children }) {
+  return <div style={{
+    padding: 8,
+    backgroundColor: tokens.colorNeutralBackground4,
+    display: "flex",
+    alignItems: "center",
+    height: 46,
+  }} className="screen-only">
+    {children}
+  </div>
+}
+
 export function NavBar({ title, subtitle = undefined, back = ".." }) {
   const navigate = useNavigate();
   const storage = React.useContext(StorageContext);
@@ -33,11 +45,7 @@ export function NavBar({ title, subtitle = undefined, back = ".." }) {
     window.document.title = `${title} - SailResults`;
   });
 
-  return <div style={{
-    padding: 4,
-    backgroundColor: tokens.colorNeutralBackground4,
-    display: "flex",
-  }} className="screen-only">
+  return <NavBarBase>
     {back && 
       <Button icon={<ChevronLeftRegular /> }
               size="large"
@@ -56,7 +64,7 @@ export function NavBar({ title, subtitle = undefined, back = ".." }) {
       {series && <SeriesStatus series={series} />}
       <AccountMenu />
     </div>
-  </div>;
+  </NavBarBase>;
 }
 
 export function SeriesNavigation() {
