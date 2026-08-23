@@ -43,8 +43,8 @@ function PasswordlessLogin({ email, setEmail }) {
       </Field>
     </div>
 
-    <Button type="submit" disabled={inProgress}>Send a link</Button>
     <Text>{status}</Text>
+    <Button type="submit" disabled={inProgress}>Send a link</Button>
   </form>
 }
 
@@ -79,8 +79,8 @@ export function EmailPasswordSignIn({ email, setEmail }) {
       </Field>
     </div>
 
-    <Button type="submit" disabled={inProgress}>Sign In</Button>
     <Text>{status}</Text>
+    <Button type="submit" disabled={inProgress}>Sign In</Button>
   </form>
 }
 
@@ -115,8 +115,8 @@ function EmailPasswordSignUp({ email, setEmail }) {
       </Field>
     </div>
 
-    <Button type="submit" disabled={inProgress}>Sign Up</Button>
     <Text>{status}</Text>
+    <Button type="submit" disabled={inProgress}>Sign Up</Button>
   </form>
 }
 
