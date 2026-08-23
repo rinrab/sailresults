@@ -36,13 +36,14 @@ function PasswordlessLogin({ email, setEmail }) {
     }
   }
 
-  return <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
-    <Field label="Email Address">
-      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-    </Field>
+  return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+      <Field label="Email Address">
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </Field>
+    </div>
 
     <Button type="submit" disabled={inProgress}>Send a link</Button>
-
     <Text>{status}</Text>
   </form>
 }
@@ -67,20 +68,58 @@ export function EmailPasswordSignIn({ email, setEmail }) {
     }
   };
 
-  return <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
-    <Field label="Email Address">
-      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-    </Field>
+  return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+      <Field label="Email Address">
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </Field>
 
-    <Field label="Password">
-      <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-    </Field>
+      <Field label="Password">
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </Field>
+    </div>
 
     <Button type="submit" disabled={inProgress}>Sign In</Button>
-
     <Text>{status}</Text>
   </form>
 }
+
+function EmailPasswordSignUp({ email, setEmail }) {
+  const navigate = useNavigate();
+  const [password, setPassword] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [inProgress, setInProgress] = React.useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setInProgress(true);
+      await signUp(email, password, setStatus);
+      setTimeout(() => navigate("/"), 300);
+    } catch (error) {
+      setStatus(error.toString());
+    } finally {
+      setInProgress(false);
+    }
+  };
+
+  return <form style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+      <Field label="Email Address">
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </Field>
+
+      <Field label="Password">
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </Field>
+    </div>
+
+    <Button type="submit" disabled={inProgress}>Sign Up</Button>
+    <Text>{status}</Text>
+  </form>
+}
+
 
 export function AccountSignIn() {
   const [passwordless, setPasswordless] = useLocalStorage(KEY_PASSWORDLESS, true);
@@ -109,41 +148,6 @@ export function AccountSignIn() {
       </Content>
     </Layout>
   );
-}
-
-export function EmailPasswordSignUp({ email, setEmail }) {
-  const navigate = useNavigate();
-  const [password, setPassword] = React.useState("");
-  const [status, setStatus] = React.useState("");
-  const [inProgress, setInProgress] = React.useState(false);
-
-  const submit = async (e) => {
-    e.preventDefault();
-
-    try {
-      setInProgress(true);
-      await signUp(email, password, setStatus);
-      setTimeout(() => navigate("/"), 300);
-    } catch (error) {
-      setStatus(error.toString());
-    } finally {
-      setInProgress(false);
-    }
-  };
-
-    return <form style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={submit}>
-      <Field label="Email Address">
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      </Field>
-
-      <Field label="Password">
-        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      </Field>
-
-      <Text>{status}</Text>
-
-      <Button type="submit" disabled={inProgress}>Sign Up</Button>
-    </form>
 }
 
 export function AccountSignUp() {
