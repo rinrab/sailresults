@@ -1,5 +1,5 @@
 import { Button, Divider, Card, MenuTrigger, Menu, MenuPopover, MenuItem, CardHeader, Text, tokens } from "@fluentui/react-components";
-import { Add32Regular, ArrowUpload32Regular, ChevronRight24Regular, MoreHorizontalRegular } from "@fluentui/react-icons";
+import { Add32Regular, AddRegular, ArrowUpload32Regular, BookOpenRegular, ChevronRight24Regular, MoreHorizontalRegular, PersonRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Content, Layout, NavBar, NavBarBase, SeriesStatus } from "./common";
@@ -127,14 +127,18 @@ export default function StartState() {
     <Layout>
       <NavBarBase>
         <div style={{ flex: 1, display: "flex", gap: 8 }}>
-          <Button onClick={() => navigate("/series/new")} appearance="primary">New Series</Button>
+          <Button onClick={() => navigate("/series/new")} 
+                  appearance="primary"
+                  icon={ <AddRegular /> }>New Series</Button>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <Button onClick={() => navigate("/docs")}>Docs</Button>
+          <Button onClick={() => navigate("/docs")}
+                  icon={ <BookOpenRegular /> }>Docs</Button>
           {isReady 
             ? (user 
               ? <AccountMenu />
-              : <Button onClick={() => navigate("/account/signin")}>Login</Button>)
+              : <Button onClick={() => navigate("/account/signin")}
+                        icon={ <PersonRegular /> }>Login</Button>)
             : <>Loading...</> 
           }
         </div>
