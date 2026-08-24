@@ -16,16 +16,21 @@ function buildSeriesQuery() {
     seriesStore, 
     and(
       where("owner", "==", auth.currentUser.uid),
-      where("deleted", "!=", true)
+      where("deleted", "==", false)
     )
   );
 }
 
 function pull(snapshot: QuerySnapshot<DocumentData, DocumentData>) {
   console.log("pull")
-  // TODO: verify data
-  snapshot.forEach((doc) => {
-    storage.pullSeries(doc.id, doc.data());
+
+  snapshot.docChanges().map((change) => {
+    if (change.type == "removed") {
+      // TODO: verify data
+      storage.pullSeriesUpdate(change.doc.id, change.doc.data());
+    } else {
+      storage.pullSeriesDelete(change.doc.id);
+    }
   });
 }
 
@@ -72,6 +77,7 @@ export function getRemoteSeries(series: Series) {
     draftFinishboard: series.draftFinishboard,
     lastEditedTime: series.lastEditedTime,
     owner: auth.currentUser?.uid,
+    deleted: series.scheduleForDelete,
   };
 
   return resource;
@@ -88,6 +94,7 @@ auth.onAuthStateChanged(async () => {
 
   if (auth.currentUser) {
     snapshotListenerUnsubscribe = onSnapshot(buildSeriesQuery(), (snapshot) => {
+      console.log("snapshot");
       if (! snapshot.metadata.hasPendingWrites && ! blockSync) {
         console.log("snapshot");
         pull(snapshot);

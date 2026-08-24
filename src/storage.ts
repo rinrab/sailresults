@@ -42,7 +42,9 @@ export interface IStorage {
   openSeries: (id: number) => ISeriesEditor;
   deleteSeries: (id: number) => void;
   importSeries: (pack: PackedSeries) => number;
-  pullSeries: (firebaseId: string, data: any) => void;
+
+  pullSeriesUpdate: (firebaseId: string, data: any) => void;
+  pullSeriesDelete: (firebaseId: string) => void;
 
   drivePush: (editor: IPushEditor) => Promise<void>;
   disconnect: () => void;
@@ -354,7 +356,7 @@ export function getStorageEditor(
       return newSeries.id;
     },
 
-    pullSeries: (firebaseId, data: any) => updateSeries((old) => {
+    pullSeriesUpdate: (firebaseId, data: any) => updateSeries((old) => {
       const series = Object.values(old).find(series => series.firebaseId == firebaseId);
 
       if (series?.needsSync) {
@@ -380,6 +382,16 @@ export function getStorageEditor(
         ...old,
         [newValue.id]: newValue,
       };
+    }),
+
+    pullSeriesDelete: (firebaseId) => updateSeries((old) => {
+      const result = {};
+      for (const series of Object.values(old)) {
+        if (series.firebaseId != firebaseId) {
+          result[series.id] = series;
+        }
+      }
+      return result;
     }),
 
     drivePush: async (pushEditor) => {
