@@ -1,4 +1,4 @@
-import { getRemoteSeries, schedulePush } from "./storage-firebase";
+import { auth, getRemoteSeries, schedulePush } from "./storage-firebase";
 import { DEFAULT_DISQUALIFICATION, setFinishboardPosition } from "./scoring";
 import { nextGlobalId } from "./storage-json";
 
@@ -12,6 +12,7 @@ export interface Series {
   firebaseId?: string;
   needsSync: boolean;
   remoteModified: boolean;
+  scheduleForDelete?: boolean;
 }
 
 export interface Racer {
@@ -28,6 +29,7 @@ export type Finishboard = {
 export interface IPushEditor {
   add: (series: Series) => string;
   update: (series: Series) => string;
+  delete: (series: Series) => void;
   commit: () => Promise<void>;
 }
 
@@ -272,6 +274,12 @@ export function getStorageEditor(
     })
   };
 
+  const wcDeleteSeries = (id: number) => updateSeries((old) => {
+    const copy = { ...old };
+    delete copy[id];
+    return copy;
+  });
+
   return {
     listSeries: () => getSeries(),
 
@@ -303,11 +311,17 @@ export function getStorageEditor(
       }
     },
 
-    deleteSeries: (id) => updateSeries((old) => {
-      const copy = { ...old };
-      delete copy[id];
-      return copy;
-    }),
+    deleteSeries: (id) => {
+      if (auth.currentUser) {
+        updateOneSeries(id, (old) => ({
+          ...old,
+          scheduleForDelete: true,
+        }))
+        schedulePush();
+      } else {
+        wcDeleteSeries(id);
+      }
+    },
 
     importSeries: (pack: PackedSeries) => {
       const startId = nextGlobalId();
@@ -372,23 +386,28 @@ export function getStorageEditor(
       const postCommit = [];
 
       Object.values(getSeries())
-        .filter(series => series.needsSync || ! series.firebaseId)
+        .filter(series => series.needsSync || ! series.firebaseId || series.scheduleForDelete)
         .map((series) => {
-          let firebaseId: string;
-          if (series.firebaseId) {
-            firebaseId = pushEditor.update(series);
+          if (series.scheduleForDelete) {
+            pushEditor.delete(series);
+            postCommit.push(() => wcDeleteSeries(series.id));
           } else {
-            firebaseId = pushEditor.add(series);
-          }
-
-          postCommit.push(() => updateSeries(old => ({
-            ...old,
-            [series.id]: {
-              ...old[series.id],
-              needsSync: false,
-              firebaseId: firebaseId,
+            let firebaseId: string;
+            if (series.firebaseId) {
+              firebaseId = pushEditor.update(series);
+            } else {
+              firebaseId = pushEditor.add(series);
             }
-          })));
+
+            postCommit.push(() => updateSeries(old => ({
+              ...old,
+              [series.id]: {
+                ...old[series.id],
+                needsSync: false,
+                firebaseId: firebaseId,
+              }
+            })));
+          }
         });
 
       await pushEditor.commit();
@@ -402,6 +421,12 @@ export function getStorageEditor(
       const result = {};
 
       for (const series of Object.values(old)) {
+        /* if it was asked to delete this item, just get rid of it to avoid
+         * stale states */
+        if (series.scheduleForDelete) {
+          continue;
+        }
+
         /* if no user is authenticated, remove all local copies that had been
          * synced before (have firebaseId) but have no local modifications
          *

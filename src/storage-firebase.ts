@@ -1,6 +1,6 @@
 import { IPushEditor, Series } from "./storage";
 import { initializeApp } from "firebase/app";
-import { doc, collection, getFirestore, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch, WriteBatch } from "firebase/firestore";
+import { doc, collection, getFirestore, getDocs, where, query, onSnapshot, Unsubscribe, QuerySnapshot, DocumentData, writeBatch, WriteBatch, and } from "firebase/firestore";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithEmailLink, sendSignInLinkToEmail, ActionCodeSettings, sendPasswordResetEmail, confirmPasswordReset } from "firebase/auth";
 import { storage } from "./storage-context";
 import { firebaseConfig } from "./storage-firebase-config";
@@ -12,7 +12,13 @@ const db = getFirestore(app);
 const seriesStore = collection(db, "series");
 
 function buildSeriesQuery() {
-  return query(seriesStore, where("owner", "==", auth.currentUser.uid));
+  return query(
+    seriesStore, 
+    and(
+      where("owner", "==", auth.currentUser.uid),
+      where("deleted", "!=", true)
+    )
+  );
 }
 
 function pull(snapshot: QuerySnapshot<DocumentData, DocumentData>) {
@@ -35,6 +41,12 @@ function getBatchEditor(batch: WriteBatch): IPushEditor {
       const resource = getRemoteSeries(series);
       batch.set(doc(seriesStore, series.firebaseId), resource);
       return series.firebaseId;
+    },
+    delete: (series) => {
+      batch.update(
+        doc(seriesStore, series.firebaseId),
+        { deleted: true }
+      );
     },
     commit: async () => await batch.commit(),
   };

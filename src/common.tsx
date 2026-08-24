@@ -125,7 +125,9 @@ export function SeriesStatus(props: { series: Series }) {
   if (!isReady) {
     return <Spinner size="extra-tiny" label="Loading Status..." />
   } else if (user) {
-    if (props.series.needsSync) {
+    if (props.series.scheduleForDelete) {
+      return <Spinner size="extra-tiny" label="Deleting..." />
+    } else if (props.series.needsSync) {
       return <Spinner size="extra-tiny" label="Syncing..." />
     } else if (props.series.remoteModified) {
       return <div style={{ display: "flex", alignItems: "center", gap: 4 }}>

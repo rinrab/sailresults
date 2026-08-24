@@ -122,6 +122,7 @@ export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollecti
       lastEditedTime: ensureString(value.lastEditedTime ?? getCurrentTime()),
       firebaseId: value.firebaseId,
       needsSync: !! value.needsSync,
+      scheduleForDelete: value.scheduleForDelete,
       remoteModified: false,
     } satisfies Series;
   }
@@ -140,6 +141,7 @@ export function saveSeries(series: SeriesCollection) {
       lastEditedTime: value.lastEditedTime,
       firebaseId: value.firebaseId,
       needsSync: value.needsSync,
+      scheduleForDelete: value.scheduleForDelete,
     };
   }
   saveKey(SERIES_KEY, result);
