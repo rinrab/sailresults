@@ -24,8 +24,8 @@ interface FiledValidation {
   validationMessage: string;
 };
 
-function validateEmail(email: string): FiledValidation {
-  if (email.match(/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/)) {
+function validateEmail(email: string | null): FiledValidation {
+  if (email?.match(/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/)) {
     return {
       validationState: "success",
       validationMessage: "Email address is valid!"
@@ -38,8 +38,8 @@ function validateEmail(email: string): FiledValidation {
   }
 }
 
-function validatePassword(password: string): FiledValidation {
-  if (password.length < 8) {
+function validatePassword(password: string | null): FiledValidation {
+  if (password?.length < 8) {
     return {
       validationState: "error",
       validationMessage: "Password must contain at least 8 characters!"
