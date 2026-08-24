@@ -14,22 +14,19 @@ const seriesStore = collection(db, "series");
 function buildSeriesQuery() {
   return query(
     seriesStore, 
-    and(
-      where("owner", "==", auth.currentUser.uid),
-      where("deleted", "==", false)
-    )
+    where("owner", "==", auth.currentUser.uid),
   );
 }
 
 function pull(snapshot: QuerySnapshot<DocumentData, DocumentData>) {
   console.log("pull")
 
-  snapshot.docChanges().map((change) => {
-    if (change.type == "removed") {
-      // TODO: verify data
-      storage.pullSeriesUpdate(change.doc.id, change.doc.data());
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.deleted) {
+      storage.pullSeriesDelete(doc.id);
     } else {
-      storage.pullSeriesDelete(change.doc.id);
+      storage.pullSeriesUpdate(doc.id, data);
     }
   });
 }
@@ -77,7 +74,7 @@ export function getRemoteSeries(series: Series) {
     draftFinishboard: series.draftFinishboard,
     lastEditedTime: series.lastEditedTime,
     owner: auth.currentUser?.uid,
-    deleted: series.scheduleForDelete,
+    deleted: series.scheduleForDelete ?? false,
   };
 
   return resource;
@@ -96,7 +93,6 @@ auth.onAuthStateChanged(async () => {
     snapshotListenerUnsubscribe = onSnapshot(buildSeriesQuery(), (snapshot) => {
       console.log("snapshot");
       if (! snapshot.metadata.hasPendingWrites && ! blockSync) {
-        console.log("snapshot");
         pull(snapshot);
         schedulePush();
       }
