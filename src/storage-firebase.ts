@@ -74,7 +74,7 @@ export function getRemoteSeries(series: Series) {
     draftFinishboard: series.draftFinishboard,
     lastEditedTime: series.lastEditedTime,
     owner: auth.currentUser?.uid,
-    deleted: series.scheduleForDelete ?? false,
+    deleted: false,
   };
 
   return resource;
