@@ -27,6 +27,9 @@ export function SailTable<ValueT>(props: SailTableProps<ValueT>) {
     overscan: 10,
   });
 
+  const onSelect = props.onSelect ?? (() => undefined);
+  const getKey = props.getKey ?? ((item, index) => index);
+
   const getCellStyles = (col: Column<ValueT>) => {
     const style: React.CSSProperties = {
       display: "flex",
@@ -92,7 +95,7 @@ export function SailTable<ValueT>(props: SailTableProps<ValueT>) {
           {virtualizer.getVirtualItems().map((item) => {
             const value = props.data[item.index];
             return (
-              <TableRow key={props.getKey ? props.getKey(value, item.index) : item.index}
+              <TableRow key={getKey(value, item.index)}
                         style={{
                           display: "flex",
                           height: item.size,
@@ -102,7 +105,7 @@ export function SailTable<ValueT>(props: SailTableProps<ValueT>) {
                           minWidth: "100%",
                           ...(item.index == props.selectedIndex) ? selectedRowStyle : {},
                         }}
-                        onClick={() => props?.onSelect(value, item.index)}>
+                        onClick={() => onSelect(value, item.index)}>
                 {props.columns.map((col, index) => (
                   <TableCell
                     key={index}
