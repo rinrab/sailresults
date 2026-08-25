@@ -77,10 +77,9 @@ export default function RacesOverviewState() {
     <Layout>
       <NavBar title={series.current.name} subtitle="Races" />
       <Content>
-        <SailTable keys={series.current.finishboards}
+        <SailTable data={series.current.finishboards}
                    columns={columns}
-                   map={(key) => key}
-                   onSelect={(key, value, index) => navigate(`${index}/edit`)} />
+                   onSelect={(value, index) => navigate(`${index}/edit`)} />
         <div style={{ display: "flex", gap: 8 }}>
           <div style={{ flex: 1 }} />
           <EditDraftButton />

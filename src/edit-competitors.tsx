@@ -54,10 +54,10 @@ function RacersList(props: { series: ISeriesEditor }) {
   if (props.series.current.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return <SailTable<Racer, Racer> 
+    return <SailTable<Racer> 
       columns={columns}
-      keys={props.series.current.racers}
-      map={racer => racer}
+      data={props.series.current.racers}
+      getKey={(racer) => racer.id}
       onSelect={(racer) => navigate(racer.id.toString())} />
   }
 }

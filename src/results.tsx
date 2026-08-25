@@ -131,8 +131,7 @@ export default function ResultsState() {
               subtitle="Results" />
       <Content screenOnly>
         <SailTable columns={columns} 
-                   keys={scoreboard}
-                   map={key => key} />
+                   data={scoreboard} />
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => window.print()}>Print</Button>
         </div>
