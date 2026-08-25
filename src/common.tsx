@@ -77,10 +77,10 @@ export function SeriesNavigation() {
                     justifyContent: "center"
                   }}
                   className="screen-only"
-                  onTabSelect={(_, data) => navigate(`/series/${seriesId}/${data.value ?? ""}`)}
-                  selectedValue={page}>
+                  onTabSelect={(_, data) => navigate(`/series/${seriesId}/${data.value}`)}
+                  selectedValue={page ?? ""}>
     <div style={{ display: "flex", flex: 1, justifyContent: "space-around", maxWidth: 400 }}>
-      <Tab value={undefined}>
+      <Tab value="">
         <Home20Regular />
         <Text block size={100}>Overview</Text>
       </Tab>
