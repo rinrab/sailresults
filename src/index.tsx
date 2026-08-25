@@ -77,7 +77,10 @@ root.render(
 );
 
 async function registerServiceWorker() {
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator &&
+      window.location.protocol == "https:" &&
+      window.location.hostname != "firefox.localhost")
+  {
     try {
       const registration = await navigator.serviceWorker.register("/service-worker.js", {
         scope: "/",
