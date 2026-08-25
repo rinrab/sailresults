@@ -176,15 +176,16 @@ export function AccountSignUp() {
 }
 
 function UserDetails(props: { user: User }) {
+  const navigate = useNavigate();
+
   return <>
     <Field label="Username">
       <Input disabled value={props.user.email} />
     </Field>
 
     <div style={{ display: "flex", gap: 8 }}>
-      <Button onClick={() => alert("not implemented")}>Change Password</Button>
+      <Button onClick={() => navigate("/account/reset-password")}>Change Password</Button>
       <Button onClick={() => signOut()}>Sign Out</Button>
-      <Button onClick={() => props.user.delete()}>Delete User</Button>
     </div>
   </>;
 }
