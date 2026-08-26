@@ -10,6 +10,7 @@ import { Description, FeaturesList, Resources } from "./docs";
 import { doExport } from "./export-import";
 import { AccountMenu } from "./account";
 import { FirebaseAuthContext } from "./storage-firebase-auth-context";
+import { _ } from "./nls";
 
 function diffDates(target: Date, now: Date) {
   const diff = now.getTime() - target.getTime();
@@ -21,11 +22,11 @@ function diffDates(target: Date, now: Date) {
   if (hours >= 24) {
     return target.toLocaleDateString();
   } else if (hours >= 1) {
-    return `${hours} hours ago`;
+    return _("{{hours}} hours ago", { hours });
   } else if (minutes >= 1) {
-    return `${minutes} minutes ago`;
+    return _("{{minutes}} minutes ago", { minutes });
   } else {
-    return "just now";
+    return _("just now");
   }
 }
 
@@ -57,11 +58,11 @@ function SeriesCard(props: { series: Series }) {
               <MenuItem onClick={(e) => {
                 e.stopPropagation();
                 doExport(makeSeriesPack(props.series));
-              }}>Export</MenuItem>
+              }}>{_("Export")}</MenuItem>
               <MenuItem onClick={(e) => {
                 e.stopPropagation();
                 storage.deleteSeries(props.series.id);
-              }}>Delete</MenuItem>
+              }}>{_("Deleted")}</MenuItem>
             </MenuPopover>
           </Menu>
         }
@@ -79,7 +80,7 @@ function SeriesCard(props: { series: Series }) {
       <div style={{ display: "flex", alignItems: "center" }}>
         <SeriesStatus series={props.series} />
         <div style={{ flex: 1 }} />
-        <Text size={200}>Last edited {diffDates(lastEdited, now)}</Text>
+        <Text size={200}>{_("Last edited {{when}}", { when: diffDates(lastEdited, now) })}</Text>
       </div>
     </HomeScreenCard>
   );
@@ -129,17 +130,17 @@ export default function StartState() {
         <div style={{ flex: 1, display: "flex", gap: 8 }}>
           <Button onClick={() => navigate("/series/new")} 
                   appearance="primary"
-                  icon={ <AddRegular /> }>New Series</Button>
+                  icon={ <AddRegular /> }>{_("New Series")}</Button>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <Button onClick={() => navigate("/docs")}
-                  icon={ <BookOpenRegular /> }>Docs</Button>
+                  icon={ <BookOpenRegular /> }>{_("Docs")}</Button>
           {isReady 
             ? (user 
               ? <AccountMenu />
               : <Button onClick={() => navigate("/account/signin")}
-                        icon={ <PersonRegular /> }>Login</Button>)
-            : <>Loading...</> 
+                        icon={ <PersonRegular /> }>{_("Login")}</Button>)
+            : <>{_("Loading...")}</> 
           }
         </div>
       </NavBarBase>
