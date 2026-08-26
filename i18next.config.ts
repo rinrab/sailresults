@@ -5,7 +5,8 @@ export default defineConfig({
     "ru"
   ],
   extract: {
-    input: "src/**/*.{js,jsx,ts,tsx}",
-    output: "src/locales/{{language}}.json"
+    input: "src/**/*.{ts,tsx}",
+    output: "src/locales/{{language}}/{{namespace}}.json",
+    functions: ["_"],
   }
 })
