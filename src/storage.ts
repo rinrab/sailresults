@@ -1,4 +1,39 @@
-import { DEFAULT_DISQUALIFICATION, Finishboard, FinishboardEntry, Racer, Series, setFinishboardPosition } from "./scoring";
+import { auth, getRemoteSeries, schedulePush } from "./storage-firebase";
+import { DEFAULT_DISQUALIFICATION, setFinishboardPosition } from "./scoring";
+import { nextGlobalId } from "./storage-json";
+
+export interface Series {
+  id: number;
+  name: string;
+  racers: Racer[];
+  finishboards: Finishboard[];
+  draftFinishboard: Finishboard | null;
+  lastEditedTime: string;
+  firebaseId?: string;
+  needsSync: boolean;
+  remoteModified: boolean;
+  scheduleForDelete?: boolean;
+}
+
+export interface Racer {
+  id: number;
+  name: string;
+  number: string;
+}
+
+export type FinishboardEntry = number | "DNC" | "DNS" | "DNF" | "NSC" | "UFD" | "BFD" | "RET" | "DSQ";
+export type Finishboard = { 
+  [racerId: number]: FinishboardEntry
+}
+
+export interface IPushEditor {
+  add: (series: Series) => string;
+  update: (series: Series) => string;
+  delete: (series: Series) => void;
+  commit: () => Promise<void>;
+}
+
+export type SeriesCollection = { [id: number]: Series };
 
 export interface IStorage {
   listSeries: () => SeriesCollection,
@@ -7,6 +42,12 @@ export interface IStorage {
   openSeries: (id: number) => ISeriesEditor;
   deleteSeries: (id: number) => void;
   importSeries: (pack: PackedSeries) => number;
+
+  pullSeriesUpdate: (firebaseId: string, data: any) => void;
+  pullSeriesDelete: (firebaseId: string) => void;
+
+  drivePush: (editor: IPushEditor) => Promise<void>;
+  disconnect: () => void;
 
   nextGlobalId: () => number;
 }
@@ -25,6 +66,9 @@ export interface ISeriesEditor {
 
   openDraft: () => IBoardEditor,
   promoteDraft: () => void,
+
+  setFirebaseId: (id: string) => void;
+  setNeedsSync: (value: boolean) => void;
 }
 
 export interface IBoardEditor {
@@ -48,148 +92,6 @@ export interface PackedSeries {
 };
 
 type Mutator<T> = (mutate: (old: T) => T) => void;
-
-function openKey(key: string) {
-  const value = localStorage.getItem(key);
-  if (value) {
-    try {
-      return JSON.parse(value);
-    } catch {
-      return undefined;
-    }
-  } else {
-    return undefined;
-  }
-}
-
-function saveKey(key: string, value: any) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-const RACERS_KEY = "racers";
-const SERIES_KEY = "series";
-const GLOBAL_ID_KEY = "globalRacerId";
-
-type LegacyRacersCollection = { [id: number]: Racer };
-type SeriesCollection = { [id: number]: Series };
-
-function ensureNumber(value: any): number {
-  if (typeof(value) == "number") {
-    return value;
-  } else {
-    throw new Error("value must be a number");
-  }
-}
-
-function ensureString(value: any): string {
-  if (typeof(value) == "string") {
-    return value;
-  } else {
-    throw new Error("value must be a string");
-  }
-}
-
-function ensureObject(value: any): Object {
-  if (typeof(value) == "object") {
-    return value;
-  } else {
-    throw new Error("value must be an object");
-  }
-}
-
-function ensureArray(value: any): any[] {
-  if (Array.isArray(value)) {
-    return value;
-  } else {
-    throw new Error("value must be an array");
-  }
-}
-
-export function openLegacyRacers(): LegacyRacersCollection {
-  const stored = ensureObject(openKey(RACERS_KEY) ?? {});
-  const result: LegacyRacersCollection = {};
-
-  for (const [key, value] of Object.entries(stored)) {
-    result[key] = {
-      id: ensureNumber(parseInt(key)),
-      name: ensureString(value["name"]),
-      number: ensureString(value["number"]),
-    };
-  }
-
-  return result;
-}
-
-function openFinishboard(value: any): Finishboard {
-  const board = ensureObject(value);
-  const result: { [racer: number]: FinishboardEntry } = [];
-  for (const [racer, entry] of Object.entries(board)) {
-    if (typeof(entry) == "number" || typeof(entry) == "string") {
-      result[parseInt(racer)] = entry as FinishboardEntry;
-    } else {
-      throw new Error("bad entry found");
-    }
-  }
-  return board as Finishboard;
-}
-
-function openSeriesRacers(
-  value: any,
-  legacyRacers: LegacyRacersCollection
-): Racer[] {
-  return ensureArray(value).map((racer) => {
-    if (typeof(racer) == "number") {
-      return legacyRacers[racer];
-    } else {
-      const obj = ensureObject(racer);
-      return {
-        id: ensureNumber(obj["id"]),
-        name: ensureString(obj["name"]),
-        number: ensureString(obj["number"]),
-      };
-    }
-  });
-}
-
-export function openSeries(legacyRacers: LegacyRacersCollection): SeriesCollection {
-  const stored = ensureObject(openKey(SERIES_KEY) ?? {});
-  const result: SeriesCollection = {};
-
-  for (const [key, value] of Object.entries(stored)) {
-    const finishboards = ensureArray(value.finishboards)
-      .filter(board => !! board).map(board => openFinishboard(board));
-      
-    const draft = value.draftFinishboard
-      ? openFinishboard(value.draftFinishboard) 
-      : null;
-
-    result[key] = {
-      id: ensureNumber(parseInt(key)),
-      name: ensureString(value.name),
-      racers: openSeriesRacers(value.racers, legacyRacers),
-      finishboards: finishboards,
-      draftFinishboard: draft,
-      lastEditedTime: ensureString(value.lastEditedTime ?? getCurrentTime()),
-    } satisfies Series;
-  }
-
-  return result;
-}
-
-export function saveSeries(series: SeriesCollection) {
-  const result = {};
-  for (const value of Object.values(series)) {
-    result[value.id] = {
-      name: value.name,
-      racers: value.racers,
-      finishboards: value.finishboards,
-      draftFinishboard: value.draftFinishboard,
-      lastEditedTime: value.lastEditedTime,
-    };
-  }
-  saveKey(SERIES_KEY, result);
-}
-
 
 function getBoardEditor(
   series: Series,
@@ -307,6 +209,15 @@ function getSeriesEditor(
           draftFinishboard: mutate(old.draftFinishboard),
       })),
     ),
+
+    setFirebaseId: (firebaseId) => update((old) => ({
+      ...old,
+      firebaseId: firebaseId,
+    })),
+    setNeedsSync: (value) => update((old) => ({
+      ...old,
+      needsSync: value,
+    })),
   };
 }
 
@@ -324,15 +235,22 @@ function getRacerEditor(racer: Racer, update: Mutator<Racer>): IRacerEditor {
   };
 }
 
-function nextGlobalId() {
-  const id = openKey(GLOBAL_ID_KEY) ?? 67;
-  saveKey(GLOBAL_ID_KEY, id + 1);
-  return id;
-}
-
-function getCurrentTime() {
+export function getCurrentTime() {
   const date = new Date(); 
   return date.toISOString();
+}
+
+function seriesAreEqual(left: Series, right: Series) {
+  if (left == right) {
+    return true;
+  }
+
+  if (! left || ! right) {
+    return false;
+  }
+
+  return JSON.stringify(getRemoteSeries(left)) ==
+         JSON.stringify(getRemoteSeries(right))
 }
 
 export function getStorageEditor(
@@ -340,14 +258,29 @@ export function getStorageEditor(
   updateSeries: Mutator<SeriesCollection>,
 ): IStorage {
   const updateOneSeries = (id: number, mutate: (old: Series) => Series) => {
-    updateSeries((old) => ({
-      ...old,
-      [id]: {
-        ...mutate(old[id]),
-        lastEditedTime: getCurrentTime()
+    updateSeries((old) => {
+      const oldValue = old[id];
+      const newValue = mutate(oldValue);
+
+      if (! seriesAreEqual(oldValue, newValue)) {
+        schedulePush();
+        newValue.needsSync = true;
+        newValue.lastEditedTime = getCurrentTime();
+        newValue.remoteModified = false;
       }
-    }))
+
+      return {
+        ...old,
+        [id]: newValue,
+      };
+    })
   };
+
+  const wcDeleteSeries = (id: number) => updateSeries((old) => {
+    const copy = { ...old };
+    delete copy[id];
+    return copy;
+  });
 
   return {
     listSeries: () => getSeries(),
@@ -361,6 +294,8 @@ export function getStorageEditor(
           finishboards: [],
           draftFinishboard: null,
           lastEditedTime: getCurrentTime(),
+          needsSync: true,
+          remoteModified: false,
       }));
       return id;
     },
@@ -378,11 +313,17 @@ export function getStorageEditor(
       }
     },
 
-    deleteSeries: (id) => updateSeries((old) => {
-      const copy = { ...old };
-      delete copy[id];
-      return copy;
-    }),
+    deleteSeries: (id) => {
+      if (auth.currentUser) {
+        updateOneSeries(id, (old) => ({
+          ...old,
+          scheduleForDelete: true,
+        }))
+        schedulePush();
+      } else {
+        wcDeleteSeries(id);
+      }
+    },
 
     importSeries: (pack: PackedSeries) => {
       const startId = nextGlobalId();
@@ -403,6 +344,8 @@ export function getStorageEditor(
         }),
         draftFinishboard: null,
         lastEditedTime: getCurrentTime(),
+        needsSync: true,
+        remoteModified: false,
       };
 
       updateSeries(old => ({
@@ -412,6 +355,103 @@ export function getStorageEditor(
 
       return newSeries.id;
     },
+
+    pullSeriesUpdate: (firebaseId, data: any) => updateSeries((old) => {
+      const series = Object.values(old).find(series => series.firebaseId == firebaseId);
+
+      if (series?.needsSync) {
+        /* don't overwrite with local modification */
+        return old;
+      }
+
+      const newValue = {
+        ...data,
+        id: series?.id ?? nextGlobalId(),
+        firebaseId: firebaseId,
+        needsSync: false,
+        remoteModified: true,
+      } satisfies Series;
+
+      if (seriesAreEqual(series, newValue)) {
+        /* don't update if pulled series is no different from the one we have
+         * locally */
+        return old;
+      }
+
+      return {
+        ...old,
+        [newValue.id]: newValue,
+      };
+    }),
+
+    pullSeriesDelete: (firebaseId) => updateSeries((old) => {
+      const result = {};
+      for (const series of Object.values(old)) {
+        if (series.firebaseId != firebaseId) {
+          result[series.id] = series;
+        }
+      }
+      return result;
+    }),
+
+    drivePush: async (pushEditor) => {
+      const postCommit = [];
+
+      Object.values(getSeries())
+        .filter(series => series.needsSync || ! series.firebaseId || series.scheduleForDelete)
+        .map((series) => {
+          if (series.scheduleForDelete) {
+            pushEditor.delete(series);
+            postCommit.push(() => wcDeleteSeries(series.id));
+          } else {
+            let firebaseId: string;
+            if (series.firebaseId) {
+              firebaseId = pushEditor.update(series);
+            } else {
+              firebaseId = pushEditor.add(series);
+            }
+
+            postCommit.push(() => updateSeries(old => ({
+              ...old,
+              [series.id]: {
+                ...old[series.id],
+                needsSync: false,
+                firebaseId: firebaseId,
+              }
+            })));
+          }
+        });
+
+      await pushEditor.commit();
+
+      /* aborted if commit() throw an error */
+
+      postCommit.map(action => action());
+    },
+
+    disconnect: () => updateSeries((old) => {
+      const result = {};
+
+      for (const series of Object.values(old)) {
+        /* if it was asked to delete this item, just get rid of it to avoid
+         * stale states */
+        if (series.scheduleForDelete) {
+          continue;
+        }
+
+        /* if no user is authenticated, remove all local copies that had been
+         * synced before (have firebaseId) but have no local modifications
+         *
+         * keeping it only if either it wasn't synced or firebaseId is missing
+         * and it also wasn't synced 
+         * */
+        if (! series.firebaseId || series.needsSync) {
+          result[series.id] = series;
+        }
+      }
+
+      return result;
+    }),
 
     nextGlobalId: nextGlobalId,
   };

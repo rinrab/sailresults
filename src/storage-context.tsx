@@ -1,13 +1,16 @@
 import React from "react";
-import { getStorageEditor, IStorage, openLegacyRacers, openSeries, saveSeries } from "./storage";
+import { getStorageEditor, IStorage } from "./storage";
+import { openLegacyRacers, openSeries, saveSeries } from "./storage-json";
 
-export const StorageContext = React.createContext<IStorage>(null);
+export const StorageContext = React.createContext(null);
+
+export let storage: IStorage;
 
 export function StorageProvider({ children }) {
   let legacyRacers = React.useMemo(() => openLegacyRacers(), []);
   let [series, setSeries] = React.useState(() => openSeries(legacyRacers));
 
-  const editor = getStorageEditor(
+  storage = getStorageEditor(
      () => series, 
      (mutate) => setSeries((old) => {
        series = mutate(old);
@@ -17,7 +20,7 @@ export function StorageProvider({ children }) {
   );
 
   return (
-    <StorageContext.Provider value={editor}>
+    <StorageContext.Provider value={storage}>
       {children}
     </StorageContext.Provider>
   );

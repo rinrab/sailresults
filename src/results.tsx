@@ -2,10 +2,11 @@ import { Button, Link, Text } from "@fluentui/react-components";
 import React from "react";
 import { useParams } from "react-router-dom";
 import { Content, formatString, Layout, NavBar, SeriesNavigation } from "./common";
-import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard, Series } from "./scoring";
+import { EvaluatedRacer, EvaluatedScore, evaluateScoreboard } from "./scoring";
 import { StorageContext } from "./storage-context";
 import { Column, SailTable } from "./table";
 import { displayVersion } from "./docs";
+import { Series } from "./storage";
 
 function ScoreCell(props: { score: EvaluatedScore }) {
   return <div>
@@ -130,8 +131,7 @@ export default function ResultsState() {
               subtitle="Results" />
       <Content screenOnly>
         <SailTable columns={columns} 
-                   keys={scoreboard}
-                   map={key => key} />
+                   data={scoreboard} />
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => window.print()}>Print</Button>
         </div>

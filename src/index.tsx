@@ -11,6 +11,8 @@ import { ImportSeriesState, NewSeriesState, SeriesConfigurationState, SeriesOver
 import StartState from "./home";
 import RacesOverviewState from "./races";
 import { StorageProvider } from "./storage-context";
+import { AccountMe, AccountResetPassword, AccountResetPasswordDone, AccountSignIn, AccountSignUp } from "./account";
+import { FirebaseAuthProvider } from "./storage-firebase-auth-context";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
@@ -18,40 +20,49 @@ function App() {
   return (
     <ErrorBoundary>
       <StorageProvider>
-        <HashRouter>
-          <Routes>
-            <Route>
-              <Route index element={<StartState />} />
-              <Route path="series">
-                <Route path="new" element={<NewSeriesState />} />
-                <Route path="import" element={<ImportSeriesState />} />
-                <Route path=":seriesId">
-                  <Route index element={<SeriesOverviewState />} />
-                  <Route path="config" element={<SeriesConfigurationState />} />
-                  <Route path="results" element={<ResultsState />} />
-                  <Route path="competitors">
-                    <Route index element={<ListCompetitorsState />} />
-                    <Route path=":racerId" element={<EditCompetitorState />} />
-                  </Route>
-                  <Route path="races">
-                    <Route index element={<RacesOverviewState />} />
-                    <Route path="new" element={<NewRaceState />} />
-                    <Route path=":raceId">
-                      <Route path="edit" element={<EditRaceState />} />
+        <FirebaseAuthProvider>
+          <HashRouter>
+            <Routes>
+              <Route>
+                <Route index element={<StartState />} />
+                <Route path="series">
+                  <Route path="new" element={<NewSeriesState />} />
+                  <Route path="import" element={<ImportSeriesState />} />
+                  <Route path=":seriesId">
+                    <Route index element={<SeriesOverviewState />} />
+                    <Route path="config" element={<SeriesConfigurationState />} />
+                    <Route path="results" element={<ResultsState />} />
+                    <Route path="competitors">
+                      <Route index element={<ListCompetitorsState />} />
+                      <Route path=":racerId" element={<EditCompetitorState />} />
+                    </Route>
+                    <Route path="races">
+                      <Route index element={<RacesOverviewState />} />
+                      <Route path="new" element={<NewRaceState />} />
+                      <Route path=":raceId">
+                        <Route path="edit" element={<EditRaceState />} />
+                      </Route>
                     </Route>
                   </Route>
                 </Route>
+                <Route path="docs">
+                  <Route index element={<DocsIndex />} />
+                  <Route path="about" element={<DocsAbout />} />
+                  <Route path="quick-start" element={<DocsQuickStart />} />
+                  <Route path="scoring" element={<DocsScoring />} />
+                  <Route path="add-to-home-screen" element={<DocsHomeScreen />} />
+                </Route>
+                <Route path="account">
+                  <Route path="signin" element={<AccountSignIn />} />
+                  <Route path="signup" element={<AccountSignUp />} />
+                  <Route path="reset-password" element={<AccountResetPassword />} />
+                  <Route path="reset-complete" element={<AccountResetPasswordDone />} />
+                  <Route path="me" element={<AccountMe />} />
+                </Route>
               </Route>
-              <Route path="docs">
-                <Route index element={<DocsIndex />} />
-                <Route path="about" element={<DocsAbout />} />
-                <Route path="quick-start" element={<DocsQuickStart />} />
-                <Route path="scoring" element={<DocsScoring />} />
-                <Route path="add-to-home-screen" element={<DocsHomeScreen />} />
-              </Route>
-            </Route>
-          </Routes>
-        </HashRouter>
+            </Routes>
+          </HashRouter>
+        </FirebaseAuthProvider>
       </StorageProvider>
     </ErrorBoundary>
   );
@@ -66,7 +77,10 @@ root.render(
 );
 
 async function registerServiceWorker() {
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator &&
+      window.location.protocol == "https:" &&
+      window.location.hostname != "firefox.localhost")
+  {
     try {
       const registration = await navigator.serviceWorker.register("/service-worker.js", {
         scope: "/",

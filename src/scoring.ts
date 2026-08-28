@@ -1,8 +1,4 @@
-export interface Racer {
-  id: number;
-  name: string;
-  number: string;
-}
+import { Finishboard, FinishboardEntry, Racer, Series } from "./storage";
 
 export interface EvaluatedScore {
   realScore: number,
@@ -60,21 +56,7 @@ export const dsqs: Record<string, DisqualificationInfo> = {
   },
 };
 
-export type FinishboardEntry = number | "DNC" | "DNS" | "DNF" | "NSC" | "UFD" | "BFD" | "RET" | "DSQ";
-export type Finishboard = { 
-  [racerId: number]: FinishboardEntry
-}
-
 export const DEFAULT_DISQUALIFICATION: FinishboardEntry = "DNF";
-
-export interface Series {
-  id: number;
-  name: string;
-  racers: Racer[];
-  finishboards: Finishboard[];
-  draftFinishboard: Finishboard | null;
-  lastEditedTime: string;
-}
 
 export function evaluateRealScore(entry: FinishboardEntry, racersCount: number) { 
   if (typeof(entry) == "number") {

@@ -4,9 +4,8 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
-import { ISeriesEditor } from "./storage";
+import { ISeriesEditor, Racer } from "./storage";
 import { Column, SailTable } from "./table";
-import { Racer } from "./scoring";
 
 function ActionsCell({ deleteFn }) {
   return <Menu>
@@ -55,10 +54,10 @@ function RacersList(props: { series: ISeriesEditor }) {
   if (props.series.current.racers.length == 0) {
     return <Text>No racers added.</Text>;
   } else {
-    return <SailTable<Racer, Racer> 
+    return <SailTable<Racer> 
       columns={columns}
-      keys={props.series.current.racers}
-      map={racer => racer}
+      data={props.series.current.racers}
+      getKey={(racer) => racer.id}
       onSelect={(racer) => navigate(racer.id.toString())} />
   }
 }

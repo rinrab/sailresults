@@ -1,10 +1,10 @@
-import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, TableRow, TableCell, Table, TableHeaderCell, TableHeader, TableBody, OptionOnSelectData } from "@fluentui/react-components";
+import { Option, Button, Combobox, Input, Text, tokens, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, OptionOnSelectData } from "@fluentui/react-components";
 import { CheckmarkCircle16Regular, CheckmarkRegular, MoreVerticalRegular, Warning16Regular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Content, formatString, Layout, NavBar, racerMatches } from "./common";
-import { Finishboard, dsqs, FinishboardEntry, sortFinishboard, Racer, DEFAULT_DISQUALIFICATION } from "./scoring";
-import { IBoardEditor, ISeriesEditor } from "./storage";
+import { Content, Layout, NavBar, racerMatches } from "./common";
+import { dsqs, sortFinishboard, DEFAULT_DISQUALIFICATION } from "./scoring";
+import { Finishboard, FinishboardEntry, IBoardEditor, ISeriesEditor, Racer } from "./storage";
 import { StorageContext } from "./storage-context";
 import { Column, SailTable } from "./table";
 
@@ -164,34 +164,34 @@ function FinishboardTable(props: {
 }) {
   const storage = React.useContext(StorageContext);
 
-  const columns: Column<Racer>[] = [
+  const columns: Column<number>[] = [
     {
       header: "#",
-      cell: (row, index) => <Text>{index + 1}</Text>,
+      cell: (id, index) => <Text>{index + 1}</Text>,
       size: 20,
       align: "end",
     },
     {
       header: "Name",
-      cell: (row) => <Text>{row?.name ?? "<racer was deleted>"}</Text>,
+      cell: (id) => <Text>{props.series.openRacer(id)?.current?.name ?? "<racer was deleted>"}</Text>,
     },
     {
       header: "Number",
-      cell: (row) => <Text>{row?.number ?? "<racer was deleted>"}</Text>,
+      cell: (id) => <Text>{props.series.openRacer(id)?.current?.number ?? "<racer was deleted>"}</Text>,
     },
     {
       header: "Rank",
-      cell: (row) => <Text>{props.draft.board[row.id]}</Text>,
+      cell: (id) => <Text>{props.draft.board[id]}</Text>,
       size: 20,
     },
     {
       header: "",
-      cell: (row) => (
-        <FinishboardMenu rank={props.draft.board[row.id]}
-                         racer={row}
-                         move={() => props.setEditingRank(row.id)}
-                         editing={props.editingRank == row.id}
-                         setPosition={(value) => props.draft.setPosition(row.id, value)} />
+      cell: (id) => (
+        <FinishboardMenu rank={props.draft.board[id]}
+                         racer={props.series.openRacer(id).current}
+                         move={() => props.setEditingRank(id)}
+                         editing={props.editingRank == id}
+                         setPosition={(value) => props.draft.setPosition(id, value)} />
       ),
       size: 32,
       align: "end",
@@ -204,8 +204,7 @@ function FinishboardTable(props: {
     const keys = sortFinishboard(props.draft.board);
     return (
       <SailTable columns={columns}
-                 keys={keys}
-                 map={(key) => ({ ...props.series.openRacer(key as any)?.current, id: key })}
+                 data={keys}
                  selectedIndex={keys.indexOf(props.editingRank)} />
     );
   }

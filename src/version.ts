@@ -1,3 +1,3 @@
 export const version_major = 1;
-export const version_minor = 3;
-export const revnum = "r7105";
+export const version_minor = 4;
+export const revnum = "r7145";

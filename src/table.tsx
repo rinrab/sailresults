@@ -10,22 +10,25 @@ export interface Column<T> {
   align?: "start" | "center" | "end";
 }
 
-export interface SailTableProps<KeyT, ValueT> {
-  columns: Column<ValueT>[];
-  keys: KeyT[];
-  map: (key: KeyT) => ValueT;
-  onSelect?: (item: ValueT, key: KeyT, index: number) => void;
+export interface SailTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
+  getKey?: (item: T, index: number) => string | number;
+  onSelect?: (item: T, index: number) => void;
   selectedIndex?: number;
 }
 
-export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
+export function SailTable<ValueT>(props: SailTableProps<ValueT>) {
   const parentRef = React.useRef(null);
   const virtualizer = useVirtualizer({
-    count: props.keys.length,
+    count: props.data.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 44,
     overscan: 10,
   });
+
+  const onSelect = props.onSelect ?? (() => undefined);
+  const getKey = props.getKey ?? ((item, index) => index);
 
   const getCellStyles = (col: Column<ValueT>) => {
     const style: React.CSSProperties = {
@@ -90,10 +93,9 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
           width: "100%",
         }}>
           {virtualizer.getVirtualItems().map((item) => {
-            const key = props.keys[item.index];
-            const value = props.map(key);
+            const value = props.data[item.index];
             return (
-              <TableRow key={key as any}
+              <TableRow key={getKey(value, item.index)}
                         style={{
                           display: "flex",
                           height: item.size,
@@ -103,7 +105,7 @@ export function SailTable<KeyT, ValueT>(props: SailTableProps<KeyT, ValueT>) {
                           minWidth: "100%",
                           ...(item.index == props.selectedIndex) ? selectedRowStyle : {},
                         }}
-                        onClick={() => props?.onSelect(value, key, item.index)}>
+                        onClick={() => onSelect(value, item.index)}>
                 {props.columns.map((col, index) => (
                   <TableCell
                     key={index}

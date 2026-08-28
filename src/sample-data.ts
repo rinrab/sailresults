@@ -1,5 +1,5 @@
-import { dsqs, FinishboardEntry } from "./scoring";
-import { PackedSeries } from "./storage";
+import { dsqs } from "./scoring";
+import { FinishboardEntry, PackedSeries } from "./storage";
 
 /*           ### THE DATA ###
  *

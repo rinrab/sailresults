@@ -1,12 +1,10 @@
 import { Text, TableBody, TableRow, TableCell, Table } from "@fluentui/react-components";
 import React from "react";
 import { formatString } from "./common";
-import { evaluateScoreboard, Series } from "./scoring";
-import { StorageContext } from "./storage-context";
+import { evaluateScoreboard } from "./scoring";
+import { Series } from "./storage";
 
 export default function ResultsOverview(props: { series: Series }) {
-  const storage = React.useContext(StorageContext);
-
   if (props.series.finishboards.length == 0) {
     return <div>
       <Text block>Results overview cannot be displayed.</Text>
