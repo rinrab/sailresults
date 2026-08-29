@@ -97,10 +97,10 @@ function HomeScreenCard(props: { onClick: any, style?: any, children: any }) {
   );
 }
 
-function Grid({ children }) {
+function Grid({ children, size }) {
   return <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(320px, auto))",
+                gridTemplateColumns: `repeat(auto-fill, minmax(${size}px, auto))`,
                 padding: 8,
                 gap: 12,
               }}>
@@ -157,7 +157,7 @@ export default function StartState() {
           <Resources />
           <Divider style={{ margin: "8px 0" }} />
           <h2>Create Series</h2>
-          <Grid>
+          <Grid size={150}>
             <HomeScreenCard style={{ alignItems: "center" }}
                             onClick={() => navigate("/series/new")}>
               <div style={{ flex: 1 }} />
@@ -176,7 +176,7 @@ export default function StartState() {
           <h2>Recent Series</h2>
           {series.length == 0 
             ? <div>There are no series yet. Click 'New Series' to begin.</div>
-            : <Grid>
+            : <Grid size={320}>
                 {series.map((item: Series) => (
                   <SeriesCard key={item.id} series={item} />
                 ))}
