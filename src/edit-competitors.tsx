@@ -72,12 +72,16 @@ export function ListCompetitorsState() {
   const [name, setName] = React.useState("");
   const [number, setNumber] = React.useState("");
 
+  const nameRef = React.useRef<HTMLInputElement>(null);
+
   const submit = () => {
     series.newRacer(name.trim(), number.trim());
 
     /* clear inputs */
     setName("");
     setNumber("");
+
+    nameRef.current.focus();
   }
 
   return (
@@ -88,7 +92,8 @@ export function ListCompetitorsState() {
         <Divider style={{ flex: "0", padding: "8px 0" }} />
         <form style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
               onSubmit={e => { e.preventDefault(); submit(); }}>
-          <Input placeholder="Name" value={name}
+          <Input ref={nameRef}
+                 placeholder="Name" value={name}
                  onChange={e => setName(e.target.value)}
                  style={{ flex: "1 1 200px" }} />
           <Input placeholder="Sail Number" value={number}
