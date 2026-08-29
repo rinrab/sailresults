@@ -117,7 +117,7 @@ function getRacerDescription(racer: Racer) {
   }
 }
 
-function RacesTable(params: { series: ISeriesEditor, racerId: number }) {
+function RacesTable(params: { races: FinishboardEntry[] }) {
   const columns: Column<FinishboardEntry>[] = [
     {
       header: "#",
@@ -132,14 +132,11 @@ function RacesTable(params: { series: ISeriesEditor, racerId: number }) {
     },
   ];
 
-  const data = params.series.current.finishboards
-    .map(board => board[params.racerId] ?? DEFAULT_DISQUALIFICATION);
-
-  if (data.length == 0) {
+  if (params.races.length == 0) {
     return <>There are no races yet.</>;
   } else {
     return <SailTable columns={columns}
-                      data={data} />
+                      data={params.races} />
   }
 }
 
@@ -159,7 +156,11 @@ export function EditCompetitorState() {
     navigate("..");
   };
 
+  const races: FinishboardEntry[] = series.current.finishboards
+    .map(board => board[racer.current.id] ?? DEFAULT_DISQUALIFICATION);
+
   const disabled = (name == racer.current.name) && (number == racer.current.number);
+  const canDelete = races.filter(place => place != "DNC" && place != "DNS").length == 0;
 
   return (
     <Layout>
@@ -183,16 +184,22 @@ export function EditCompetitorState() {
             </div>
 
             <h2>Races</h2>
-            <RacesTable series={series} racerId={racer.current.id} />
+            <RacesTable races={races} />
             <div style={{ display: "flex", justifyContent: "end", marginTop: 8 }}>
               <Link onClick={() => navigate("../../races")}>View all races.</Link>
             </div>
 
             <h2>Danger Zone</h2>
-            <Button onClick={() => {
-              series.deleteRacer(racer.current.id)
-              navigate("..");
-            }}>Delete</Button>
+            {!canDelete && <div style={{ marginBottom: 8 }}>
+              Can't delete competitors that had participated in one or more
+              races. If you really want to get rid of this person, please first
+              manually change all of their placings to DNC/DNS.
+            </div>}
+            <Button disabled={!canDelete}
+                    onClick={() => {
+                      series.deleteRacer(racer.current.id);
+                      navigate("..");
+                    }}>Delete</Button>
           </div>
           <div style={{ display: "flex", justifyContent: "end", gap: 8 }}>
             <Button onClick={() => navigate("..")}>Back</Button>
