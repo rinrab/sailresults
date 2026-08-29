@@ -20,26 +20,29 @@ export interface SailTableProps<T> {
   footer?: React.ReactElement;
 }
 
-function getCellStyles<ValueT>(col: Column<ValueT>) {
+function getCellStyles<ValueT>(col: Column<ValueT>, printable: boolean) {
   const style: React.CSSProperties = {
-    display: "flex",
     alignItems: "center",
     justifyContent: col.align,
     textAlign: col.align,
   }
 
-  if (col.minsize) {
-    style.flexGrow = col.size ?? 1;
-    style.flexShrink = 1;
-    style.flexBasis = 0;
-    style.minWidth = col.minsize;
-  } else if (col.size) {
-    style.flexGrow = 0;
-    style.flexShrink = 0;
-    style.flexBasis = "auto";
-    style.width = col.size;
-  } else {
-    style.flex = 1;
+  if (! printable) {
+    style.display = "flex";
+
+    if (col.minsize) {
+      style.flexGrow = col.size ?? 1;
+      style.flexShrink = 1;
+      style.flexBasis = 0;
+      style.minWidth = col.minsize;
+    } else if (col.size) {
+      style.flexGrow = 0;
+      style.flexShrink = 0;
+      style.flexBasis = "auto";
+      style.width = col.size;
+    } else {
+      style.flex = 1;
+    }
   }
 
   return style;
@@ -71,7 +74,8 @@ function PrintableHeader<ValueT>(props: SailTableProps<ValueT>) {
   return <thead>
     <tr>
       {props.columns.map((col, index) => (
-        <td key={index}>{col.header}</td>
+        <td key={index}
+            style={getCellStyles(col, true)}>{col.header}</td>
       ))}
     </tr>
   </thead>
@@ -104,7 +108,7 @@ function VirtualHeader<ValueT>(props: SailTableProps<ValueT>) {
     }}>
       {props.columns.map((col, index) => (
         <TableCell key={index}
-                   style={getCellStyles(col)}>
+                   style={getCellStyles(col, false)}>
           {col.header}
         </TableCell>
       ))}
@@ -181,7 +185,8 @@ function Row<T>(props: SailTableProps<T> & {
     return <tr style={style}
                onClick={() => onSelect(props.item, props.index)}>
       {props.columns.map((col, index) => (
-        <td key={index}>
+        <td key={index}
+            style={getCellStyles(col, true)}>
           {col.cell(props.item, props.index)}
         </td>
       ))}
@@ -191,7 +196,7 @@ function Row<T>(props: SailTableProps<T> & {
                      onClick={() => onSelect(props.item, props.index)}>
       {props.columns.map((col, index) => (
         <TableCell key={index}
-                   style={getCellStyles(col)}>
+                   style={getCellStyles(col, false)}>
           {col.cell(props.item, props.index)}
         </TableCell>
       ))}
