@@ -6,6 +6,7 @@ import { AccountMenu } from "./account";
 import { StorageContext } from "./storage-context";
 import { FirebaseAuthContext } from "./storage-firebase-auth-context";
 import { Racer, Series } from "./storage";
+import { flushSync } from "react-dom";
 
 export function formatString(str: string) {
   return (str == "") ? "-" : str;
@@ -15,10 +16,38 @@ export function racerMatches(racer: Racer, query: string) {
   return (racer.name + racer.number).toLowerCase().includes(query);
 }
 
+export function usePrinting() {
+  const [isPrinting, setIsPrinting] = React.useState(false);
+
+  React.useEffect(() => {
+    const onBeforePrint = () => {
+      setIsPrinting(true);
+      flushSync(() => undefined);
+    };
+    const onAfterPrint = () => {
+      setIsPrinting(false);
+    };
+
+    addEventListener("beforeprint", onBeforePrint);
+    addEventListener("afterprint", onAfterPrint);
+
+    return () => {
+      removeEventListener("beforeprint", onBeforePrint);
+      removeEventListener("afterprint", onAfterPrint);
+    };
+  });
+
+  return isPrinting;
+}
+
 export function Layout({ children, print = undefined }) {
+  const isPrinting = usePrinting();
+
   return <div className="layout">
-    {children}
-    {print && <div className="print-only">{print}</div>}
+    {isPrinting
+      ? print && <div className="print-only">{print}</div>
+      : children
+    }
   </div>;
 }
 
