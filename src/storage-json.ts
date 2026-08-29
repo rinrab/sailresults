@@ -72,7 +72,7 @@ export function openLegacyRacers(): LegacyRacersCollection {
 
 function openFinishboard(value: any): Finishboard {
   const board = ensureObject(value);
-  const result: { [racer: number]: FinishboardEntry } = [];
+  const result: Finishboard = {};
   for (const [racer, entry] of Object.entries(board)) {
     if (typeof(entry) == "number" || typeof(entry) == "string") {
       result[parseInt(racer)] = entry as FinishboardEntry;
@@ -80,7 +80,7 @@ function openFinishboard(value: any): Finishboard {
       throw new Error("bad entry found");
     }
   }
-  return board as Finishboard;
+  return result;
 }
 
 function openSeriesRacers(
