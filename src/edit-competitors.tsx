@@ -1,11 +1,12 @@
-import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Field } from "@fluentui/react-components";
+import { Button, Divider, Input, Text, Menu, MenuTrigger, MenuPopover, MenuItem, Field, Link } from "@fluentui/react-components";
 import { MoreVerticalRegular } from "@fluentui/react-icons";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
-import { ISeriesEditor, Racer } from "./storage";
+import { FinishboardEntry, ISeriesEditor, Racer } from "./storage";
 import { Column, SailTable } from "./table";
+import { DEFAULT_DISQUALIFICATION } from "./scoring";
 
 function ActionsCell({ deleteFn }) {
   return <Menu>
@@ -116,6 +117,32 @@ function getRacerDescription(racer: Racer) {
   }
 }
 
+function RacesTable(params: { series: ISeriesEditor, racerId: number }) {
+  const columns: Column<FinishboardEntry>[] = [
+    {
+      header: "#",
+      size: 40,
+      align: "end",
+      cell: (place, index) => <>R{index + 1}</>
+    },
+    {
+      header: "Place",
+      minsize: 60,
+      cell: (place, index) => <>{place}</>
+    },
+  ];
+
+  const data = params.series.current.finishboards
+    .map(board => board[params.racerId] ?? DEFAULT_DISQUALIFICATION);
+
+  if (data.length == 0) {
+    return <>There are no races yet.</>;
+  } else {
+    return <SailTable columns={columns}
+                      data={data} />
+  }
+}
+
 export function EditCompetitorState() {
   const { seriesId, racerId } = useParams();
   const storage = React.useContext(StorageContext);
@@ -137,7 +164,7 @@ export function EditCompetitorState() {
       <NavBar title={series.current.name}
               subtitle={getRacerDescription(racer.current)} />
       <Content>
-        <form onSubmit={done} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <form onSubmit={done} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <div style={{ flex: 1, overflow: "auto" }}>
             <h1>Competitor Details</h1>
             <h2>General Information</h2>
@@ -151,6 +178,12 @@ export function EditCompetitorState() {
                 <Input placeholder="Name" value={number}
                        onChange={e => setNumber(e.target.value)} />
               </Field>
+            </div>
+
+            <h2>Races</h2>
+            <RacesTable series={series} racerId={racer.current.id} />
+            <div style={{ display: "flex", justifyContent: "end", marginTop: 8 }}>
+              <Link onClick={() => navigate("../../races")}>View all races.</Link>
             </div>
 
             <h2>Danger Zone</h2>
