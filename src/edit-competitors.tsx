@@ -4,21 +4,22 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Content, Layout, NavBar, SeriesNavigation } from "./common";
 import { StorageContext } from "./storage-context";
-import { FinishboardEntry, ISeriesEditor, Racer } from "./storage";
+import { FinishboardEntry, ISeriesEditor, Racer, Series } from "./storage";
 import { Column, SailTable } from "./table";
-import { DEFAULT_DISQUALIFICATION } from "./scoring";
+import { DEFAULT_DISQUALIFICATION, dsqs } from "./scoring";
 
-function ActionsCell({ deleteFn }) {
+function ActionsCell({ deleteFn, canDelete }) {
   return <Menu>
     <MenuTrigger>
       <Button icon={<MoreVerticalRegular />} appearance="transparent"
               onClick={(e) => e.stopPropagation()} />
     </MenuTrigger>
     <MenuPopover>
-      <MenuItem onClick={(e) => {
-        e.stopPropagation();
-        deleteFn();
-      }}>Delete</MenuItem>
+      <MenuItem disabled={! canDelete}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteFn();
+                }}>Delete</MenuItem>
     </MenuPopover>
   </Menu>
 }
@@ -49,7 +50,8 @@ function RacersList(props: { series: ISeriesEditor }) {
       header: "",
       size: 32,
       cell: (row) => {
-        return <ActionsCell deleteFn={() => props.series.deleteRacer(row.id)} />
+        return <ActionsCell deleteFn={() => props.series.deleteRacer(row.id)}
+                            canDelete={checkCanDelete(row.id, props.series.current)} />
       }
     }
   ];
@@ -122,6 +124,20 @@ function getRacerDescription(racer: Racer) {
   }
 }
 
+function checkCanDelete(racerId: number, series: Series) {
+  for (const board of series.finishboards) {
+    const score = board[racerId];
+    if (!score || typeof(score) == "number") {
+      return false;
+    } else {
+      if (dsqs[score].countsAsParticipation) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function RacesTable(params: { races: FinishboardEntry[] }) {
   const columns: Column<FinishboardEntry>[] = [
     {
@@ -165,7 +181,7 @@ export function EditCompetitorState() {
     .map(board => board[racer.current.id] ?? DEFAULT_DISQUALIFICATION);
 
   const disabled = (name == racer.current.name) && (number == racer.current.number);
-  const canDelete = races.filter(place => place != "DNC" && place != "DNS").length == 0;
+  const canDelete = checkCanDelete(racer.current.id, series.current);
 
   return (
     <Layout>
