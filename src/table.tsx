@@ -38,12 +38,16 @@ export function SailTable<ValueT>(props: SailTableProps<ValueT>) {
       textAlign: col.align,
     }
 
-    if (col.size) {
-      style.flex = "0 0 auto";
-      style.width = col.size;
-    } else if (col.minsize) {
-      style.flex = 1;
+    if (col.minsize) {
+      style.flexGrow = col.size ?? 1;
+      style.flexShrink = 1;
+      style.flexBasis = 0;
       style.minWidth = col.minsize;
+    } else if (col.size) {
+      style.flexGrow = 0;
+      style.flexShrink = 0;
+      style.flexBasis = "auto";
+      style.width = col.size;
     } else {
       style.flex = 1;
     }

@@ -34,12 +34,14 @@ function RacersList(props: { series: ISeriesEditor }) {
     },
     {
       header: "Name",
+      size: 2,
       minsize: 120,
       cell: (row) => <Text>{row.name}</Text>,
     },
     {
       header: "Number",
-      minsize: 120,
+      size: 1,
+      minsize: 60,
       cell: (row) => <Text>{row.number}</Text>,
     },
     {

@@ -173,10 +173,14 @@ function FinishboardTable(props: {
     },
     {
       header: "Name",
+      size: 2,
+      minsize: 120,
       cell: (id) => <Text>{props.series.openRacer(id)?.current?.name ?? "<racer was deleted>"}</Text>,
     },
     {
       header: "Number",
+      size: 1,
+      minsize: 60,
       cell: (id) => <Text>{props.series.openRacer(id)?.current?.number ?? "<racer was deleted>"}</Text>,
     },
     {
