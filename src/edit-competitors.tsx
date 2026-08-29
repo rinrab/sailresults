@@ -121,30 +121,49 @@ export function EditCompetitorState() {
   const storage = React.useContext(StorageContext);
   const series = storage.openSeries(parseInt(seriesId));
   const racer = series.openRacer(parseInt(racerId));
+  const [name, setName] = React.useState(racer.current.name);
+  const [number, setNumber] = React.useState(racer.current.number);
   const navigate = useNavigate();
+
+  const done = (e) => {
+    e.preventDefault();
+    racer.setName(name);
+    racer.setNumber(number);
+    navigate("..");
+  };
 
   return (
     <Layout>
       <NavBar title={series.current.name}
               subtitle={getRacerDescription(racer.current)} />
       <Content>
-        <h1>Competitor Details</h1>
-        <form style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-          <Field style={{ flex: "0" }} label="Name">
-            <Input placeholder="Name" value={racer.current.name}
-                   onChange={e => racer.setName(e.target.value)} />
-          </Field>
-          <Field style={{ flex: "0" }} label="Number">
-            <Input placeholder="Name" value={racer.current.number}
-                   onChange={e => racer.setNumber(e.target.value)} />
-          </Field>
+        <form onSubmit={done} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1, overflow: "auto" }}>
+            <h1>Competitor Details</h1>
+            <h2>General Information</h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <Field style={{ flex: "0" }} label="Name">
+                <Input placeholder="Name" value={name}
+                       onChange={e => setName(e.target.value)} />
+              </Field>
+              <Field style={{ flex: "0" }} label="Number">
+                <Input placeholder="Name" value={number}
+                       onChange={e => setNumber(e.target.value)} />
+              </Field>
+            </div>
+
+            <h2>Danger Zone</h2>
+            <Button onClick={() => {
+              series.deleteRacer(racer.current.id)
+              navigate("..");
+            }}>Delete</Button>
+          </div>
+          <div style={{ display: "flex", justifyContent: "end", gap: 8 }}>
+            <Button onClick={() => navigate("..")}>Back</Button>
+            <Button type="submit">Done</Button>
+          </div>
         </form>
-        <div style={{ display: "flex", justifyContent: "end" }}>
-          <Button onClick={() => {
-            series.deleteRacer(racer.current.id)
-            navigate("..");
-          }}>Delete</Button>
-        </div>
       </Content>
     </Layout>
   );
