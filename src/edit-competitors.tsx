@@ -159,6 +159,8 @@ export function EditCompetitorState() {
     navigate("..");
   };
 
+  const disabled = (name == racer.current.name) && (number == racer.current.number);
+
   return (
     <Layout>
       <NavBar title={series.current.name}
@@ -194,7 +196,7 @@ export function EditCompetitorState() {
           </div>
           <div style={{ display: "flex", justifyContent: "end", gap: 8 }}>
             <Button onClick={() => navigate("..")}>Back</Button>
-            <Button type="submit">Done</Button>
+            <Button disabled={disabled} type="submit">Done</Button>
           </div>
         </form>
       </Content>
