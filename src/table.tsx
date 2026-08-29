@@ -17,6 +17,7 @@ export interface SailTableProps<T> {
   onSelect?: (item: T, index: number) => void;
   selectedIndex?: number;
   printable?: boolean;
+  footer?: React.ReactElement;
 }
 
 function getCellStyles<ValueT>(col: Column<ValueT>) {
@@ -50,6 +51,15 @@ export function SailTable<ValueT>(props: SailTableProps<ValueT>) {
       ? <table style={{ width: "100%" }}>
           <PrintableHeader {...props} />
           <PrintableBody {...props} />
+          {props.footer &&
+            <tfoot>
+              <tr style={{ border: "none" }}>
+                <td colSpan={99999} style={{ border: "none", padding: 0 }}>
+                  {props.footer}
+                </td>
+              </tr>
+            </tfoot>
+          }
         </table>
       : <VirtualTable {...props} />
     }
@@ -122,26 +132,28 @@ function VirtualTable<T>(props: SailTableProps<T>) {
   const getKey = props.getKey ?? ((item, index) => index);
 
   return <div ref={parentRef} style={{ overflow: "auto", flex: 1 }}>
-    <VirtualHeader {...props } />
-    <TableBody style={{ 
-      display: "grid",
-      height: virtualizer.getTotalSize(),
-      position: "relative",
-      width: "100%",
-    }}>
-      {virtualizer.getVirtualItems().map((item) => {
-        const value = props.data[item.index];
-        return <Row {...props}
-                    key={getKey(value, item.index)}
-                    item={value}
-                    index={item.index}
-                    style={{
-                      position: "absolute",
-                      transform: `translateY(${item.start}px)`,
-                      height: item.size,
-                    }} />
-      })}
-    </TableBody>
+    <Table>
+      <VirtualHeader {...props } />
+      <TableBody style={{ 
+        display: "grid",
+        height: virtualizer.getTotalSize(),
+        position: "relative",
+        width: "100%",
+      }}>
+        {virtualizer.getVirtualItems().map((item) => {
+          const value = props.data[item.index];
+          return <Row {...props}
+                      key={getKey(value, item.index)}
+                      item={value}
+                      index={item.index}
+                      style={{
+                        position: "absolute",
+                        transform: `translateY(${item.start}px)`,
+                        height: item.size,
+                      }} />
+        })}
+      </TableBody>
+    </Table>
   </div>
 }
 
