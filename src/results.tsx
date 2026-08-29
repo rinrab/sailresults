@@ -95,6 +95,17 @@ function ResultsPrint(props: { series: Series, scoreboard: EvaluatedRacer[] }) {
   );
 };
 
+function ResultsTable(props: { series: Series, scoreboard: EvaluatedRacer[] }) {
+  if (props.series.racers.length == 0) {
+    return <div>There are no competitors.</div>
+  } else if (props.series.finishboards.length == 0) {
+    return <div>There are no races.</div>
+  } else {
+    return <SailTable columns={makeTableColumns(props.series)} 
+                      data={props.scoreboard} />
+  }
+}
+
 export default function ResultsState() {
   const { seriesId } = useParams();
   const storage = React.useContext(StorageContext);
@@ -107,8 +118,10 @@ export default function ResultsState() {
       <NavBar title={series.current.name}
               subtitle="Results" />
       <Content screenOnly>
-        <SailTable columns={makeTableColumns(series.current)} 
-                   data={scoreboard} />
+        <div style={{ display: "flex", flex: 1 }}>
+          <ResultsTable series={series.current}
+                        scoreboard={scoreboard} />
+        </div>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => window.print()}>Print</Button>
         </div>
