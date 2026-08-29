@@ -112,7 +112,9 @@ export default function StartState() {
   const navigate = useNavigate();
   const storage = React.useContext(StorageContext);
   const { isReady, user } = React.useContext(FirebaseAuthContext);
-  const series = storage.listSeries();
+
+  const series = Object.values(storage.listSeries())
+                       .sort(compareSeries);
 
   const createSample = (sample: PackedSeries) => {
     //const id = importSeries(storage, sample);
@@ -172,11 +174,14 @@ export default function StartState() {
             </HomeScreenCard>
           </Grid>
           <h2>Recent Series</h2>
-          <Grid>
-            {Object.values(series).sort(compareSeries).map((item: Series) => (
-              <SeriesCard key={item.id} series={item} />
-            ))}
-          </Grid>
+          {series.length == 0 
+            ? <div>There are no series yet. Click 'New Series' to begin.</div>
+            : <Grid>
+                {series.map((item: Series) => (
+                  <SeriesCard key={item.id} series={item} />
+                ))}
+              </Grid>
+          }
         </div>
       </Content>
     </Layout>
