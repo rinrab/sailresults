@@ -132,8 +132,13 @@ function getSeriesEditor(
 
     newRacer: (name, number) => {
       const id = nextGlobalId();
+
       update(old => ({
         ...old,
+        finishboards: old.finishboards.map(board => ({
+          ...board,
+          [id]: "DNC"
+        })),
         racers: [
           ...old.racers,
           {
@@ -143,6 +148,7 @@ function getSeriesEditor(
           }
         ],
       }));
+
       return id;
     },
 
