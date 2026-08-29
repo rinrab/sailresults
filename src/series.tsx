@@ -155,7 +155,7 @@ export function SeriesOverviewState() {
           </Card>
 
           <Card onClick={() => navigate("config")} style={{ marginBottom: 12 }}>
-            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Configuration</h3>}
+            <CardHeader header={<h3 style={{ margin: "0 0 4px 0" }}>Settings</h3>}
                         description={<><b>Name:</b>&nbsp;{series.current.name}</>}
                         action={<ChevronRight24Regular /> } />
           </Card>
@@ -173,7 +173,8 @@ export function SeriesConfigurationState() {
 
   return (
     <Layout>
-      <NavBar title={series.current.name} subtitle="Configuration" />
+      <NavBar title={series.current.name}
+              subtitle="Settings" />
       <Content>
         <div style={{ overflow: "auto", flex: 1 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}> 
