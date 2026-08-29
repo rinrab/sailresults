@@ -186,7 +186,7 @@ export function EditCompetitorState() {
             <h2>Races</h2>
             <RacesTable races={races} />
             <div style={{ display: "flex", justifyContent: "end", marginTop: 8 }}>
-              <Link onClick={() => navigate("../../races")}>View all races.</Link>
+              <Link onClick={() => navigate("../../races")}>View all races</Link>
             </div>
 
             <h2>Danger Zone</h2>
