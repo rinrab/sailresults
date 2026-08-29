@@ -174,6 +174,11 @@ function getSeriesEditor(
 
     deleteRacer: (id) => update(old => ({
       ...old,
+      finishboards: old.finishboards.map(board => {
+        const copy = { ...board };
+        delete board[id];
+        return copy;
+      }),
       racers: old.racers.filter(racer => racer.id != id),
     })),
 
