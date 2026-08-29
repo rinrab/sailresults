@@ -119,9 +119,7 @@ function FinishboardSuggestions(props: {
 
 function FinishboardMenu(props: {
   rank: FinishboardEntry,
-  racer: Racer,
   move: () => void,
-  editing: boolean,
   setPosition: (value: FinishboardEntry | null) => void,
 }) {
   return (
@@ -192,9 +190,7 @@ function FinishboardTable(props: {
       header: "",
       cell: (id) => (
         <FinishboardMenu rank={props.draft.board[id]}
-                         racer={props.series.openRacer(id).current}
                          move={() => props.setEditingRank(id)}
-                         editing={props.editingRank == id}
                          setPosition={(value) => props.draft.setPosition(id, value)} />
       ),
       size: 32,
