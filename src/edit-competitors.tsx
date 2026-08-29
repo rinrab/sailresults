@@ -128,7 +128,7 @@ export function EditCompetitorState() {
       <NavBar title={series.current.name}
               subtitle={getRacerDescription(racer.current)} />
       <Content>
-        <h1>Editing Competitor</h1>
+        <h1>Competitor Details</h1>
         <form style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
           <Field style={{ flex: "0" }} label="Name">
             <Input placeholder="Name" value={racer.current.name}
