@@ -102,7 +102,7 @@ export default function ResultsState() {
     },
     {
       header: "Number",
-      minsize: 120,
+      minsize: 60,
       cell: (row) => <Text>{row.racer.number}</Text>,
     },
     ...series.current.finishboards.map((_, index) => ({
